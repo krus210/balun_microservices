@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package github.com.krus210.balun_microservices.protobuf.auth.proto;
+
+option go_package = "pkg/gen/proto;proto_v1";
+
+// AuthService - регистрация, логин, валидация токена.
+service AuthService {
+  // Register - Регистрация пользователя
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+
+  // Login - Аутентификация пользователя
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+
+  // Refresh - Запрос нового токена при протухании текущего
+  rpc Refresh(RefreshRequest) returns (RefreshResponse) {}
+}
+
+// RegisterRequest - запрос Register
+message RegisterRequest {
+  // email -электронная почта
+  string email = 1;
+  //  password - пароль пользователя
+  string password = 2;
+}
+
+// RegisterRequest - ответ Register
+message RegisterResponse {
+  // userId - уникальный идентификатор пользователя
+  int64 userId = 1;
+}
+
+// RegisterRequest - запрос Login
+message LoginRequest {
+  // email -электронная почта
+  string email = 1;
+  //  password - пароль пользователя
+  string password = 2;
+}
+
+// RegisterRequest - ответ Login
+message LoginResponse {
+  // accessToken - токен доступа
+  string accessToken = 1;
+  // refreshToken - токен после протухания accessToken
+  string refreshToken = 2;
+  // userId - уникальный идентификатор пользователя
+  int64 userId = 3;
+}
+
+// RegisterRequest - запрос Refresh
+message RefreshRequest {
+  // refreshToken - токен после протухания accessToken
+  string refreshToken = 1;
+}
+
+// RegisterRequest - ответ Refresh
+message RefreshResponse {
+  // accessToken - токен доступа
+  string accessToken = 1;
+  // refreshToken - токен после протухания accessToken
+  string refreshToken = 2;
+  // userId - уникальный идентификатор пользователя
+  int64 userId = 3;
+}
