@@ -7,11 +7,13 @@ import (
 	"strings"
 	"sync"
 
+	"buf.build/go/protovalidate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 
 	pb "users/pkg/api"
 )
@@ -28,6 +30,21 @@ type Server struct {
 
 func NewServer() *Server {
 	return &Server{users: make(map[serialId]*pb.UserProfile)}
+}
+
+func validationInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	validator, err := protovalidate.New()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to initialize validator")
+	}
+
+	if protoReq, ok := req.(proto.Message); ok {
+		if err := validator.Validate(protoReq); err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+
+	return handler(ctx, req)
 }
 
 func (s *Server) CreateProfile(ctx context.Context, req *pb.CreateProfileRequest) (*pb.CreateProfileResponse, error) {
@@ -164,7 +181,9 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(validationInterceptor),
+	)
 	pb.RegisterUsersServiceServer(server, implementation) // регистрация обработчиков
 
 	reflection.Register(server) // регистрируем дополнительные обработчики
