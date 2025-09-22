@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package github.com.krus210.balun_microservices.protobuf.auth.proto;
+package github.com.krus210.balun_microservices.protobuf.auth.v1.proto;
 
 option go_package = "pkg/gen/proto;proto_v1";
 
@@ -24,13 +24,13 @@ message RegisterRequest {
   string password = 2;
 }
 
-// RegisterRequest - ответ Register
+// RegisterResponse - ответ Register
 message RegisterResponse {
   // userId - уникальный идентификатор пользователя
   int64 userId = 1;
 }
 
-// RegisterRequest - запрос Login
+// LoginRequest - запрос Login
 message LoginRequest {
   // email -электронная почта
   string email = 1;
@@ -38,7 +38,7 @@ message LoginRequest {
   string password = 2;
 }
 
-// RegisterRequest - ответ Login
+// LoginResponse - ответ Login
 message LoginResponse {
   // accessToken - токен доступа
   string accessToken = 1;
@@ -48,13 +48,13 @@ message LoginResponse {
   int64 userId = 3;
 }
 
-// RegisterRequest - запрос Refresh
+// RefreshRequest - запрос Refresh
 message RefreshRequest {
   // refreshToken - токен после протухания accessToken
   string refreshToken = 1;
 }
 
-// RegisterRequest - ответ Refresh
+// RefreshResponse - ответ Refresh
 message RefreshResponse {
   // accessToken - токен доступа
   string accessToken = 1;

@@ -30,7 +30,7 @@ type User struct {
 type Server struct {
 	pb.AuthServiceServer
 
-	// Бизнес логика/зовисимоти
+	// Бизнес логика/зависимости
 	mx    sync.RWMutex
 	users map[string]*User
 }
@@ -52,24 +52,17 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 		return nil, err
 	}
 
-	var err error
-	var userId int64
 	s.mx.Lock()
-	if user, ok := s.users[req.Email]; ok && user != nil {
-		err = status.New(codes.AlreadyExists, "user already exists").Err()
-	}
-	if err == nil {
-		userId = rand.Int64()
-		s.users[req.Email] = &User{
-			id:       userId,
-			email:    req.Email,
-			password: req.Password,
-		}
-	}
 	defer s.mx.Unlock()
+	if user, ok := s.users[req.Email]; ok && user != nil {
+		return nil, status.New(codes.AlreadyExists, "user already exists").Err()
+	}
 
-	if err != nil {
-		return nil, err
+	userId := rand.Int64()
+	s.users[req.Email] = &User{
+		id:       userId,
+		email:    req.Email,
+		password: req.Password,
 	}
 
 	return &pb.RegisterResponse{UserId: userId}, nil
@@ -122,6 +115,7 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 	var err error
 
 	s.mx.Lock()
+	defer s.mx.Unlock()
 	user, ok := s.users[req.Email]
 	switch {
 	case !ok || user == nil:
@@ -129,15 +123,13 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 	case user.email != req.Email || user.password != req.Password:
 		err = status.New(codes.Unauthenticated, "email or password are not right").Err()
 	}
-	if err == nil {
-		s.users[req.Email].accessToken = uuid.New().String()
-		s.users[req.Email].refreshToken = uuid.New().String()
-	}
-	defer s.mx.Unlock()
 
 	if err != nil {
 		return nil, err
 	}
+
+	s.users[req.Email].accessToken = uuid.New().String()
+	s.users[req.Email].refreshToken = uuid.New().String()
 
 	return &pb.LoginResponse{
 		AccessToken:  s.users[req.Email].accessToken,
@@ -155,10 +147,10 @@ func (s *Server) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Refre
 		log.Println(key, md.Get(key))
 	}
 
-	var err error
 	var resultUser *User
 
 	s.mx.Lock()
+	defer s.mx.Unlock()
 	for _, user := range s.users {
 		if user.refreshToken == req.RefreshToken {
 			fmt.Printf("user refreshToken = %s\n, req token = %s", user.refreshToken, req.RefreshToken)
@@ -167,17 +159,11 @@ func (s *Server) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Refre
 		}
 	}
 	if resultUser == nil {
-		err = status.New(codes.Unauthenticated, "refresh token is not valid").Err()
+		return nil, status.New(codes.Unauthenticated, "refresh token is not valid").Err()
 	}
-	if err == nil {
-		resultUser.accessToken = uuid.New().String()
-		resultUser.refreshToken = uuid.New().String()
-	}
-	defer s.mx.Unlock()
 
-	if err != nil {
-		return nil, err
-	}
+	resultUser.accessToken = uuid.New().String()
+	resultUser.refreshToken = uuid.New().String()
 
 	return &pb.RefreshResponse{
 		AccessToken:  resultUser.accessToken,
