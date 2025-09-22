@@ -86,7 +86,7 @@ func (s *Server) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest
 	return &pb.UpdateProfileResponse{UserProfile: user}, nil
 }
 
-func (s *Server) GetProfileById(ctx context.Context, req *pb.GetProfileByIDRequest) (*pb.GetProfileByIDResponse, error) {
+func (s *Server) GetProfileByID(ctx context.Context, req *pb.GetProfileByIDRequest) (*pb.GetProfileByIDResponse, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		log.Println("Заголовков нет")
