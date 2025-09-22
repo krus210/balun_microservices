@@ -87,7 +87,7 @@ func (s *Server) SendFriendRequest(ctx context.Context, req *pb.SendFriendReques
 	return &pb.SendFriendRequestResponse{FriendRequest: friendRequest}, nil
 }
 
-func (s *Server) ListRequests(ctx context.Context, req *pb.ListRequestsRequest) (*pb.ListRequestsResponse, error) {
+func (s *Server) ListRequests(ctx context.Context, _ *pb.ListRequestsRequest) (*pb.ListRequestsResponse, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		log.Println("Заголовков нет")
