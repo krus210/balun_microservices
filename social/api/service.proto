@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package github.com.krus210.balun_microservices.protobuf.social.v1.proto;
+
+import "buf/validate/validate.proto";
+
+option go_package = "pkg/api;service_pb";
+
+// SocialService - добавление в друзья, отклонение, удаление, списки.
+service SocialService {
+  // SendFriendRequest - Отправить заявку в друзья
+  rpc SendFriendRequest(SendFriendRequestRequest) returns (SendFriendRequestResponse) {}
+  // ListRequests - Входящие заявки в друзья
+  rpc ListRequests(ListRequestsRequest) returns (ListRequestsResponse) {}
+  // AcceptFriendRequest - Принять заявку в друзья
+  rpc AcceptFriendRequest(AcceptFriendRequestRequest) returns (AcceptFriendRequestResponse) {}
+  // DeclineFriendRequest - Отклонить заявку в друзья
+  rpc DeclineFriendRequest(DeclineFriendRequestRequest) returns (DeclineFriendRequestResponse) {}
+  // RemoveFriend - Удалить пользователя из друзей
+  rpc RemoveFriend(RemoveFriendRequest) returns (RemoveFriendResponse) {}
+  // ListFriends - Список друзей
+  rpc ListFriends(ListFriendsRequest) returns (ListFriendsResponse) {}
+}
+
+// FriendRequestStatus - статус заявки в друзья
+enum FriendRequestStatus {
+  FRIEND_REQUEST_STATUS_PENDING = 0;
+  FRIEND_REQUEST_STATUS_ACCEPTED = 1;
+  FRIEND_REQUEST_STATUS_DECLINED = 2;
+}
+
+// FriendRequest - заявка в друзья
+message FriendRequest {
+  // requestId - идентификатор заявки
+  int64 requestId = 1;
+  // fromUserId - идентификатор пользователя, отправившего заявку
+  int64 userId = 2;
+  // status - статус заявки
+  FriendRequestStatus status = 4;
+}
+
+// SendFriendRequestRequest - запрос SendFriendRequest
+message SendFriendRequestRequest {
+  // fromUserId - идентификатор пользователя, отправляющего заявку
+  int64 userId = 1;
+}
+
+// SendFriendRequestResponse - ответ SendFriendRequest
+message SendFriendRequestResponse {
+  // friendRequest - заявка в друзья
+  FriendRequest friendRequest = 1;
+}
+
+// ListRequestsRequest - запрос ListRequests
+message ListRequestsRequest {
+  // userId - идентификатор пользователя
+  int64 userId = 1;
+}
+
+// ListRequestsResponse - ответ ListRequests
+message ListRequestsResponse {
+  // requests - список заявок в друзья
+  repeated FriendRequest requests = 1;
+}
+
+// AcceptFriendRequestRequest - запрос AcceptFriendRequest
+message AcceptFriendRequestRequest {
+  // requestId - идентификатор заявки
+  int64 requestId = 1;
+}
+
+// AcceptFriendRequestResponse - ответ AcceptFriendRequest
+message AcceptFriendRequestResponse {
+  // friendRequest - заявка в друзья
+  FriendRequest friendRequest = 1;
+}
+
+// DeclineFriendRequestRequest - запрос DeclineFriendRequest
+message DeclineFriendRequestRequest {
+  // requestId - идентификатор заявки
+  int64 requestId = 1;
+}
+
+// DeclineFriendRequestResponse - ответ DeclineFriendRequest
+message DeclineFriendRequestResponse {
+  // friendRequest - заявка в друзья
+  FriendRequest friendRequest = 1;
+}
+
+// RemoveFriendRequest - запрос RemoveFriend
+message RemoveFriendRequest {
+  // userId - идентификатор пользователя для удаления из друзей
+  int64 userId = 1;
+}
+
+// RemoveFriendResponse - ответ RemoveFriend
+message RemoveFriendResponse {
+  // empty response
+}
+
+// ListFriendsRequest - запрос ListFriends
+message ListFriendsRequest {
+  // userId - идентификатор пользователя
+  int64 userId = 1;
+  // limit - лимит результатов
+  int64 limit = 2;
+  // cursor - курсор для пагинации
+  optional string cursor = 3;
+}
+
+// ListFriendsResponse - ответ ListFriends
+message ListFriendsResponse {
+  // friendUserIds - список идентификаторов друзей
+  repeated int64 friendUserIds = 1;
+  // nextCursor - следующий курсор для пагинации
+  optional string nextCursor = 2;
+}
