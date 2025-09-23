@@ -1,0 +1,206 @@
+syntax = "proto3";
+
+package github.com.krus210.balun_microservices.protobuf.gateway.v1.proto;
+
+import "api/auth/auth.proto";
+import "api/chat/chat.proto";
+import "api/social/social.proto";
+import "api/users/users.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "gateway/pkg/api/gateway;gateway";
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Microservices Gateway API"
+    version: "1.0"
+    description: "HTTP Gateway для микросервисной архитектуры"
+    contact: {
+      name: "API Support"
+      email: "support@example.com"
+    }
+  }
+  schemes: HTTP
+  schemes: HTTPS
+  consumes: "application/json"
+  produces: "application/json"
+};
+
+// GatewayService - HTTP Gateway для всех микросервисов
+service GatewayService {
+  // Auth Service Methods
+
+  // Register - Регистрация пользователя
+  rpc Register(github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/register"
+      body: "*"
+    };
+  }
+
+  // Login - Аутентификация пользователя
+  rpc Login(github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/login"
+      body: "*"
+    };
+  }
+
+  // Refresh - Обновление токена
+  rpc Refresh(github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  // Users Service Methods
+
+  // CreateProfile - Создание профиля пользователя
+  rpc CreateProfile(github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/profiles"
+      body: "*"
+    };
+  }
+
+  // UpdateProfile - Обновление профиля пользователя
+  rpc UpdateProfile(github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/profiles/{userId}"
+      body: "*"
+    };
+  }
+
+  // GetProfileByID - Получение профиля по ID
+  rpc GetProfileByID(github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/profiles/{userId}"
+    };
+  }
+
+  // GetProfileByNickname - Получение профиля по никнейму
+  rpc GetProfileByNickname(github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/profiles/by-nickname/{nickname}"
+    };
+  }
+
+  // SearchByNickname - Поиск пользователей по никнейму
+  rpc SearchByNickname(github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/search"
+    };
+  }
+
+  // Social Service Methods
+
+  // SendFriendRequest - Отправить заявку в друзья
+  rpc SendFriendRequest(github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/social/friend-requests"
+      body: "*"
+    };
+  }
+
+  // ListRequests - Список входящих заявок в друзья
+  rpc ListRequests(github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/social/friend-requests"
+    };
+  }
+
+  // AcceptFriendRequest - Принять заявку в друзья
+  rpc AcceptFriendRequest(github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/social/friend-requests/{requestId}/accept"
+    };
+  }
+
+  // DeclineFriendRequest - Отклонить заявку в друзья
+  rpc DeclineFriendRequest(github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/social/friend-requests/{requestId}/decline"
+    };
+  }
+
+  // RemoveFriend - Удалить из друзей
+  rpc RemoveFriend(github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/social/friends/{userId}"
+    };
+  }
+
+  // ListFriends - Список друзей
+  rpc ListFriends(github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/social/friends"
+    };
+  }
+
+  // Chat Service Methods
+
+  // CreateDirectChat - Создать личный чат
+  rpc CreateDirectChat(github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/chat/direct-chats"
+      body: "*"
+    };
+  }
+
+  // GetChat - Получить информацию о чате
+  rpc GetChat(github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/chat/chats/{chatId}"
+    };
+  }
+
+  // ListUserChats - Список чатов пользователя
+  rpc ListUserChats(github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/chat/chats"
+    };
+  }
+
+  // ListChatMembers - Список участников чата
+  rpc ListChatMembers(github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/chat/chats/{chatId}/members"
+    };
+  }
+
+  // SendMessage - Отправить сообщение
+  rpc SendMessage(github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/chat/chats/{chatId}/messages"
+      body: "text"
+    };
+  }
+
+  // ListMessages - История сообщений
+  rpc ListMessages(github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesRequest)
+    returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/chat/chats/{chatId}/messages"
+    };
+  }
+}
