@@ -22,7 +22,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type server struct {
+type Server struct {
 	pb.UnimplementedGatewayServiceServer
 
 	authClient   auth.AuthServiceClient
@@ -31,28 +31,28 @@ type server struct {
 	chatClient   chat.ChatServiceClient
 }
 
-func NewServer() (*server, error) {
-	authConn, err := grpc.NewClient("localhost:8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewServer() (*Server, error) {
+	authConn, err := grpc.NewClient("auth:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to auth service: %w", err)
 	}
 
-	usersConn, err := grpc.NewClient("localhost:8083", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to users service: %w", err)
 	}
 
-	socialConn, err := grpc.NewClient("localhost:8084", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	socialConn, err := grpc.NewClient("social:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to social service: %w", err)
 	}
 
-	chatConn, err := grpc.NewClient("localhost:8085", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	chatConn, err := grpc.NewClient("chat:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to chat service: %w", err)
 	}
 
-	srv := &server{
+	srv := &Server{
 		authClient:   auth.NewAuthServiceClient(authConn),
 		usersClient:  users.NewUsersServiceClient(usersConn),
 		socialClient: social.NewSocialServiceClient(socialConn),
@@ -62,7 +62,7 @@ func NewServer() (*server, error) {
 	return srv, nil
 }
 
-func (s *server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.RegisterResponse, error) {
+func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.RegisterResponse, error) {
 	log.Printf("Gateway: Register request for email: %s", req.GetEmail())
 
 	resp, err := s.authClient.Register(ctx, req)
@@ -74,7 +74,7 @@ func (s *server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth
 	return resp, nil
 }
 
-func (s *server) Login(ctx context.Context, req *auth.LoginRequest) (*auth.LoginResponse, error) {
+func (s *Server) Login(ctx context.Context, req *auth.LoginRequest) (*auth.LoginResponse, error) {
 	log.Printf("Gateway: Login request for email: %s", req.GetEmail())
 
 	resp, err := s.authClient.Login(ctx, req)
@@ -86,7 +86,7 @@ func (s *server) Login(ctx context.Context, req *auth.LoginRequest) (*auth.Login
 	return resp, nil
 }
 
-func (s *server) Refresh(ctx context.Context, req *auth.RefreshRequest) (*auth.RefreshResponse, error) {
+func (s *Server) Refresh(ctx context.Context, req *auth.RefreshRequest) (*auth.RefreshResponse, error) {
 	log.Printf("Gateway: Refresh request")
 
 	resp, err := s.authClient.Refresh(ctx, req)
@@ -98,7 +98,7 @@ func (s *server) Refresh(ctx context.Context, req *auth.RefreshRequest) (*auth.R
 	return resp, nil
 }
 
-func (s *server) CreateProfile(ctx context.Context, req *users.CreateProfileRequest) (*users.CreateProfileResponse, error) {
+func (s *Server) CreateProfile(ctx context.Context, req *users.CreateProfileRequest) (*users.CreateProfileResponse, error) {
 	log.Printf("Gateway: CreateProfile request for user: %s", req.GetNickname())
 
 	resp, err := s.usersClient.CreateProfile(ctx, req)
@@ -110,7 +110,7 @@ func (s *server) CreateProfile(ctx context.Context, req *users.CreateProfileRequ
 	return resp, nil
 }
 
-func (s *server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequest) (*users.UpdateProfileResponse, error) {
+func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequest) (*users.UpdateProfileResponse, error) {
 	log.Printf("Gateway: UpdateProfile request for userId: %d", req.GetUserId())
 
 	resp, err := s.usersClient.UpdateProfile(ctx, req)
@@ -122,7 +122,7 @@ func (s *server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequ
 	return resp, nil
 }
 
-func (s *server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRequest) (*users.GetProfileByIDResponse, error) {
+func (s *Server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRequest) (*users.GetProfileByIDResponse, error) {
 	log.Printf("Gateway: GetProfileByID request for userId: %d", req.GetUserId())
 
 	resp, err := s.usersClient.GetProfileByID(ctx, req)
@@ -134,7 +134,7 @@ func (s *server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRe
 	return resp, nil
 }
 
-func (s *server) GetProfileByNickname(ctx context.Context, req *users.GetProfileByNicknameRequest) (*users.GetProfileByNicknameResponse, error) {
+func (s *Server) GetProfileByNickname(ctx context.Context, req *users.GetProfileByNicknameRequest) (*users.GetProfileByNicknameResponse, error) {
 	log.Printf("Gateway: GetProfileByNickname request for nickname: %s", req.GetNickname())
 
 	resp, err := s.usersClient.GetProfileByNickname(ctx, req)
@@ -146,7 +146,7 @@ func (s *server) GetProfileByNickname(ctx context.Context, req *users.GetProfile
 	return resp, nil
 }
 
-func (s *server) SearchByNickname(ctx context.Context, req *users.SearchByNicknameRequest) (*users.SearchByNicknameResponse, error) {
+func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNicknameRequest) (*users.SearchByNicknameResponse, error) {
 	log.Printf("Gateway: SearchByNickname request for query: %s", req.GetQuery())
 
 	resp, err := s.usersClient.SearchByNickname(ctx, req)
@@ -158,7 +158,7 @@ func (s *server) SearchByNickname(ctx context.Context, req *users.SearchByNickna
 	return resp, nil
 }
 
-func (s *server) SendFriendRequest(ctx context.Context, req *social.SendFriendRequestRequest) (*social.SendFriendRequestResponse, error) {
+func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRequestRequest) (*social.SendFriendRequestResponse, error) {
 	log.Printf("Gateway: SendFriendRequest from userId: %d", req.GetUserId())
 
 	resp, err := s.socialClient.SendFriendRequest(ctx, req)
@@ -170,7 +170,7 @@ func (s *server) SendFriendRequest(ctx context.Context, req *social.SendFriendRe
 	return resp, nil
 }
 
-func (s *server) ListRequests(ctx context.Context, req *social.ListRequestsRequest) (*social.ListRequestsResponse, error) {
+func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsRequest) (*social.ListRequestsResponse, error) {
 	log.Printf("Gateway: ListRequests for userId: %d", req.GetUserId())
 
 	resp, err := s.socialClient.ListRequests(ctx, req)
@@ -182,7 +182,7 @@ func (s *server) ListRequests(ctx context.Context, req *social.ListRequestsReque
 	return resp, nil
 }
 
-func (s *server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFriendRequestRequest) (*social.AcceptFriendRequestResponse, error) {
+func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFriendRequestRequest) (*social.AcceptFriendRequestResponse, error) {
 	log.Printf("Gateway: AcceptFriendRequest requestId: %d", req.GetRequestId())
 
 	resp, err := s.socialClient.AcceptFriendRequest(ctx, req)
@@ -194,7 +194,7 @@ func (s *server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFrie
 	return resp, nil
 }
 
-func (s *server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFriendRequestRequest) (*social.DeclineFriendRequestResponse, error) {
+func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFriendRequestRequest) (*social.DeclineFriendRequestResponse, error) {
 	log.Printf("Gateway: DeclineFriendRequest requestId: %d", req.GetRequestId())
 
 	resp, err := s.socialClient.DeclineFriendRequest(ctx, req)
@@ -206,7 +206,7 @@ func (s *server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFr
 	return resp, nil
 }
 
-func (s *server) RemoveFriend(ctx context.Context, req *social.RemoveFriendRequest) (*social.RemoveFriendResponse, error) {
+func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendRequest) (*social.RemoveFriendResponse, error) {
 	log.Printf("Gateway: RemoveFriend userId: %d", req.GetUserId())
 
 	resp, err := s.socialClient.RemoveFriend(ctx, req)
@@ -218,7 +218,7 @@ func (s *server) RemoveFriend(ctx context.Context, req *social.RemoveFriendReque
 	return resp, nil
 }
 
-func (s *server) ListFriends(ctx context.Context, req *social.ListFriendsRequest) (*social.ListFriendsResponse, error) {
+func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest) (*social.ListFriendsResponse, error) {
 	log.Printf("Gateway: ListFriends for userId: %d", req.GetUserId())
 
 	resp, err := s.socialClient.ListFriends(ctx, req)
@@ -230,7 +230,7 @@ func (s *server) ListFriends(ctx context.Context, req *social.ListFriendsRequest
 	return resp, nil
 }
 
-func (s *server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectChatRequest) (*chat.CreateDirectChatResponse, error) {
+func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectChatRequest) (*chat.CreateDirectChatResponse, error) {
 	log.Printf("Gateway: CreateDirectChat for participantId: %d", req.GetParticipantId())
 
 	resp, err := s.chatClient.CreateDirectChat(ctx, req)
@@ -242,7 +242,7 @@ func (s *server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectCha
 	return resp, nil
 }
 
-func (s *server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.GetChatResponse, error) {
+func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.GetChatResponse, error) {
 	log.Printf("Gateway: GetChat chatId: %d", req.GetChatId())
 
 	resp, err := s.chatClient.GetChat(ctx, req)
@@ -254,7 +254,7 @@ func (s *server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.G
 	return resp, nil
 }
 
-func (s *server) ListUserChats(ctx context.Context, req *chat.ListUserChatsRequest) (*chat.ListUserChatsResponse, error) {
+func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsRequest) (*chat.ListUserChatsResponse, error) {
 	log.Printf("Gateway: ListUserChats for userId: %d", req.GetUserId())
 
 	resp, err := s.chatClient.ListUserChats(ctx, req)
@@ -266,7 +266,7 @@ func (s *server) ListUserChats(ctx context.Context, req *chat.ListUserChatsReque
 	return resp, nil
 }
 
-func (s *server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersRequest) (*chat.ListChatMembersResponse, error) {
+func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersRequest) (*chat.ListChatMembersResponse, error) {
 	log.Printf("Gateway: ListChatMembers for chatId: %d", req.GetChatId())
 
 	resp, err := s.chatClient.ListChatMembers(ctx, req)
@@ -278,7 +278,7 @@ func (s *server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersR
 	return resp, nil
 }
 
-func (s *server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
+func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
 	log.Printf("Gateway: SendMessage in chatId: %d, text: %s", req.GetChatId(), req.GetText())
 
 	resp, err := s.chatClient.SendMessage(ctx, req)
@@ -290,7 +290,7 @@ func (s *server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) 
 	return resp, nil
 }
 
-func (s *server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest) (*chat.ListMessagesResponse, error) {
+func (s *Server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest) (*chat.ListMessagesResponse, error) {
 	log.Printf("Gateway: ListMessages for chatId: %d", req.GetChatId())
 
 	resp, err := s.chatClient.ListMessages(ctx, req)
@@ -309,7 +309,7 @@ func main() {
 
 	server, err := NewServer()
 	if err != nil {
-		log.Fatalf("failed to create server: %v", err)
+		log.Fatalf("failed to create Server: %v", err)
 	}
 
 	var wg sync.WaitGroup
@@ -328,7 +328,7 @@ func main() {
 			log.Fatalf("failed to listen: %v", err)
 		}
 
-		log.Printf("Gateway gRPC server listening at %v", lis.Addr())
+		log.Printf("Gateway gRPC Server listening at %v", lis.Addr())
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
@@ -350,7 +350,7 @@ func main() {
 			log.Fatalf("failed to listen: %v", err)
 		}
 
-		log.Printf("Gateway HTTP server listening at %v", lis.Addr())
+		log.Printf("Gateway HTTP Server listening at %v", lis.Addr())
 		if err := httpServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
