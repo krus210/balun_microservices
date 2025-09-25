@@ -1,0 +1,5 @@
+bin/
+vendor.protobuf/
+.git/
+.DS_Store
+*.log

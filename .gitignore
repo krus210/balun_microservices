@@ -27,6 +27,18 @@ go.work.sum
 # env file
 .env
 
+# extra
+vendor.protobuf
+bin/
+
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+# claude
+.claude/
+CLAUDE.md
+
+# gemini
+.gemini/
+GEMINI.md

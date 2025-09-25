@@ -1,0 +1,2154 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Microservices Gateway API",
+    "description": "HTTP Gateway для микросервисной архитектуры",
+    "version": "1.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "GatewayService"
+    },
+    {
+      "name": "AuthService"
+    },
+    {
+      "name": "ChatService"
+    },
+    {
+      "name": "SocialService"
+    },
+    {
+      "name": "UsersService"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Login - Аутентификация пользователя",
+        "operationId": "GatewayService_Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoLoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoLoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "summary": "Refresh - Обновление токена",
+        "operationId": "GatewayService_Refresh",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoRefreshResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoRefreshRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "summary": "Register - Регистрация пользователя",
+        "operationId": "GatewayService_Register",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoRegisterResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoRegisterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/chat/chats": {
+      "get": {
+        "summary": "ListUserChats - Список чатов пользователя",
+        "operationId": "GatewayService_ListUserChats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListUserChatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "userId - идентификатор пользователя",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/chat/chats/{chatId}": {
+      "get": {
+        "summary": "GetChat - Получить информацию о чате",
+        "operationId": "GatewayService_GetChat",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetChatResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chatId",
+            "description": "chatId - идентификатор чата",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/chat/chats/{chatId}/members": {
+      "get": {
+        "summary": "ListChatMembers - Список участников чата",
+        "operationId": "GatewayService_ListChatMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListChatMembersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chatId",
+            "description": "chatId - идентификатор чата",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/chat/chats/{chatId}/messages": {
+      "get": {
+        "summary": "ListMessages - История сообщений",
+        "operationId": "GatewayService_ListMessages",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListMessagesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chatId",
+            "description": "chatId - идентификатор чата",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "limit",
+            "description": "limit - лимит результатов",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "cursor",
+            "description": "cursor - курсор для пагинации",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      },
+      "post": {
+        "summary": "SendMessage - Отправить сообщение",
+        "operationId": "GatewayService_SendMessage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoSendMessageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chatId",
+            "description": "chatId - идентификатор чата",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "text",
+            "description": "text - текст сообщения",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/chat/direct-chats": {
+      "post": {
+        "summary": "CreateDirectChat - Создать личный чат",
+        "operationId": "GatewayService_CreateDirectChat",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCreateDirectChatResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateDirectChatRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/social/friend-requests": {
+      "get": {
+        "summary": "ListRequests - Список входящих заявок в друзья",
+        "operationId": "GatewayService_ListRequests",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListRequestsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "userId - идентификатор пользователя",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      },
+      "post": {
+        "summary": "SendFriendRequest - Отправить заявку в друзья",
+        "operationId": "GatewayService_SendFriendRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoSendFriendRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoSendFriendRequestRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/social/friend-requests/{requestId}/accept": {
+      "put": {
+        "summary": "AcceptFriendRequest - Принять заявку в друзья",
+        "operationId": "GatewayService_AcceptFriendRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoAcceptFriendRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "requestId",
+            "description": "requestId - идентификатор заявки",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/social/friend-requests/{requestId}/decline": {
+      "put": {
+        "summary": "DeclineFriendRequest - Отклонить заявку в друзья",
+        "operationId": "GatewayService_DeclineFriendRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoDeclineFriendRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "requestId",
+            "description": "requestId - идентификатор заявки",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/social/friends": {
+      "get": {
+        "summary": "ListFriends - Список друзей",
+        "operationId": "GatewayService_ListFriends",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListFriendsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "userId - идентификатор пользователя",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "limit",
+            "description": "limit - лимит результатов",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "cursor",
+            "description": "cursor - курсор для пагинации",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/social/friends/{userId}": {
+      "delete": {
+        "summary": "RemoveFriend - Удалить из друзей",
+        "operationId": "GatewayService_RemoveFriend",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoRemoveFriendResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "userId - идентификатор пользователя для удаления из друзей",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/users/profiles": {
+      "post": {
+        "summary": "CreateProfile - Создание профиля пользователя",
+        "operationId": "GatewayService_CreateProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCreateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/users/profiles/by-nickname/{nickname}": {
+      "get": {
+        "summary": "GetProfileByNickname - Получение профиля по никнейму",
+        "operationId": "GatewayService_GetProfileByNickname",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetProfileByNicknameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "nickname",
+            "description": "nickname - никнейм пользователя",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/users/profiles/{userId}": {
+      "get": {
+        "summary": "GetProfileByID - Получение профиля по ID",
+        "operationId": "GatewayService_GetProfileByID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetProfileByIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "userId - идентификатор пользователя",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      },
+      "put": {
+        "summary": "UpdateProfile - Обновление профиля пользователя",
+        "operationId": "GatewayService_UpdateProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoUpdateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "userId - идентификатор пользователя",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGatewayServiceUpdateProfileBody"
+            }
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/api/v1/users/search": {
+      "get": {
+        "summary": "SearchByNickname - Поиск пользователей по никнейму",
+        "operationId": "GatewayService_SearchByNickname",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoSearchByNicknameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "description": "query - запрос для поиска",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "limit - лимит результатов",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GatewayService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService/Login": {
+      "post": {
+        "summary": "Login - Аутентификация пользователя",
+        "operationId": "AuthService_Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoLoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoLoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService/Refresh": {
+      "post": {
+        "summary": "Refresh - Запрос нового токена при протухании текущего",
+        "operationId": "AuthService_Refresh",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoRefreshResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoRefreshRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService/Register": {
+      "post": {
+        "summary": "Register - Регистрация пользователя",
+        "operationId": "AuthService_Register",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoRegisterResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoRegisterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/CreateDirectChat": {
+      "post": {
+        "summary": "CreateDirectChat - Создать личный чат",
+        "operationId": "ChatService_CreateDirectChat",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCreateDirectChatResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateDirectChatRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/GetChat": {
+      "post": {
+        "summary": "GetChat - Получить информацию о чате",
+        "operationId": "ChatService_GetChat",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetChatResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetChatRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/ListChatMembers": {
+      "post": {
+        "summary": "ListChatMembers - Получить участников",
+        "operationId": "ChatService_ListChatMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListChatMembersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoListChatMembersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/ListMessages": {
+      "post": {
+        "summary": "ListMessages - История сообщений",
+        "operationId": "ChatService_ListMessages",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListMessagesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoListMessagesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/ListUserChats": {
+      "post": {
+        "summary": "ListUserChats - Получить список чатов",
+        "operationId": "ChatService_ListUserChats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListUserChatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoListUserChatsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/SendMessage": {
+      "post": {
+        "summary": "SendMessage - Отправить сообщение",
+        "operationId": "ChatService_SendMessage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoSendMessageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoSendMessageRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/StreamMessages": {
+      "post": {
+        "summary": "StreamMessages - Серверный стрим новых сообщений",
+        "operationId": "ChatService_StreamMessages",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/protoStreamMessagesResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of protoStreamMessagesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoStreamMessagesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/AcceptFriendRequest": {
+      "post": {
+        "summary": "AcceptFriendRequest - Принять заявку в друзья",
+        "operationId": "SocialService_AcceptFriendRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoAcceptFriendRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoAcceptFriendRequestRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SocialService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/DeclineFriendRequest": {
+      "post": {
+        "summary": "DeclineFriendRequest - Отклонить заявку в друзья",
+        "operationId": "SocialService_DeclineFriendRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoDeclineFriendRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeclineFriendRequestRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SocialService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/ListFriends": {
+      "post": {
+        "summary": "ListFriends - Список друзей",
+        "operationId": "SocialService_ListFriends",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListFriendsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoListFriendsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SocialService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/ListRequests": {
+      "post": {
+        "summary": "ListRequests - Входящие заявки в друзья",
+        "operationId": "SocialService_ListRequests",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoListRequestsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoListRequestsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SocialService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/RemoveFriend": {
+      "post": {
+        "summary": "RemoveFriend - Удалить пользователя из друзей",
+        "operationId": "SocialService_RemoveFriend",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoRemoveFriendResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoRemoveFriendRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SocialService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/SendFriendRequest": {
+      "post": {
+        "summary": "SendFriendRequest - Отправить заявку в друзья",
+        "operationId": "SocialService_SendFriendRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoSendFriendRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoSendFriendRequestRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SocialService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/CreateProfile": {
+      "post": {
+        "summary": "CreateProfile - Создание профиля пользователя",
+        "operationId": "UsersService_CreateProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCreateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/GetProfileByID": {
+      "post": {
+        "summary": "GetProfileByID - Получение профиля пользователя по ID",
+        "operationId": "UsersService_GetProfileByID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetProfileByIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetProfileByIDRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/GetProfileByNickname": {
+      "post": {
+        "summary": "GetProfileByNickname - Получение профиля пользователя по никнейму",
+        "operationId": "UsersService_GetProfileByNickname",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetProfileByNicknameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetProfileByNicknameRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/SearchByNickname": {
+      "post": {
+        "summary": "SearchByNickname - Поиск профиля пользователя по никнейму",
+        "operationId": "UsersService_SearchByNickname",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoSearchByNicknameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoSearchByNicknameRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/UpdateProfile": {
+      "post": {
+        "summary": "UpdateProfile - Обновление профиля пользователя",
+        "operationId": "UsersService_UpdateProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoUpdateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoUpdateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protoAcceptFriendRequestRequest": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "format": "int64",
+          "title": "requestId - идентификатор заявки"
+        }
+      },
+      "title": "AcceptFriendRequestRequest - запрос AcceptFriendRequest"
+    },
+    "protoAcceptFriendRequestResponse": {
+      "type": "object",
+      "properties": {
+        "friendRequest": {
+          "$ref": "#/definitions/protoFriendRequest",
+          "title": "friendRequest - заявка в друзья"
+        }
+      },
+      "title": "AcceptFriendRequestResponse - ответ AcceptFriendRequest"
+    },
+    "protoChat": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор чата"
+        },
+        "participantIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "participantIds - список участников чата"
+        },
+        "createdAtUnixMs": {
+          "type": "string",
+          "format": "int64",
+          "title": "createdAtUnixMs - время создания чата в миллисекундах"
+        },
+        "lastMessageUnixMs": {
+          "type": "string",
+          "format": "int64",
+          "title": "lastMessageUnixMs - время последнего сообщения в миллисекундах"
+        }
+      }
+    },
+    "protoCreateDirectChatRequest": {
+      "type": "object",
+      "properties": {
+        "participantId": {
+          "type": "string",
+          "format": "int64",
+          "title": "participantId - идентификатор участника чата"
+        }
+      },
+      "title": "CreateDirectChatRequest - запрос CreateDirectChat"
+    },
+    "protoCreateDirectChatResponse": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор созданного чата"
+        }
+      },
+      "title": "CreateDirectChatResponse - ответ CreateDirectChat"
+    },
+    "protoCreateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя"
+        },
+        "nickname": {
+          "type": "string",
+          "title": "nickname - никнейм пользователя"
+        },
+        "bio": {
+          "type": "string",
+          "title": "bio - биография пользователя"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "title": "avatarUrl - ссылка на аватар пользователя"
+        }
+      },
+      "title": "CreateProfileRequest - запрос CreateProfile"
+    },
+    "protoCreateProfileResponse": {
+      "type": "object",
+      "properties": {
+        "userProfile": {
+          "$ref": "#/definitions/protoUserProfile",
+          "title": "userProfile - профиль пользователя"
+        }
+      },
+      "title": "CreateProfileResponse - ответ CreateProfile"
+    },
+    "protoDeclineFriendRequestRequest": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "format": "int64",
+          "title": "requestId - идентификатор заявки"
+        }
+      },
+      "title": "DeclineFriendRequestRequest - запрос DeclineFriendRequest"
+    },
+    "protoDeclineFriendRequestResponse": {
+      "type": "object",
+      "properties": {
+        "friendRequest": {
+          "$ref": "#/definitions/protoFriendRequest",
+          "title": "friendRequest - заявка в друзья"
+        }
+      },
+      "title": "DeclineFriendRequestResponse - ответ DeclineFriendRequest"
+    },
+    "protoFriendRequest": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "format": "int64",
+          "title": "requestId - идентификатор заявки"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "fromUserId - идентификатор пользователя, отправившего заявку"
+        },
+        "status": {
+          "$ref": "#/definitions/protoFriendRequestStatus",
+          "title": "status - статус заявки"
+        }
+      },
+      "title": "FriendRequest - заявка в друзья"
+    },
+    "protoFriendRequestStatus": {
+      "type": "string",
+      "enum": [
+        "FRIEND_REQUEST_STATUS_PENDING",
+        "FRIEND_REQUEST_STATUS_ACCEPTED",
+        "FRIEND_REQUEST_STATUS_DECLINED"
+      ],
+      "default": "FRIEND_REQUEST_STATUS_PENDING",
+      "title": "FriendRequestStatus - статус заявки в друзья"
+    },
+    "protoGatewayServiceUpdateProfileBody": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "title": "nickname - никнейм пользователя"
+        },
+        "bio": {
+          "type": "string",
+          "title": "bio - биография пользователя"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "title": "avatarUrl - ссылка на аватар пользователя"
+        }
+      },
+      "title": "UpdateProfileRequest - запрос UpdateProfile"
+    },
+    "protoGetChatRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор чата"
+        }
+      },
+      "title": "GetChatRequest - запрос GetChat"
+    },
+    "protoGetChatResponse": {
+      "type": "object",
+      "properties": {
+        "chat": {
+          "$ref": "#/definitions/protoChat",
+          "title": "chat - информация о чате"
+        }
+      },
+      "title": "GetChatResponse - ответ GetChat"
+    },
+    "protoGetProfileByIDRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя"
+        }
+      },
+      "title": "GetProfileByIDRequest - запрос GetProfileByID"
+    },
+    "protoGetProfileByIDResponse": {
+      "type": "object",
+      "properties": {
+        "userProfile": {
+          "$ref": "#/definitions/protoUserProfile",
+          "title": "userProfile - профиль пользователя"
+        }
+      },
+      "title": "GetProfileByIDResponse - ответ GetProfileByID"
+    },
+    "protoGetProfileByNicknameRequest": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "title": "nickname - никнейм пользователя"
+        }
+      },
+      "title": "GetProfileByNicknameRequest - запрос GetProfileByNickname"
+    },
+    "protoGetProfileByNicknameResponse": {
+      "type": "object",
+      "properties": {
+        "userProfile": {
+          "$ref": "#/definitions/protoUserProfile",
+          "title": "userProfile - профиль пользователя"
+        }
+      },
+      "title": "GetProfileByNicknameResponse - ответ GetProfileByNickname"
+    },
+    "protoListChatMembersRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор чата"
+        }
+      },
+      "title": "ListChatMembersRequest - запрос ListChatMembers"
+    },
+    "protoListChatMembersResponse": {
+      "type": "object",
+      "properties": {
+        "userIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "userIds - список идентификаторов пользователей"
+        }
+      },
+      "title": "ListChatMembersResponse - ответ ListChatMembers"
+    },
+    "protoListFriendsRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64",
+          "title": "limit - лимит результатов"
+        },
+        "cursor": {
+          "type": "string",
+          "title": "cursor - курсор для пагинации"
+        }
+      },
+      "title": "ListFriendsRequest - запрос ListFriends"
+    },
+    "protoListFriendsResponse": {
+      "type": "object",
+      "properties": {
+        "friendUserIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "friendUserIds - список идентификаторов друзей"
+        },
+        "nextCursor": {
+          "type": "string",
+          "title": "nextCursor - следующий курсор для пагинации"
+        }
+      },
+      "title": "ListFriendsResponse - ответ ListFriends"
+    },
+    "protoListMessagesRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор чата"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64",
+          "title": "limit - лимит результатов"
+        },
+        "cursor": {
+          "type": "string",
+          "title": "cursor - курсор для пагинации"
+        }
+      },
+      "title": "ListMessagesRequest - запрос ListMessages"
+    },
+    "protoListMessagesResponse": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoMessage"
+          },
+          "title": "messages - список сообщений"
+        },
+        "nextCursor": {
+          "type": "string",
+          "title": "nextCursor - курсор для следующей страницы"
+        }
+      },
+      "title": "ListMessagesResponse - ответ ListMessages"
+    },
+    "protoListRequestsRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя"
+        }
+      },
+      "title": "ListRequestsRequest - запрос ListRequests"
+    },
+    "protoListRequestsResponse": {
+      "type": "object",
+      "properties": {
+        "requests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoFriendRequest"
+          },
+          "title": "requests - список заявок в друзья"
+        }
+      },
+      "title": "ListRequestsResponse - ответ ListRequests"
+    },
+    "protoListUserChatsRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя"
+        }
+      },
+      "title": "ListUserChatsRequest - запрос ListUserChats"
+    },
+    "protoListUserChatsResponse": {
+      "type": "object",
+      "properties": {
+        "chats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoChat"
+          },
+          "title": "chats - список чатов"
+        }
+      },
+      "title": "ListUserChatsResponse - ответ ListUserChats"
+    },
+    "protoLoginRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "title": "email -электронная почта"
+        },
+        "password": {
+          "type": "string",
+          "title": "password - пароль пользователя"
+        }
+      },
+      "title": "LoginRequest - запрос Login"
+    },
+    "protoLoginResponse": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "title": "accessToken - токен доступа"
+        },
+        "refreshToken": {
+          "type": "string",
+          "title": "refreshToken - токен после протухания accessToken"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - уникальный идентификатор пользователя"
+        }
+      },
+      "title": "LoginResponse - ответ Login"
+    },
+    "protoMessage": {
+      "type": "object",
+      "properties": {
+        "messageId": {
+          "type": "string",
+          "format": "int64",
+          "title": "messageId - идентификатор сообщения"
+        },
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор чата"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор отправителя"
+        },
+        "text": {
+          "type": "string",
+          "title": "text - текст сообщения"
+        },
+        "sentAtUnixMs": {
+          "type": "string",
+          "format": "int64",
+          "title": "sentAtUnixMs - время отправки в миллисекундах"
+        }
+      }
+    },
+    "protoRefreshRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string",
+          "title": "refreshToken - токен после протухания accessToken"
+        }
+      },
+      "title": "RefreshRequest - запрос Refresh"
+    },
+    "protoRefreshResponse": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "title": "accessToken - токен доступа"
+        },
+        "refreshToken": {
+          "type": "string",
+          "title": "refreshToken - токен после протухания accessToken"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - уникальный идентификатор пользователя"
+        }
+      },
+      "title": "RefreshResponse - ответ Refresh"
+    },
+    "protoRegisterRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "title": "email -электронная почта"
+        },
+        "password": {
+          "type": "string",
+          "title": "password - пароль пользователя"
+        }
+      },
+      "title": "RegisterRequest - запрос Register"
+    },
+    "protoRegisterResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - уникальный идентификатор пользователя"
+        }
+      },
+      "title": "RegisterResponse - ответ Register"
+    },
+    "protoRemoveFriendRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя для удаления из друзей"
+        }
+      },
+      "title": "RemoveFriendRequest - запрос RemoveFriend"
+    },
+    "protoRemoveFriendResponse": {
+      "type": "object",
+      "description": "empty response",
+      "title": "RemoveFriendResponse - ответ RemoveFriend"
+    },
+    "protoSearchByNicknameRequest": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "title": "query - запрос для поиска"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64",
+          "title": "limit - лимит результатов"
+        }
+      },
+      "title": "SearchByNicknameRequest - запрос SearchByNickname"
+    },
+    "protoSearchByNicknameResponse": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoUserProfile"
+          },
+          "title": "results - список профилей пользователей"
+        }
+      },
+      "title": "SearchByNicknameResponse - ответ SearchByNickname"
+    },
+    "protoSendFriendRequestRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "fromUserId - идентификатор пользователя, отправляющего заявку"
+        }
+      },
+      "title": "SendFriendRequestRequest - запрос SendFriendRequest"
+    },
+    "protoSendFriendRequestResponse": {
+      "type": "object",
+      "properties": {
+        "friendRequest": {
+          "$ref": "#/definitions/protoFriendRequest",
+          "title": "friendRequest - заявка в друзья"
+        }
+      },
+      "title": "SendFriendRequestResponse - ответ SendFriendRequest"
+    },
+    "protoSendMessageRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор чата"
+        },
+        "text": {
+          "type": "string",
+          "title": "text - текст сообщения"
+        }
+      },
+      "title": "SendMessageRequest - запрос SendMessage"
+    },
+    "protoSendMessageResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "$ref": "#/definitions/protoMessage",
+          "title": "message - отправленное сообщение"
+        }
+      },
+      "title": "SendMessageResponse - ответ SendMessage"
+    },
+    "protoStreamMessagesRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64",
+          "title": "chatId - идентификатор чата"
+        },
+        "sinceUnixMs": {
+          "type": "string",
+          "format": "int64",
+          "title": "sinceUnixMs - время с которого получать сообщения в миллисекундах"
+        }
+      },
+      "title": "StreamMessagesRequest - запрос StreamMessages"
+    },
+    "protoStreamMessagesResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "$ref": "#/definitions/protoMessage",
+          "title": "message - новое сообщение"
+        }
+      },
+      "title": "StreamMessagesResponse - ответ StreamMessages"
+    },
+    "protoUpdateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя"
+        },
+        "nickname": {
+          "type": "string",
+          "title": "nickname - никнейм пользователя"
+        },
+        "bio": {
+          "type": "string",
+          "title": "bio - биография пользователя"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "title": "avatarUrl - ссылка на аватар пользователя"
+        }
+      },
+      "title": "UpdateProfileRequest - запрос UpdateProfile"
+    },
+    "protoUpdateProfileResponse": {
+      "type": "object",
+      "properties": {
+        "userProfile": {
+          "$ref": "#/definitions/protoUserProfile",
+          "title": "userProfile - профиль пользователя"
+        }
+      },
+      "title": "UpdateProfileResponse - ответ UpdateProfile"
+    },
+    "protoUserProfile": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "userId - идентификатор пользователя"
+        },
+        "nickname": {
+          "type": "string",
+          "title": "nickname - никнейм пользователя"
+        },
+        "bio": {
+          "type": "string",
+          "title": "bio - биография пользователя"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "title": "avatarUrl - ссылка на аватар пользователя"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

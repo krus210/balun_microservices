@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package github.com.krus210.balun_microservices.protobuf.chat.v1.proto;
+
+import "buf/validate/validate.proto";
+
+option go_package = "pkg/gen/proto;proto_v1";
+
+// ChatService - управление чатами и отправка сообщений.
+service ChatService {
+  // CreateDirectChat - Создать личный чат
+  rpc CreateDirectChat(CreateDirectChatRequest) returns (CreateDirectChatResponse) {}
+  // GetChat - Получить информацию о чате
+  rpc GetChat(GetChatRequest) returns (GetChatResponse) {}
+  // ListUserChats - Получить список чатов
+  rpc ListUserChats(ListUserChatsRequest) returns (ListUserChatsResponse) {}
+  // ListChatMembers - Получить участников
+  rpc ListChatMembers(ListChatMembersRequest) returns (ListChatMembersResponse) {}
+  // SendMessage - Отправить сообщение
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse) {}
+  // ListMessages - История сообщений
+  rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {}
+  // StreamMessages - Серверный стрим новых сообщений
+  rpc StreamMessages(StreamMessagesRequest) returns (stream StreamMessagesResponse) {}
+}
+
+message Chat {
+  // chatId - идентификатор чата
+  int64 chatId = 1;
+  // participantIds - список участников чата
+  repeated int64 participantIds = 2;
+  // createdAtUnixMs - время создания чата в миллисекундах
+  int64 createdAtUnixMs = 3;
+  // lastMessageUnixMs - время последнего сообщения в миллисекундах
+  optional int64 lastMessageUnixMs = 4;
+}
+
+message Message {
+  // messageId - идентификатор сообщения
+  int64 messageId = 1;
+  // chatId - идентификатор чата
+  int64 chatId = 2;
+  // userId - идентификатор отправителя
+  int64 userId = 3;
+  // text - текст сообщения
+  string text = 4;
+  // sentAtUnixMs - время отправки в миллисекундах
+  int64 sentAtUnixMs = 5;
+}
+
+// CreateDirectChatRequest - запрос CreateDirectChat
+message CreateDirectChatRequest {
+  // participantId - идентификатор участника чата
+  int64 participantId = 1;
+}
+
+// CreateDirectChatResponse - ответ CreateDirectChat
+message CreateDirectChatResponse {
+  // chatId - идентификатор созданного чата
+    int64 chatId = 1;
+}
+
+// GetChatRequest - запрос GetChat
+message GetChatRequest {
+  // chatId - идентификатор чата
+  int64 chatId = 1;
+}
+
+// GetChatResponse - ответ GetChat
+message GetChatResponse {
+  // chat - информация о чате
+  Chat chat = 1;
+}
+
+// ListUserChatsRequest - запрос ListUserChats
+message ListUserChatsRequest {
+  // userId - идентификатор пользователя
+  int64 userId = 1;
+}
+
+// ListUserChatsResponse - ответ ListUserChats
+message ListUserChatsResponse {
+  // chats - список чатов
+  repeated Chat chats = 1;
+}
+
+// ListChatMembersRequest - запрос ListChatMembers
+message ListChatMembersRequest {
+  // chatId - идентификатор чата
+  int64 chatId = 1;
+}
+
+// ListChatMembersResponse - ответ ListChatMembers
+message ListChatMembersResponse {
+  // userIds - список идентификаторов пользователей
+  repeated int64 userIds = 1;
+}
+
+// SendMessageRequest - запрос SendMessage
+message SendMessageRequest {
+  // chatId - идентификатор чата
+  int64 chatId = 1;
+  // text - текст сообщения
+  string text = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 1000
+    }
+  ];
+}
+
+// SendMessageResponse - ответ SendMessage
+message SendMessageResponse {
+  // message - отправленное сообщение
+  Message message = 1;
+}
+
+// ListMessagesRequest - запрос ListMessages
+message ListMessagesRequest {
+  // chatId - идентификатор чата
+  int64 chatId = 1;
+  // limit - лимит результатов
+  int64 limit = 2;
+  // cursor - курсор для пагинации
+  optional string cursor = 3;
+}
+
+// ListMessagesResponse - ответ ListMessages
+message ListMessagesResponse {
+  // messages - список сообщений
+  repeated Message messages = 1;
+  // nextCursor - курсор для следующей страницы
+  optional string nextCursor = 2;
+}
+
+// StreamMessagesRequest - запрос StreamMessages
+message StreamMessagesRequest {
+  // chatId - идентификатор чата
+  int64 chatId = 1;
+  // sinceUnixMs - время с которого получать сообщения в миллисекундах
+  optional int64 sinceUnixMs = 2;
+}
+
+// StreamMessagesResponse - ответ StreamMessages
+message StreamMessagesResponse {
+  // message - новое сообщение
+  Message message = 1;
+}

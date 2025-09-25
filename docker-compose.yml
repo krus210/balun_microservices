@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8082"
+    networks:
+      - microservices
+
+  users:
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8082"
+    networks:
+      - microservices
+
+  social:
+    build:
+      context: ./social
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8082"
+    networks:
+      - microservices
+
+  chat:
+    build:
+      context: ./chat
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8082"
+    networks:
+      - microservices
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "8082:8082"
+    depends_on:
+      - auth
+      - users
+      - social
+      - chat
+    networks:
+      - microservices
+
+networks:
+  microservices:
+    driver: bridge
