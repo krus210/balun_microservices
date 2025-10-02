@@ -1,10 +1,11 @@
 package usecase
 
 import (
-	"auth/internal/app/models"
-	"auth/internal/usecase/dto"
 	"context"
 	"time"
+
+	"auth/internal/app/models"
+	"auth/internal/usecase/dto"
 
 	"github.com/google/uuid"
 )

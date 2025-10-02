@@ -1,10 +1,11 @@
 package grpc
 
 import (
-	"auth/internal/usecase/dto"
-	pb "auth/pkg/api"
 	"context"
 	"log"
+
+	"auth/internal/usecase/dto"
+	pb "auth/pkg/api"
 
 	"google.golang.org/grpc/metadata"
 )

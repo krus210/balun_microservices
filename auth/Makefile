@@ -1,3 +1,5 @@
+include vendor.proto.mk
+
 # Используем bin в текущей директории для установки плагинов protoc
 LOCAL_BIN := $(CURDIR)/bin
 
@@ -10,6 +12,9 @@ PROTO_PATH := $(CURDIR)/api
 # Путь до сгенеренных .pb.go файлов
 PKG_PROTO_PATH := $(CURDIR)/pkg
 
+# Путь до завендореных protobuf файлов
+VENDOR_PROTO_PATH := $(CURDIR)/vendor.protobuf
+
 # устанавливаем необходимые плагины
 .bin-deps: export GOBIN := $(LOCAL_BIN)
 .bin-deps:
@@ -21,10 +26,14 @@ PKG_PROTO_PATH := $(CURDIR)/pkg
 # генерация .go файлов с помощью protoc
 .protoc-generate:
 	mkdir -p $(PKG_PROTO_PATH)
-	$(PROTOC) --proto_path=$(CURDIR) \
+	$(PROTOC) -I $(VENDOR_PROTO_PATH) --proto_path=$(CURDIR) \
 	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
 	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
 	$(PROTO_PATH)/service.proto
+	$(PROTOC) -I $(VENDOR_PROTO_PATH) --proto_path=$(CURDIR) \
+	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
+	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
+	$(VENDOR_PROTO_PATH)/users/api/service.proto
 
 # go mod tidy
 .tidy:
@@ -45,5 +54,10 @@ build:
 	.bin-deps \
 	.protoc-generate \
 	.tidy \
+	.vendor-reset \
+	.vendor-protovalidate \
+	.vendor-users \
+	.vendor-tidy \
+	vendor \
 	generate \
 	build

@@ -1,10 +1,11 @@
 package usecase
 
 import (
-	"auth/internal/app/models"
-	"auth/internal/usecase/dto"
 	"context"
 	"errors"
+
+	"auth/internal/app/models"
+	"auth/internal/usecase/dto"
 )
 
 // Порты вторичные

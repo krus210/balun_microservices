@@ -1,9 +1,10 @@
 package usecase
 
 import (
+	"context"
+
 	"auth/internal/app/models"
 	"auth/internal/usecase/dto"
-	"context"
 )
 
 func (s *AuthService) Register(ctx context.Context, req dto.RegisterRequest) (*models.User, error) {

@@ -1,10 +1,11 @@
-package middleware
+package errors
 
 import (
-	"auth/internal/app/models"
-	"auth/internal/usecase"
 	"context"
 	"errors"
+
+	"auth/internal/app/models"
+	"auth/internal/usecase"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -22,7 +23,7 @@ func ErrorsUnaryInterceptor() grpc.UnaryServerInterceptor {
 		resp, err = handler(ctx, req)
 		//
 		if _, ok := status.FromError(err); ok {
-			return
+			return resp, err
 		}
 
 		switch {
@@ -36,6 +37,6 @@ func ErrorsUnaryInterceptor() grpc.UnaryServerInterceptor {
 			err = status.Error(codes.Unknown, err.Error())
 		}
 
-		return
+		return resp, err
 	}
 }
