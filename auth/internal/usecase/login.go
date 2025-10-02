@@ -1,0 +1,36 @@
+package usecase
+
+import (
+	"auth/internal/app/models"
+	"auth/internal/usecase/dto"
+	"context"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*models.User, error) {
+	user, err := s.usersRepo.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, models.ErrNotFound
+	}
+	if user.Password != req.Password {
+		return nil, ErrWrongPassword
+	}
+
+	user.Token = &models.UserToken{
+		AccessToken:    uuid.New().String(),
+		RefreshToken:   uuid.New().String(),
+		TokenExpiresAt: time.Now().Add(time.Hour * 24 * 7),
+	}
+
+	err = s.usersRepo.UpdateUser(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
