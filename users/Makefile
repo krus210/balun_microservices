@@ -51,6 +51,7 @@ build:
 	.protoc-generate \
 	.tidy \
 	.vendor-protovalidate \
+	.wire \
 	vendor \
 	generate \
 	build
