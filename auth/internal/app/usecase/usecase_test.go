@@ -119,7 +119,7 @@ func TestAuthService_Register(t *testing.T) {
 
 			if tt.expectedError != nil {
 				require.Error(t, err)
-				assert.Equal(t, tt.expectedError.Error(), err.Error())
+				assert.Contains(t, err.Error(), tt.expectedError.Error())
 				assert.Nil(t, user)
 			} else {
 				require.NoError(t, err)
@@ -244,7 +244,7 @@ func TestAuthService_Login(t *testing.T) {
 
 			if tt.expectedError != nil {
 				require.Error(t, err)
-				assert.Equal(t, tt.expectedError.Error(), err.Error())
+				assert.Contains(t, err.Error(), tt.expectedError.Error())
 				assert.Nil(t, user)
 			} else {
 				require.NoError(t, err)
@@ -386,7 +386,7 @@ func TestAuthService_Refresh(t *testing.T) {
 
 			if tt.expectedError != nil {
 				require.Error(t, err)
-				assert.Equal(t, tt.expectedError.Error(), err.Error())
+				assert.Contains(t, err.Error(), tt.expectedError.Error())
 				assert.Nil(t, user)
 			} else {
 				require.NoError(t, err)

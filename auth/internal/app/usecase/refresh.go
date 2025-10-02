@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"auth/internal/app/usecase/dto"
@@ -14,7 +15,7 @@ import (
 func (s *AuthService) Refresh(ctx context.Context, req dto.RefreshRequest) (*models.User, error) {
 	user, err := s.usersRepo.GetUserByID(ctx, req.UserID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[AuthService][Refresh] userRepo GetUserByID error: %w", err)
 	}
 	if user == nil {
 		return nil, models.ErrNotFound
@@ -31,7 +32,7 @@ func (s *AuthService) Refresh(ctx context.Context, req dto.RefreshRequest) (*mod
 
 	err = s.usersRepo.UpdateUser(ctx, user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[AuthService][Refresh] userRepo UpdateUser error: %w", err)
 	}
 
 	return user, nil
