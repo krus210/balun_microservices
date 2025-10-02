@@ -4,13 +4,14 @@ import (
 	"context"
 	"log"
 
-	"auth/internal/usecase/dto"
+	"auth/internal/app/usecase/dto"
+
 	pb "auth/pkg/api"
 
 	"google.golang.org/grpc/metadata"
 )
 
-func (h *AuthHandler) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
+func (h *AuthController) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		log.Println("Заголовков нет")
@@ -19,7 +20,7 @@ func (h *AuthHandler) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.
 		log.Println(key, md.Get(key))
 	}
 
-	user, err := h.usecases.Refresh(ctx, dto.RefreshRequest{
+	user, err := h.usecase.Refresh(ctx, dto.RefreshRequest{
 		UserID:       1, // TODO: получать из хедера
 		RefreshToken: req.RefreshToken,
 	})

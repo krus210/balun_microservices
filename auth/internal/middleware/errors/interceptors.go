@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"auth/internal/app/usecase"
+
 	"auth/internal/app/models"
-	"auth/internal/usecase"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

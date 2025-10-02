@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (h *AuthHandler) validateCredentials(email string, password string) error {
+func (h *AuthController) validateCredentials(email string, password string) error {
 	var violations []*errdetails.BadRequest_FieldViolation
 	if len(email) == 0 {
 		violations = append(violations, &errdetails.BadRequest_FieldViolation{

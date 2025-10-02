@@ -4,13 +4,14 @@ import (
 	"context"
 	"log"
 
-	"auth/internal/usecase/dto"
+	"auth/internal/app/usecase/dto"
+
 	pb "auth/pkg/api"
 
 	"google.golang.org/grpc/metadata"
 )
 
-func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (h *AuthController) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		log.Println("Заголовков нет")
@@ -24,7 +25,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 		return nil, err
 	}
 
-	user, err := h.usecases.Login(ctx, dto.LoginRequest{
+	user, err := h.usecase.Register(ctx, dto.RegisterRequest{
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	})
@@ -32,9 +33,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 		return nil, err
 	}
 
-	return &pb.LoginResponse{
-		UserId:       user.ID,
-		AccessToken:  user.Token.AccessToken,
-		RefreshToken: user.Token.RefreshToken,
+	return &pb.RegisterResponse{
+		UserId: user.ID,
 	}, nil
 }

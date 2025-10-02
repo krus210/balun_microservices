@@ -1,11 +1,13 @@
+//go:generate minimock -i .UsersService,.UsersRepository,.Usecase -s _mock.go -o ./mocks -g
 package usecase
 
 import (
 	"context"
 	"errors"
 
+	"auth/internal/app/usecase/dto"
+
 	"auth/internal/app/models"
-	"auth/internal/usecase/dto"
 )
 
 // Порты вторичные
@@ -22,7 +24,7 @@ type (
 	}
 )
 
-type Usecases interface {
+type Usecase interface {
 	// Register создание пользователя
 	//
 	// ErrAlreadyExists
@@ -49,9 +51,9 @@ type AuthService struct {
 	usersRepo    UsersRepository
 }
 
-var _ Usecases = (*AuthService)(nil)
+var _ Usecase = (*AuthService)(nil)
 
-func NewUsecases(usersService UsersService, usersRepo UsersRepository) *AuthService {
+func NewUsecase(usersService UsersService, usersRepo UsersRepository) *AuthService {
 	return &AuthService{
 		usersService: usersService,
 		usersRepo:    usersRepo,

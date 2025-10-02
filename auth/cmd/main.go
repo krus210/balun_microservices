@@ -4,8 +4,11 @@ import (
 	"log"
 	"net"
 
-	"auth/internal/repository"
-	"auth/internal/usecase"
+	"auth/internal/app/adapters"
+	deliveryGrpc "auth/internal/app/delivery/grpc"
+	"auth/internal/app/repository"
+	"auth/internal/app/usecase"
+
 	authPb "auth/pkg/api"
 	usersPb "auth/pkg/users/api"
 
@@ -13,8 +16,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
-	"auth/internal/clients"
-	deliveryGrpc "auth/internal/delivery/grpc"
 	errorsMiddleware "auth/internal/middleware/errors"
 )
 
@@ -24,13 +25,13 @@ func main() {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
 
-	usersClient := clients.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
+	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 
 	repo := repository.NewUsersRepositoryStub()
 
-	usecases := usecase.NewUsecases(usersClient, repo)
+	authUsecase := usecase.NewUsecase(usersClient, repo)
 
-	handler := deliveryGrpc.NewAuthHandler(usecases)
+	controller := deliveryGrpc.NewAuthController(authUsecase)
 
 	lis, err := net.Listen("tcp", ":8082")
 	if err != nil {
@@ -42,7 +43,7 @@ func main() {
 			errorsMiddleware.ErrorsUnaryInterceptor(),
 		),
 	)
-	authPb.RegisterAuthServiceServer(server, handler) // регистрация обработчиков
+	authPb.RegisterAuthServiceServer(server, controller) // регистрация обработчиков
 
 	reflection.Register(server) // регистрируем дополнительные обработчики
 

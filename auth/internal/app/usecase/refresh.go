@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
+	"auth/internal/app/usecase/dto"
+
 	"auth/internal/app/models"
-	"auth/internal/usecase/dto"
 
 	"github.com/google/uuid"
 )
