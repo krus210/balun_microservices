@@ -7,6 +7,11 @@ type FriendRequestDto struct {
 	ToUserID   int64
 }
 
+type ChangeFriendRequestDto struct {
+	UserID    int64
+	RequestID int64
+}
+
 type ListFriendsDto struct {
 	UserID int64
 	Limit  int64

@@ -2,12 +2,12 @@ package models
 
 import "time"
 
-type FriendRequestStatus string
+type FriendRequestStatus int
 
 const (
-	FriendRequestAccepted  FriendRequestStatus = "PENDING"
-	FriendRequestRequested FriendRequestStatus = "REQUESTED"
-	FriendRequestDeclined  FriendRequestStatus = "DECLINED"
+	FriendRequestPending  FriendRequestStatus = 0
+	FriendRequestAccepted FriendRequestStatus = 1
+	FriendRequestDeclined FriendRequestStatus = 2
 )
 
 type FriendRequest struct {

@@ -30,9 +30,9 @@ type Usecase interface {
 	// ListFriendRequests получение списка заявок на друзья
 	ListFriendRequests(ctx context.Context, toUserID int64) ([]*models.FriendRequest, error)
 	// AcceptFriendRequest принятие заявки на друзья
-	AcceptFriendRequest(ctx context.Context, requestID int64) (*models.FriendRequest, error)
+	AcceptFriendRequest(ctx context.Context, req dto.ChangeFriendRequestDto) (*models.FriendRequest, error)
 	// DeclineFriendRequest отказ от заявки на друзья
-	DeclineFriendRequest(ctx context.Context, requestID int64) (*models.FriendRequest, error)
+	DeclineFriendRequest(ctx context.Context, req dto.ChangeFriendRequestDto) (*models.FriendRequest, error)
 	// RemoveFriend удаление друга
 	RemoveFriend(ctx context.Context, req dto.FriendRequestDto) error
 	// ListFriends получение списка друзей

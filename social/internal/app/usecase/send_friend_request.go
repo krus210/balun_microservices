@@ -37,7 +37,7 @@ func (s *SocialService) SendFriendRequest(ctx context.Context, req dto.FriendReq
 	friendRequest = &models.FriendRequest{
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,
-		Status:     models.FriendRequestRequested,
+		Status:     models.FriendRequestPending,
 	}
 
 	savedFriendRequest, err := s.socialRepo.SaveFriendRequest(ctx, friendRequest)

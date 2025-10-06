@@ -3,6 +3,7 @@ package models
 import "errors"
 
 var (
-	ErrNotFound      = errors.New("user not found")
-	ErrAlreadyExists = errors.New("user already exists")
+	ErrNotFound         = errors.New("user not found")
+	ErrAlreadyExists    = errors.New("user already exists")
+	ErrPermissionDenied = errors.New("permission denied")
 )

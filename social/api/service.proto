@@ -34,15 +34,17 @@ message FriendRequest {
   // requestId - идентификатор заявки
   int64 requestId = 1;
   // fromUserId - идентификатор пользователя, отправившего заявку
-  int64 userId = 2;
+  int64 fromUserId = 2;
+  // toUserId - идентификатор пользователя, получающего заявку
+  int64 toUserId = 3;
   // status - статус заявки
   FriendRequestStatus status = 4;
 }
 
 // SendFriendRequestRequest - запрос SendFriendRequest
 message SendFriendRequestRequest {
-  // fromUserId - идентификатор пользователя, отправляющего заявку
-  int64 userId = 1;
+  // toUserId - идентификатор пользователя, получающего заявку
+  int64 toUserId = 1;
 }
 
 // SendFriendRequestResponse - ответ SendFriendRequest
@@ -53,8 +55,8 @@ message SendFriendRequestResponse {
 
 // ListRequestsRequest - запрос ListRequests
 message ListRequestsRequest {
-  // userId - идентификатор пользователя
-  int64 userId = 1;
+  // toUserId - идентификатор пользователя получающего заявку
+  int64 toUserId = 1;
 }
 
 // ListRequestsResponse - ответ ListRequests

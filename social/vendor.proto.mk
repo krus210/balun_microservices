@@ -2,7 +2,7 @@
 VENDOR_PROTO_PATH := $(CURDIR)/vendor.protobuf
 
 # vendor
-vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protovalidate .vendor-protoc-gen-openapiv2 .vendor-tidy
+vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protovalidate .vendor-protoc-gen-openapiv2 .vendor-users .vendor-tidy
 
 # delete VENDOR_PROTO_PATH
 .vendor-reset:
@@ -51,6 +51,11 @@ vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protova
 	mv $(VENDOR_PROTO_PATH)/protovalidate/proto/protovalidate/buf $(VENDOR_PROTO_PATH)
 	rm -rf $(VENDOR_PROTO_PATH)/protovalidate
 
+# Копируем proto файлы users сервиса
+.vendor-users:
+	mkdir -p $(VENDOR_PROTO_PATH)/users/api
+	cp -f ../users/api/service.proto $(VENDOR_PROTO_PATH)/users/api/
+
 # delete all non .proto files
 .vendor-tidy:
 	find $(VENDOR_PROTO_PATH) -type f ! -name "*.proto" -delete
@@ -65,5 +70,6 @@ vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protova
 	.vendor-googleapis \
 	.vendor-protoc-gen-openapiv2 \
 	.vendor-protovalidate \
+	.vendor-users \
 	.vendor-tidy \
 	vendor
