@@ -1,0 +1,45 @@
+package usecase
+
+import (
+	"context"
+	"fmt"
+
+	"social/internal/app/models"
+	"social/internal/app/usecase/dto"
+)
+
+func (s *SocialService) RemoveFriend(ctx context.Context, req dto.FriendRequestDto) error {
+	friendRequest, err := s.getAcceptedFriendRequest(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		return fmt.Errorf("[SocialService][RemoveFriend] sociaRepo getAcceptedFriendRequest error: %w", err)
+	}
+
+	err = s.socialRepo.DeleteFriendRequest(ctx, friendRequest.ID)
+	if err != nil {
+		return fmt.Errorf("[SocialService][RemoveFriend] sociaRepo DeleteFriendRequest error: %w", err)
+	}
+
+	return nil
+}
+
+func (s *SocialService) getAcceptedFriendRequest(ctx context.Context, firstUserID int64, secondUserID int64) (*models.FriendRequest, error) {
+	friendRequest, err := s.socialRepo.GetFriendRequestByUserIDs(ctx, firstUserID, secondUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if friendRequest != nil && friendRequest.Status == models.FriendRequestAccepted {
+		return friendRequest, nil
+	}
+
+	friendRequest, err = s.socialRepo.GetFriendRequestByUserIDs(ctx, secondUserID, firstUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if friendRequest == nil || friendRequest.Status != models.FriendRequestAccepted {
+		return nil, models.ErrNotFound
+	}
+
+	return friendRequest, nil
+}
