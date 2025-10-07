@@ -12,18 +12,6 @@
   "tags": [
     {
       "name": "GatewayService"
-    },
-    {
-      "name": "AuthService"
-    },
-    {
-      "name": "ChatService"
-    },
-    {
-      "name": "SocialService"
-    },
-    {
-      "name": "UsersService"
     }
   ],
   "schemes": [
@@ -376,8 +364,8 @@
         },
         "parameters": [
           {
-            "name": "userId",
-            "description": "userId - идентификатор пользователя",
+            "name": "toUserId",
+            "description": "toUserId - идентификатор пользователя получающего заявку",
             "in": "query",
             "required": false,
             "type": "string",
@@ -695,7 +683,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/protoGatewayServiceUpdateProfileBody"
+              "$ref": "#/definitions/GatewayServiceUpdateProfileBody"
             }
           }
         ],
@@ -743,721 +731,26 @@
           "GatewayService"
         ]
       }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService/Login": {
-      "post": {
-        "summary": "Login - Аутентификация пользователя",
-        "operationId": "AuthService_Login",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoLoginResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoLoginRequest"
-            }
-          }
-        ],
-        "tags": [
-          "AuthService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService/Refresh": {
-      "post": {
-        "summary": "Refresh - Запрос нового токена при протухании текущего",
-        "operationId": "AuthService_Refresh",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoRefreshResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoRefreshRequest"
-            }
-          }
-        ],
-        "tags": [
-          "AuthService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService/Register": {
-      "post": {
-        "summary": "Register - Регистрация пользователя",
-        "operationId": "AuthService_Register",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoRegisterResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoRegisterRequest"
-            }
-          }
-        ],
-        "tags": [
-          "AuthService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/CreateDirectChat": {
-      "post": {
-        "summary": "CreateDirectChat - Создать личный чат",
-        "operationId": "ChatService_CreateDirectChat",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoCreateDirectChatResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoCreateDirectChatRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ChatService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/GetChat": {
-      "post": {
-        "summary": "GetChat - Получить информацию о чате",
-        "operationId": "ChatService_GetChat",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoGetChatResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoGetChatRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ChatService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/ListChatMembers": {
-      "post": {
-        "summary": "ListChatMembers - Получить участников",
-        "operationId": "ChatService_ListChatMembers",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoListChatMembersResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoListChatMembersRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ChatService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/ListMessages": {
-      "post": {
-        "summary": "ListMessages - История сообщений",
-        "operationId": "ChatService_ListMessages",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoListMessagesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoListMessagesRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ChatService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/ListUserChats": {
-      "post": {
-        "summary": "ListUserChats - Получить список чатов",
-        "operationId": "ChatService_ListUserChats",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoListUserChatsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoListUserChatsRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ChatService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/SendMessage": {
-      "post": {
-        "summary": "SendMessage - Отправить сообщение",
-        "operationId": "ChatService_SendMessage",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoSendMessageResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoSendMessageRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ChatService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatService/StreamMessages": {
-      "post": {
-        "summary": "StreamMessages - Серверный стрим новых сообщений",
-        "operationId": "ChatService_StreamMessages",
-        "responses": {
-          "200": {
-            "description": "A successful response.(streaming responses)",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "$ref": "#/definitions/protoStreamMessagesResponse"
-                },
-                "error": {
-                  "$ref": "#/definitions/rpcStatus"
-                }
-              },
-              "title": "Stream result of protoStreamMessagesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoStreamMessagesRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ChatService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/AcceptFriendRequest": {
-      "post": {
-        "summary": "AcceptFriendRequest - Принять заявку в друзья",
-        "operationId": "SocialService_AcceptFriendRequest",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoAcceptFriendRequestResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoAcceptFriendRequestRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SocialService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/DeclineFriendRequest": {
-      "post": {
-        "summary": "DeclineFriendRequest - Отклонить заявку в друзья",
-        "operationId": "SocialService_DeclineFriendRequest",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoDeclineFriendRequestResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoDeclineFriendRequestRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SocialService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/ListFriends": {
-      "post": {
-        "summary": "ListFriends - Список друзей",
-        "operationId": "SocialService_ListFriends",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoListFriendsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoListFriendsRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SocialService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/ListRequests": {
-      "post": {
-        "summary": "ListRequests - Входящие заявки в друзья",
-        "operationId": "SocialService_ListRequests",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoListRequestsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoListRequestsRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SocialService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/RemoveFriend": {
-      "post": {
-        "summary": "RemoveFriend - Удалить пользователя из друзей",
-        "operationId": "SocialService_RemoveFriend",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoRemoveFriendResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoRemoveFriendRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SocialService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.social.v1.proto.SocialService/SendFriendRequest": {
-      "post": {
-        "summary": "SendFriendRequest - Отправить заявку в друзья",
-        "operationId": "SocialService_SendFriendRequest",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoSendFriendRequestResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoSendFriendRequestRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SocialService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/CreateProfile": {
-      "post": {
-        "summary": "CreateProfile - Создание профиля пользователя",
-        "operationId": "UsersService_CreateProfile",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoCreateProfileResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoCreateProfileRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/GetProfileByID": {
-      "post": {
-        "summary": "GetProfileByID - Получение профиля пользователя по ID",
-        "operationId": "UsersService_GetProfileByID",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoGetProfileByIDResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoGetProfileByIDRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/GetProfileByNickname": {
-      "post": {
-        "summary": "GetProfileByNickname - Получение профиля пользователя по никнейму",
-        "operationId": "UsersService_GetProfileByNickname",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoGetProfileByNicknameResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoGetProfileByNicknameRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/SearchByNickname": {
-      "post": {
-        "summary": "SearchByNickname - Поиск профиля пользователя по никнейму",
-        "operationId": "UsersService_SearchByNickname",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoSearchByNicknameResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoSearchByNicknameRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
-    "/github.com.krus210.balun_microservices.protobuf.users.v1.proto.UsersService/UpdateProfile": {
-      "post": {
-        "summary": "UpdateProfile - Обновление профиля пользователя",
-        "operationId": "UsersService_UpdateProfile",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/protoUpdateProfileResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoUpdateProfileRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
     }
   },
   "definitions": {
-    "protoAcceptFriendRequestRequest": {
+    "GatewayServiceUpdateProfileBody": {
       "type": "object",
       "properties": {
-        "requestId": {
+        "nickname": {
           "type": "string",
-          "format": "int64",
-          "title": "requestId - идентификатор заявки"
+          "title": "nickname - никнейм пользователя"
+        },
+        "bio": {
+          "type": "string",
+          "title": "bio - биография пользователя"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "title": "avatarUrl - ссылка на аватар пользователя"
         }
       },
-      "title": "AcceptFriendRequestRequest - запрос AcceptFriendRequest"
+      "title": "UpdateProfileRequest - запрос UpdateProfile"
     },
     "protoAcceptFriendRequestResponse": {
       "type": "object",
@@ -1552,17 +845,6 @@
       },
       "title": "CreateProfileResponse - ответ CreateProfile"
     },
-    "protoDeclineFriendRequestRequest": {
-      "type": "object",
-      "properties": {
-        "requestId": {
-          "type": "string",
-          "format": "int64",
-          "title": "requestId - идентификатор заявки"
-        }
-      },
-      "title": "DeclineFriendRequestRequest - запрос DeclineFriendRequest"
-    },
     "protoDeclineFriendRequestResponse": {
       "type": "object",
       "properties": {
@@ -1581,10 +863,15 @@
           "format": "int64",
           "title": "requestId - идентификатор заявки"
         },
-        "userId": {
+        "fromUserId": {
           "type": "string",
           "format": "int64",
           "title": "fromUserId - идентификатор пользователя, отправившего заявку"
+        },
+        "toUserId": {
+          "type": "string",
+          "format": "int64",
+          "title": "toUserId - идентификатор пользователя, получающего заявку"
         },
         "status": {
           "$ref": "#/definitions/protoFriendRequestStatus",
@@ -1603,35 +890,6 @@
       "default": "FRIEND_REQUEST_STATUS_PENDING",
       "title": "FriendRequestStatus - статус заявки в друзья"
     },
-    "protoGatewayServiceUpdateProfileBody": {
-      "type": "object",
-      "properties": {
-        "nickname": {
-          "type": "string",
-          "title": "nickname - никнейм пользователя"
-        },
-        "bio": {
-          "type": "string",
-          "title": "bio - биография пользователя"
-        },
-        "avatarUrl": {
-          "type": "string",
-          "title": "avatarUrl - ссылка на аватар пользователя"
-        }
-      },
-      "title": "UpdateProfileRequest - запрос UpdateProfile"
-    },
-    "protoGetChatRequest": {
-      "type": "object",
-      "properties": {
-        "chatId": {
-          "type": "string",
-          "format": "int64",
-          "title": "chatId - идентификатор чата"
-        }
-      },
-      "title": "GetChatRequest - запрос GetChat"
-    },
     "protoGetChatResponse": {
       "type": "object",
       "properties": {
@@ -1641,17 +899,6 @@
         }
       },
       "title": "GetChatResponse - ответ GetChat"
-    },
-    "protoGetProfileByIDRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64",
-          "title": "userId - идентификатор пользователя"
-        }
-      },
-      "title": "GetProfileByIDRequest - запрос GetProfileByID"
     },
     "protoGetProfileByIDResponse": {
       "type": "object",
@@ -1663,16 +910,6 @@
       },
       "title": "GetProfileByIDResponse - ответ GetProfileByID"
     },
-    "protoGetProfileByNicknameRequest": {
-      "type": "object",
-      "properties": {
-        "nickname": {
-          "type": "string",
-          "title": "nickname - никнейм пользователя"
-        }
-      },
-      "title": "GetProfileByNicknameRequest - запрос GetProfileByNickname"
-    },
     "protoGetProfileByNicknameResponse": {
       "type": "object",
       "properties": {
@@ -1682,17 +919,6 @@
         }
       },
       "title": "GetProfileByNicknameResponse - ответ GetProfileByNickname"
-    },
-    "protoListChatMembersRequest": {
-      "type": "object",
-      "properties": {
-        "chatId": {
-          "type": "string",
-          "format": "int64",
-          "title": "chatId - идентификатор чата"
-        }
-      },
-      "title": "ListChatMembersRequest - запрос ListChatMembers"
     },
     "protoListChatMembersResponse": {
       "type": "object",
@@ -1707,26 +933,6 @@
         }
       },
       "title": "ListChatMembersResponse - ответ ListChatMembers"
-    },
-    "protoListFriendsRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64",
-          "title": "userId - идентификатор пользователя"
-        },
-        "limit": {
-          "type": "string",
-          "format": "int64",
-          "title": "limit - лимит результатов"
-        },
-        "cursor": {
-          "type": "string",
-          "title": "cursor - курсор для пагинации"
-        }
-      },
-      "title": "ListFriendsRequest - запрос ListFriends"
     },
     "protoListFriendsResponse": {
       "type": "object",
@@ -1746,26 +952,6 @@
       },
       "title": "ListFriendsResponse - ответ ListFriends"
     },
-    "protoListMessagesRequest": {
-      "type": "object",
-      "properties": {
-        "chatId": {
-          "type": "string",
-          "format": "int64",
-          "title": "chatId - идентификатор чата"
-        },
-        "limit": {
-          "type": "string",
-          "format": "int64",
-          "title": "limit - лимит результатов"
-        },
-        "cursor": {
-          "type": "string",
-          "title": "cursor - курсор для пагинации"
-        }
-      },
-      "title": "ListMessagesRequest - запрос ListMessages"
-    },
     "protoListMessagesResponse": {
       "type": "object",
       "properties": {
@@ -1784,17 +970,6 @@
       },
       "title": "ListMessagesResponse - ответ ListMessages"
     },
-    "protoListRequestsRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64",
-          "title": "userId - идентификатор пользователя"
-        }
-      },
-      "title": "ListRequestsRequest - запрос ListRequests"
-    },
     "protoListRequestsResponse": {
       "type": "object",
       "properties": {
@@ -1808,17 +983,6 @@
         }
       },
       "title": "ListRequestsResponse - ответ ListRequests"
-    },
-    "protoListUserChatsRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64",
-          "title": "userId - идентификатор пользователя"
-        }
-      },
-      "title": "ListUserChatsRequest - запрос ListUserChats"
     },
     "protoListUserChatsResponse": {
       "type": "object",
@@ -1950,36 +1114,10 @@
       },
       "title": "RegisterResponse - ответ Register"
     },
-    "protoRemoveFriendRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64",
-          "title": "userId - идентификатор пользователя для удаления из друзей"
-        }
-      },
-      "title": "RemoveFriendRequest - запрос RemoveFriend"
-    },
     "protoRemoveFriendResponse": {
       "type": "object",
       "description": "empty response",
       "title": "RemoveFriendResponse - ответ RemoveFriend"
-    },
-    "protoSearchByNicknameRequest": {
-      "type": "object",
-      "properties": {
-        "query": {
-          "type": "string",
-          "title": "query - запрос для поиска"
-        },
-        "limit": {
-          "type": "string",
-          "format": "int64",
-          "title": "limit - лимит результатов"
-        }
-      },
-      "title": "SearchByNicknameRequest - запрос SearchByNickname"
     },
     "protoSearchByNicknameResponse": {
       "type": "object",
@@ -1998,10 +1136,10 @@
     "protoSendFriendRequestRequest": {
       "type": "object",
       "properties": {
-        "userId": {
+        "toUserId": {
           "type": "string",
           "format": "int64",
-          "title": "fromUserId - идентификатор пользователя, отправляющего заявку"
+          "title": "toUserId - идентификатор пользователя, получающего заявку"
         }
       },
       "title": "SendFriendRequestRequest - запрос SendFriendRequest"
@@ -2016,21 +1154,6 @@
       },
       "title": "SendFriendRequestResponse - ответ SendFriendRequest"
     },
-    "protoSendMessageRequest": {
-      "type": "object",
-      "properties": {
-        "chatId": {
-          "type": "string",
-          "format": "int64",
-          "title": "chatId - идентификатор чата"
-        },
-        "text": {
-          "type": "string",
-          "title": "text - текст сообщения"
-        }
-      },
-      "title": "SendMessageRequest - запрос SendMessage"
-    },
     "protoSendMessageResponse": {
       "type": "object",
       "properties": {
@@ -2040,55 +1163,6 @@
         }
       },
       "title": "SendMessageResponse - ответ SendMessage"
-    },
-    "protoStreamMessagesRequest": {
-      "type": "object",
-      "properties": {
-        "chatId": {
-          "type": "string",
-          "format": "int64",
-          "title": "chatId - идентификатор чата"
-        },
-        "sinceUnixMs": {
-          "type": "string",
-          "format": "int64",
-          "title": "sinceUnixMs - время с которого получать сообщения в миллисекундах"
-        }
-      },
-      "title": "StreamMessagesRequest - запрос StreamMessages"
-    },
-    "protoStreamMessagesResponse": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "$ref": "#/definitions/protoMessage",
-          "title": "message - новое сообщение"
-        }
-      },
-      "title": "StreamMessagesResponse - ответ StreamMessages"
-    },
-    "protoUpdateProfileRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64",
-          "title": "userId - идентификатор пользователя"
-        },
-        "nickname": {
-          "type": "string",
-          "title": "nickname - никнейм пользователя"
-        },
-        "bio": {
-          "type": "string",
-          "title": "bio - биография пользователя"
-        },
-        "avatarUrl": {
-          "type": "string",
-          "title": "avatarUrl - ссылка на аватар пользователя"
-        }
-      },
-      "title": "UpdateProfileRequest - запрос UpdateProfile"
     },
     "protoUpdateProfileResponse": {
       "type": "object",
