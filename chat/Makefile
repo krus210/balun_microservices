@@ -31,6 +31,10 @@ VENDOR_PROTO_PATH := $(CURDIR)/vendor.protobuf
 	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
 	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
 	 $(PROTO_PATH)/service.proto
+	$(PROTOC) -I $(VENDOR_PROTO_PATH) --proto_path=$(CURDIR) \
+	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
+	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
+	$(VENDOR_PROTO_PATH)/users/api/service.proto
 
 # go mod tidy
 .tidy:
@@ -51,6 +55,8 @@ build:
 	.protoc-generate \
 	.tidy \
 	.vendor-protovalidate \
+	.vendor-users \
+	.vendor-tidy \
 	vendor \
 	generate \
 	build
