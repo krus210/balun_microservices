@@ -6,7 +6,7 @@ services:
       context: ./auth
       dockerfile: Dockerfile
     ports:
-      - "8081:8082"
+      - "8081:8081"
     networks:
       - microservices
 
@@ -15,7 +15,7 @@ services:
       context: ./users
       dockerfile: Dockerfile
     ports:
-      - "8083:8082"
+      - "8082:8082"
     networks:
       - microservices
 
@@ -24,7 +24,7 @@ services:
       context: ./social
       dockerfile: Dockerfile
     ports:
-      - "8084:8082"
+      - "8083:8083"
     networks:
       - microservices
 
@@ -33,7 +33,7 @@ services:
       context: ./chat
       dockerfile: Dockerfile
     ports:
-      - "8085:8082"
+      - "8084:8084"
     networks:
       - microservices
 
@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-      - "8082:8082"
+      - "8085:8085"
     depends_on:
       - auth
       - users

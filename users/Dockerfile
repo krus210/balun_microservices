@@ -7,9 +7,8 @@ WORKDIR /app
 COPY . .
 
 RUN go mod download
-RUN go build -o users cmd/main.go
+RUN go build -o users ./cmd/
 
 EXPOSE 8082
 
 CMD ["./users"]
-

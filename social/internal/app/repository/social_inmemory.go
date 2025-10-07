@@ -44,7 +44,7 @@ func (r *InMemorySocialRepository) UpdateFriendRequest(ctx context.Context, requ
 
 	req, exists := r.friendRequests[requestID]
 	if !exists {
-		return nil, fmt.Errorf("friend request with id %d not found", requestID)
+		return nil, nil
 	}
 
 	now := time.Now()
@@ -60,7 +60,7 @@ func (r *InMemorySocialRepository) GetFriendRequest(ctx context.Context, request
 
 	req, exists := r.friendRequests[requestID]
 	if !exists {
-		return nil, fmt.Errorf("friend request with id %d not found", requestID)
+		return nil, nil
 	}
 
 	return req, nil
@@ -114,7 +114,7 @@ func (r *InMemorySocialRepository) GetFriendRequestByUserIDs(ctx context.Context
 		}
 	}
 
-	return nil, fmt.Errorf("friend request from user %d to user %d not found", fromUserID, toUserID)
+	return nil, nil
 }
 
 func (r *InMemorySocialRepository) DeleteFriendRequest(ctx context.Context, requestID int64) error {
@@ -122,7 +122,7 @@ func (r *InMemorySocialRepository) DeleteFriendRequest(ctx context.Context, requ
 	defer r.mu.Unlock()
 
 	if _, exists := r.friendRequests[requestID]; !exists {
-		return fmt.Errorf("friend request with id %d not found", requestID)
+		return nil
 	}
 
 	delete(r.friendRequests, requestID)

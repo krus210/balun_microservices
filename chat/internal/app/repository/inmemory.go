@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strconv"
 	"sync"
@@ -58,7 +57,7 @@ func (r *InMemoryChatRepository) GetChat(ctx context.Context, chatID int64) (*mo
 
 	chat, exists := r.chats[chatID]
 	if !exists {
-		return nil, fmt.Errorf("chat with id %d not found", chatID)
+		return nil, nil
 	}
 
 	// Deep copy to avoid external modifications
@@ -107,7 +106,7 @@ func (r *InMemoryChatRepository) GetDirectChatByParticipants(ctx context.Context
 		}
 	}
 
-	return nil, fmt.Errorf("direct chat between users %d and %d not found", userID1, userID2)
+	return nil, nil
 }
 
 func (r *InMemoryChatRepository) ListChatsByUserID(ctx context.Context, userID int64) ([]*models.Chat, error) {
@@ -143,7 +142,7 @@ func (r *InMemoryChatRepository) GetChatMembers(ctx context.Context, chatID int6
 
 	chat, exists := r.chats[chatID]
 	if !exists {
-		return nil, fmt.Errorf("chat with id %d not found", chatID)
+		return nil, nil
 	}
 
 	members := make([]int64, len(chat.ParticipantIDs))
@@ -157,7 +156,7 @@ func (r *InMemoryChatRepository) IsChatMember(ctx context.Context, chatID int64,
 
 	chat, exists := r.chats[chatID]
 	if !exists {
-		return false, fmt.Errorf("chat with id %d not found", chatID)
+		return false, nil
 	}
 
 	for _, participantID := range chat.ParticipantIDs {
@@ -175,7 +174,7 @@ func (r *InMemoryChatRepository) SaveMessage(ctx context.Context, msg *models.Me
 
 	// Check chat exists
 	if _, exists := r.chats[msg.ChatID]; !exists {
-		return nil, fmt.Errorf("chat with id %d not found", msg.ChatID)
+		return nil, nil
 	}
 
 	if msg.ID == 0 {
@@ -205,7 +204,7 @@ func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID int64,
 
 	// Check chat exists
 	if _, exists := r.chats[chatID]; !exists {
-		return nil, nil, fmt.Errorf("chat with id %d not found", chatID)
+		return nil, nil, nil
 	}
 
 	chatMessages := r.messages[chatID]
@@ -225,7 +224,7 @@ func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID int64,
 	if cursor != nil && *cursor != "" {
 		cursorID, err := strconv.ParseInt(*cursor, 10, 64)
 		if err != nil {
-			return nil, nil, fmt.Errorf("invalid cursor: %w", err)
+			return nil, nil, nil
 		}
 
 		// Find the position after the cursor

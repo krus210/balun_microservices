@@ -63,7 +63,7 @@ func (r *UsersRepositoryStub) GetUserByEmail(ctx context.Context, email string) 
 
 	user, exists := r.emails[email]
 	if !exists {
-		return nil, models.ErrNotFound
+		return nil, nil
 	}
 
 	return user, nil
@@ -75,7 +75,7 @@ func (r *UsersRepositoryStub) GetUserByID(ctx context.Context, userID int64) (*m
 
 	user, exists := r.users[userID]
 	if !exists {
-		return nil, models.ErrNotFound
+		return nil, nil
 	}
 
 	return user, nil

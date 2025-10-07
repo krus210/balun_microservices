@@ -32,7 +32,7 @@ type Server struct {
 }
 
 func NewServer() (*Server, error) {
-	authConn, err := grpc.NewClient("auth:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authConn, err := grpc.NewClient("auth:8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to auth service: %w", err)
 	}
@@ -42,12 +42,12 @@ func NewServer() (*Server, error) {
 		return nil, fmt.Errorf("failed to connect to users service: %w", err)
 	}
 
-	socialConn, err := grpc.NewClient("social:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	socialConn, err := grpc.NewClient("social:8083", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to social service: %w", err)
 	}
 
-	chatConn, err := grpc.NewClient("chat:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	chatConn, err := grpc.NewClient("chat:8084", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to chat service: %w", err)
 	}
@@ -363,7 +363,7 @@ func main() {
 
 		reflection.Register(grpcServer)
 
-		lis, err := net.Listen("tcp", ":8082")
+		lis, err := net.Listen("tcp", ":8085")
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}

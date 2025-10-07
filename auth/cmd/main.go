@@ -33,7 +33,7 @@ func main() {
 
 	controller := deliveryGrpc.NewAuthController(authUsecase)
 
-	lis, err := net.Listen("tcp", ":8082")
+	lis, err := net.Listen("tcp", ":8081")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -52,9 +52,9 @@ func main() {
 		log.Fatalf("failed to serve: %v", err)
 	}
 	// Register:
-	// grpc_cli call --json_input --json_output localhost:8082 AuthService/Register '{"email":"stas@gmail.com", "password":"123456"}'
+	// grpc_cli call --json_input --json_output localhost:8081 AuthService/Register '{"email":"stas@gmail.com", "password":"123456"}'
 	// Login:
-	// grpc_cli call --json_input --json_output localhost:8082 AuthService/Login '{"email":"stas@gmail.com", "password":"123456"}'
+	// grpc_cli call --json_input --json_output localhost:8081 AuthService/Login '{"email":"stas@gmail.com", "password":"123456"}'
 	// Refresh:
-	// grpc_cli call --json_input --json_output localhost:8082 AuthService/Refresh '{"refreshToken":"ff9bf764-0bfc-4e5d-b59f-cdaeeececb06"}'
+	// grpc_cli call --json_input --json_output localhost:8081 AuthService/Refresh '{"refreshToken":"ff9bf764-0bfc-4e5d-b59f-cdaeeececb06"}'
 }
