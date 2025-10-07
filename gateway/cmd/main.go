@@ -62,13 +62,53 @@ func NewServer() (*Server, error) {
 	return srv, nil
 }
 
+// customHTTPError обрабатывает gRPC ошибки и возвращает соответствующие HTTP коды
+func customHTTPError(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
+	w.Header().Set("Content-Type", marshaler.ContentType("application/json"))
+
+	// Извлекаем gRPC статус из ошибки
+	s, ok := status.FromError(err)
+	if !ok {
+		s = status.New(codes.Unknown, err.Error())
+	}
+
+	// Мапим gRPC код в HTTP статус
+	httpStatus := runtime.HTTPStatusFromCode(s.Code())
+	w.WriteHeader(httpStatus)
+
+	// Формируем JSON ответ
+	type errorResponse struct {
+		Error   string `json:"error"`
+		Code    int32  `json:"code"`
+		Message string `json:"message"`
+	}
+
+	resp := &errorResponse{
+		Error:   http.StatusText(httpStatus),
+		Code:    int32(s.Code()),
+		Message: s.Message(),
+	}
+
+	// Маршалим ответ
+	buf, merr := marshaler.Marshal(resp)
+	if merr != nil {
+		log.Printf("Failed to marshal error response: %v", merr)
+		w.Write([]byte(`{"error":"Internal Server Error","code":13,"message":"failed to marshal error message"}`))
+		return
+	}
+
+	if _, werr := w.Write(buf); werr != nil {
+		log.Printf("Failed to write error response: %v", werr)
+	}
+}
+
 func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.RegisterResponse, error) {
 	log.Printf("Gateway: Register request for email: %s", req.GetEmail())
 
 	resp, err := s.authClient.Register(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: Register error: %v", err)
-		return nil, status.Error(codes.Internal, "auth service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -80,7 +120,7 @@ func (s *Server) Login(ctx context.Context, req *auth.LoginRequest) (*auth.Login
 	resp, err := s.authClient.Login(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: Login error: %v", err)
-		return nil, status.Error(codes.Internal, "auth service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -92,7 +132,7 @@ func (s *Server) Refresh(ctx context.Context, req *auth.RefreshRequest) (*auth.R
 	resp, err := s.authClient.Refresh(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: Refresh error: %v", err)
-		return nil, status.Error(codes.Internal, "auth service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -104,7 +144,7 @@ func (s *Server) CreateProfile(ctx context.Context, req *users.CreateProfileRequ
 	resp, err := s.usersClient.CreateProfile(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: CreateProfile error: %v", err)
-		return nil, status.Error(codes.Internal, "users service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -116,7 +156,7 @@ func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequ
 	resp, err := s.usersClient.UpdateProfile(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: UpdateProfile error: %v", err)
-		return nil, status.Error(codes.Internal, "users service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -128,7 +168,7 @@ func (s *Server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRe
 	resp, err := s.usersClient.GetProfileByID(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: GetProfileByID error: %v", err)
-		return nil, status.Error(codes.Internal, "users service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -140,7 +180,7 @@ func (s *Server) GetProfileByNickname(ctx context.Context, req *users.GetProfile
 	resp, err := s.usersClient.GetProfileByNickname(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: GetProfileByNickname error: %v", err)
-		return nil, status.Error(codes.Internal, "users service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -152,7 +192,7 @@ func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNickna
 	resp, err := s.usersClient.SearchByNickname(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: SearchByNickname error: %v", err)
-		return nil, status.Error(codes.Internal, "users service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -164,7 +204,7 @@ func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRe
 	resp, err := s.socialClient.SendFriendRequest(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: SendFriendRequest error: %v", err)
-		return nil, status.Error(codes.Internal, "social service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -176,7 +216,7 @@ func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsReque
 	resp, err := s.socialClient.ListRequests(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: ListRequests error: %v", err)
-		return nil, status.Error(codes.Internal, "social service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -188,7 +228,7 @@ func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFrie
 	resp, err := s.socialClient.AcceptFriendRequest(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: AcceptFriendRequest error: %v", err)
-		return nil, status.Error(codes.Internal, "social service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -200,7 +240,7 @@ func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFr
 	resp, err := s.socialClient.DeclineFriendRequest(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: DeclineFriendRequest error: %v", err)
-		return nil, status.Error(codes.Internal, "social service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -212,7 +252,7 @@ func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendReque
 	resp, err := s.socialClient.RemoveFriend(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: RemoveFriend error: %v", err)
-		return nil, status.Error(codes.Internal, "social service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -224,7 +264,7 @@ func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest
 	resp, err := s.socialClient.ListFriends(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: ListFriends error: %v", err)
-		return nil, status.Error(codes.Internal, "social service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -236,7 +276,7 @@ func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectCha
 	resp, err := s.chatClient.CreateDirectChat(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: CreateDirectChat error: %v", err)
-		return nil, status.Error(codes.Internal, "chat service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -248,7 +288,7 @@ func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.G
 	resp, err := s.chatClient.GetChat(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: GetChat error: %v", err)
-		return nil, status.Error(codes.Internal, "chat service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -260,7 +300,7 @@ func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsReque
 	resp, err := s.chatClient.ListUserChats(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: ListUserChats error: %v", err)
-		return nil, status.Error(codes.Internal, "chat service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -272,7 +312,7 @@ func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersR
 	resp, err := s.chatClient.ListChatMembers(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: ListChatMembers error: %v", err)
-		return nil, status.Error(codes.Internal, "chat service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -284,7 +324,7 @@ func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) 
 	resp, err := s.chatClient.SendMessage(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: SendMessage error: %v", err)
-		return nil, status.Error(codes.Internal, "chat service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -296,7 +336,7 @@ func (s *Server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest
 	resp, err := s.chatClient.ListMessages(ctx, req)
 	if err != nil {
 		log.Printf("Gateway: ListMessages error: %v", err)
-		return nil, status.Error(codes.Internal, "chat service error")
+		return nil, err
 	}
 
 	return resp, nil
@@ -338,7 +378,10 @@ func main() {
 	go func() {
 		defer wg.Done()
 
-		mux := runtime.NewServeMux()
+		// Создаем ServeMux с кастомным обработчиком ошибок
+		mux := runtime.NewServeMux(
+			runtime.WithErrorHandler(customHTTPError),
+		)
 		if err = pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
 			log.Fatalf("failed to register gateway handler: %v", err)
 		}

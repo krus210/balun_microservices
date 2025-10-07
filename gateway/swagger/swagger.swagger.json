@@ -36,6 +36,18 @@
               "$ref": "#/definitions/protoLoginResponse"
             }
           },
+          "400": {
+            "description": "Invalid argument",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -69,6 +81,18 @@
               "$ref": "#/definitions/protoRefreshResponse"
             }
           },
+          "400": {
+            "description": "Invalid argument",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -100,6 +124,18 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/protoRegisterResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid argument",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "409": {
+            "description": "User already exists",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           },
           "default": {
@@ -166,6 +202,18 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/protoGetChatResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "Chat not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           },
           "default": {
@@ -280,6 +328,18 @@
               "$ref": "#/definitions/protoSendMessageResponse"
             }
           },
+          "400": {
+            "description": "Invalid argument",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -320,6 +380,18 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/protoCreateDirectChatResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid argument",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "409": {
+            "description": "Chat already exists",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           },
           "default": {
@@ -386,6 +458,24 @@
               "$ref": "#/definitions/protoSendFriendRequestResponse"
             }
           },
+          "400": {
+            "description": "Invalid argument",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "409": {
+            "description": "Friend request already exists",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -419,6 +509,18 @@
               "$ref": "#/definitions/protoAcceptFriendRequestResponse"
             }
           },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "Friend request not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -450,6 +552,18 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/protoDeclineFriendRequestResponse"
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "Friend request not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           },
           "default": {
@@ -533,6 +647,12 @@
               "$ref": "#/definitions/protoRemoveFriendResponse"
             }
           },
+          "404": {
+            "description": "Friend not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -564,6 +684,18 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/protoCreateProfileResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid argument",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "409": {
+            "description": "Profile already exists",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           },
           "default": {
@@ -599,6 +731,12 @@
               "$ref": "#/definitions/protoGetProfileByNicknameResponse"
             }
           },
+          "404": {
+            "description": "Profile not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -631,6 +769,12 @@
               "$ref": "#/definitions/protoGetProfileByIDResponse"
             }
           },
+          "404": {
+            "description": "Profile not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
@@ -660,6 +804,18 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/protoUpdateProfileResponse"
+            }
+          },
+          "404": {
+            "description": "Profile not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "409": {
+            "description": "Nickname already exists",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           },
           "default": {

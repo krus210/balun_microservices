@@ -37,6 +37,26 @@ service GatewayService {
       post: "/api/v1/auth/register"
       body: "*"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid argument"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "409"
+        value: {
+          description: "User already exists"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // Login - Аутентификация пользователя
@@ -46,6 +66,26 @@ service GatewayService {
       post: "/api/v1/auth/login"
       body: "*"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid argument"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "401"
+        value: {
+          description: "Unauthenticated"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // Refresh - Обновление токена
@@ -54,6 +94,26 @@ service GatewayService {
     option (google.api.http) = {
       post: "/api/v1/auth/refresh"
       body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid argument"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "401"
+        value: {
+          description: "Unauthenticated"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
     };
   }
 
@@ -66,6 +126,26 @@ service GatewayService {
       post: "/api/v1/users/profiles"
       body: "*"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid argument"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "409"
+        value: {
+          description: "Profile already exists"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // UpdateProfile - Обновление профиля пользователя
@@ -75,6 +155,26 @@ service GatewayService {
       put: "/api/v1/users/profiles/{userId}"
       body: "*"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "404"
+        value: {
+          description: "Profile not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "409"
+        value: {
+          description: "Nickname already exists"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // GetProfileByID - Получение профиля по ID
@@ -83,6 +183,17 @@ service GatewayService {
     option (google.api.http) = {
       get: "/api/v1/users/profiles/{userId}"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "404"
+        value: {
+          description: "Profile not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // GetProfileByNickname - Получение профиля по никнейму
@@ -90,6 +201,17 @@ service GatewayService {
     returns (github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse) {
     option (google.api.http) = {
       get: "/api/v1/users/profiles/by-nickname/{nickname}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "404"
+        value: {
+          description: "Profile not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
     };
   }
 
@@ -110,6 +232,35 @@ service GatewayService {
       post: "/api/v1/social/friend-requests"
       body: "*"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid argument"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "User not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "409"
+        value: {
+          description: "Friend request already exists"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // ListRequests - Список входящих заявок в друзья
@@ -126,6 +277,26 @@ service GatewayService {
     option (google.api.http) = {
       put: "/api/v1/social/friend-requests/{requestId}/accept"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "403"
+        value: {
+          description: "Permission denied"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "Friend request not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // DeclineFriendRequest - Отклонить заявку в друзья
@@ -134,6 +305,26 @@ service GatewayService {
     option (google.api.http) = {
       put: "/api/v1/social/friend-requests/{requestId}/decline"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "403"
+        value: {
+          description: "Permission denied"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "Friend request not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // RemoveFriend - Удалить из друзей
@@ -141,6 +332,17 @@ service GatewayService {
     returns (github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse) {
     option (google.api.http) = {
       delete: "/api/v1/social/friends/{userId}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "404"
+        value: {
+          description: "Friend not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
     };
   }
 
@@ -161,6 +363,26 @@ service GatewayService {
       post: "/api/v1/chat/direct-chats"
       body: "*"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid argument"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "409"
+        value: {
+          description: "Chat already exists"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+    };
   }
 
   // GetChat - Получить информацию о чате
@@ -168,6 +390,26 @@ service GatewayService {
     returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse) {
     option (google.api.http) = {
       get: "/api/v1/chat/chats/{chatId}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "403"
+        value: {
+          description: "Permission denied"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "Chat not found"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
     };
   }
 
@@ -193,6 +435,26 @@ service GatewayService {
     option (google.api.http) = {
       post: "/api/v1/chat/chats/{chatId}/messages"
       body: "text"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid argument"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
+      responses: {
+        key: "403"
+        value: {
+          description: "Permission denied"
+          schema: {
+            json_schema: {ref: "#/definitions/rpcStatus"}
+          }
+        }
+      }
     };
   }
 
