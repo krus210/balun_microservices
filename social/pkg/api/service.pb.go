@@ -78,7 +78,9 @@ type FriendRequest struct {
 	// requestId - идентификатор заявки
 	RequestId int64 `protobuf:"varint,1,opt,name=requestId,proto3" json:"requestId,omitempty"`
 	// fromUserId - идентификатор пользователя, отправившего заявку
-	UserId int64 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"`
+	FromUserId int64 `protobuf:"varint,2,opt,name=fromUserId,proto3" json:"fromUserId,omitempty"`
+	// toUserId - идентификатор пользователя, получающего заявку
+	ToUserId int64 `protobuf:"varint,3,opt,name=toUserId,proto3" json:"toUserId,omitempty"`
 	// status - статус заявки
 	Status        FriendRequestStatus `protobuf:"varint,4,opt,name=status,proto3,enum=github.com.krus210.balun_microservices.protobuf.social.v1.proto.FriendRequestStatus" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -122,9 +124,16 @@ func (x *FriendRequest) GetRequestId() int64 {
 	return 0
 }
 
-func (x *FriendRequest) GetUserId() int64 {
+func (x *FriendRequest) GetFromUserId() int64 {
 	if x != nil {
-		return x.UserId
+		return x.FromUserId
+	}
+	return 0
+}
+
+func (x *FriendRequest) GetToUserId() int64 {
+	if x != nil {
+		return x.ToUserId
 	}
 	return 0
 }
@@ -139,8 +148,8 @@ func (x *FriendRequest) GetStatus() FriendRequestStatus {
 // SendFriendRequestRequest - запрос SendFriendRequest
 type SendFriendRequestRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// fromUserId - идентификатор пользователя, отправляющего заявку
-	UserId        int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	// toUserId - идентификатор пользователя, получающего заявку
+	ToUserId      int64 `protobuf:"varint,1,opt,name=toUserId,proto3" json:"toUserId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,9 +184,9 @@ func (*SendFriendRequestRequest) Descriptor() ([]byte, []int) {
 	return file_api_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SendFriendRequestRequest) GetUserId() int64 {
+func (x *SendFriendRequestRequest) GetToUserId() int64 {
 	if x != nil {
-		return x.UserId
+		return x.ToUserId
 	}
 	return 0
 }
@@ -231,8 +240,8 @@ func (x *SendFriendRequestResponse) GetFriendRequest() *FriendRequest {
 // ListRequestsRequest - запрос ListRequests
 type ListRequestsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// userId - идентификатор пользователя
-	UserId        int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	// toUserId - идентификатор пользователя получающего заявку
+	ToUserId      int64 `protobuf:"varint,1,opt,name=toUserId,proto3" json:"toUserId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -267,9 +276,9 @@ func (*ListRequestsRequest) Descriptor() ([]byte, []int) {
 	return file_api_service_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ListRequestsRequest) GetUserId() int64 {
+func (x *ListRequestsRequest) GetToUserId() int64 {
 	if x != nil {
-		return x.UserId
+		return x.ToUserId
 	}
 	return 0
 }
@@ -710,17 +719,20 @@ var File_api_service_proto protoreflect.FileDescriptor
 
 const file_api_service_proto_rawDesc = "" +
 	"\n" +
-	"\x11api/service.proto\x12?github.com.krus210.balun_microservices.protobuf.social.v1.proto\x1a\x1bbuf/validate/validate.proto\"\xb3\x01\n" +
+	"\x11api/service.proto\x12?github.com.krus210.balun_microservices.protobuf.social.v1.proto\x1a\x1bbuf/validate/validate.proto\"\xd7\x01\n" +
 	"\rFriendRequest\x12\x1c\n" +
-	"\trequestId\x18\x01 \x01(\x03R\trequestId\x12\x16\n" +
-	"\x06userId\x18\x02 \x01(\x03R\x06userId\x12l\n" +
-	"\x06status\x18\x04 \x01(\x0e2T.github.com.krus210.balun_microservices.protobuf.social.v1.proto.FriendRequestStatusR\x06status\"2\n" +
-	"\x18SendFriendRequestRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\"\x91\x01\n" +
+	"\trequestId\x18\x01 \x01(\x03R\trequestId\x12\x1e\n" +
+	"\n" +
+	"fromUserId\x18\x02 \x01(\x03R\n" +
+	"fromUserId\x12\x1a\n" +
+	"\btoUserId\x18\x03 \x01(\x03R\btoUserId\x12l\n" +
+	"\x06status\x18\x04 \x01(\x0e2T.github.com.krus210.balun_microservices.protobuf.social.v1.proto.FriendRequestStatusR\x06status\"6\n" +
+	"\x18SendFriendRequestRequest\x12\x1a\n" +
+	"\btoUserId\x18\x01 \x01(\x03R\btoUserId\"\x91\x01\n" +
 	"\x19SendFriendRequestResponse\x12t\n" +
-	"\rfriendRequest\x18\x01 \x01(\v2N.github.com.krus210.balun_microservices.protobuf.social.v1.proto.FriendRequestR\rfriendRequest\"-\n" +
-	"\x13ListRequestsRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\"\x82\x01\n" +
+	"\rfriendRequest\x18\x01 \x01(\v2N.github.com.krus210.balun_microservices.protobuf.social.v1.proto.FriendRequestR\rfriendRequest\"1\n" +
+	"\x13ListRequestsRequest\x12\x1a\n" +
+	"\btoUserId\x18\x01 \x01(\x03R\btoUserId\"\x82\x01\n" +
 	"\x14ListRequestsResponse\x12j\n" +
 	"\brequests\x18\x01 \x03(\v2N.github.com.krus210.balun_microservices.protobuf.social.v1.proto.FriendRequestR\brequests\":\n" +
 	"\x1aAcceptFriendRequestRequest\x12\x1c\n" +

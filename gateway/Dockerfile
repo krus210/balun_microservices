@@ -7,9 +7,8 @@ WORKDIR /app
 COPY . .
 
 RUN go mod download
-RUN go build -o gateway cmd/main.go
+RUN go build -o gateway ./cmd/
 
-EXPOSE 8080 8082
+EXPOSE 8080 8085
 
 CMD ["./gateway"]
-

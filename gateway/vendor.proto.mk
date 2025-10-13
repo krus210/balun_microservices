@@ -2,7 +2,7 @@
 VENDOR_PROTO_PATH := $(CURDIR)/vendor.protobuf
 
 # vendor
-vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protovalidate .vendor-protoc-gen-openapiv2 .vendor-tidy
+vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protovalidate .vendor-protoc-gen-openapiv2 .vendor-auth-service .vendor-users-service .vendor-social-service .vendor-chat-service .vendor-tidy
 
 # delete VENDOR_PROTO_PATH
 .vendor-reset:
@@ -51,6 +51,30 @@ vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protova
 	mv $(VENDOR_PROTO_PATH)/protovalidate/proto/protovalidate/buf $(VENDOR_PROTO_PATH)
 	rm -rf $(VENDOR_PROTO_PATH)/protovalidate
 
+# Устанавливаем proto описания auth service
+.vendor-auth-service:
+	mkdir -p $(VENDOR_PROTO_PATH)/api/auth
+	cp $(CURDIR)/../auth/api/service.proto $(VENDOR_PROTO_PATH)/api/auth/auth.proto
+	sed -i '' 's|option go_package = ".*";|option go_package = "gateway/pkg/api/auth;auth";|' $(VENDOR_PROTO_PATH)/api/auth/auth.proto
+
+# Устанавливаем proto описания users service
+.vendor-users-service:
+	mkdir -p $(VENDOR_PROTO_PATH)/api/users
+	cp $(CURDIR)/../users/api/service.proto $(VENDOR_PROTO_PATH)/api/users/users.proto
+	sed -i '' 's|option go_package = ".*";|option go_package = "gateway/pkg/api/users;users";|' $(VENDOR_PROTO_PATH)/api/users/users.proto
+
+# Устанавливаем proto описания social service
+.vendor-social-service:
+	mkdir -p $(VENDOR_PROTO_PATH)/api/social
+	cp $(CURDIR)/../social/api/service.proto $(VENDOR_PROTO_PATH)/api/social/social.proto
+	sed -i '' 's|option go_package = ".*";|option go_package = "gateway/pkg/api/social;social";|' $(VENDOR_PROTO_PATH)/api/social/social.proto
+
+# Устанавливаем proto описания chat service
+.vendor-chat-service:
+	mkdir -p $(VENDOR_PROTO_PATH)/api/chat
+	cp $(CURDIR)/../chat/api/service.proto $(VENDOR_PROTO_PATH)/api/chat/chat.proto
+	sed -i '' 's|option go_package = ".*";|option go_package = "gateway/pkg/api/chat;chat";|' $(VENDOR_PROTO_PATH)/api/chat/chat.proto
+
 # delete all non .proto files
 .vendor-tidy:
 	find $(VENDOR_PROTO_PATH) -type f ! -name "*.proto" -delete
@@ -66,5 +90,9 @@ vendor:	.vendor-reset .vendor-googleapis .vendor-google-protobuf .vendor-protova
 	.vendor-googleapis \
 	.vendor-protoc-gen-openapiv2 \
 	.vendor-protovalidate \
+	.vendor-auth-service \
+	.vendor-users-service \
+	.vendor-social-service \
+	.vendor-chat-service \
 	.vendor-tidy \
 	vendor

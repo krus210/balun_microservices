@@ -30,27 +30,105 @@ var File_api_gateway_service_proto protoreflect.FileDescriptor
 
 const file_api_gateway_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19api/gateway/service.proto\x12@github.com.krus210.balun_microservices.protobuf.gateway.v1.proto\x1a\x13api/auth/auth.proto\x1a\x13api/chat/chat.proto\x1a\x17api/social/social.proto\x1a\x15api/users/users.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xb1$\n" +
-	"\x0eGatewayService\x12\xcd\x01\n" +
-	"\bRegister\x12N.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest\x1aO.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/auth/register\x12\xc1\x01\n" +
-	"\x05Login\x12K.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest\x1aL.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12\xc9\x01\n" +
-	"\aRefresh\x12M.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest\x1aN.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12\xdf\x01\n" +
-	"\rCreateProfile\x12T.github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest\x1aU.github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/users/profiles\x12\xe8\x01\n" +
-	"\rUpdateProfile\x12T.github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileRequest\x1aU.github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/api/v1/users/profiles/{userId}\x12\xe8\x01\n" +
-	"\x0eGetProfileByID\x12U.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDRequest\x1aV.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/users/profiles/{userId}\x12\x88\x02\n" +
-	"\x14GetProfileByNickname\x12[.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameRequest\x1a\\.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse\"5\x82\xd3\xe4\x93\x02/\x12-/api/v1/users/profiles/by-nickname/{nickname}\x12\xe3\x01\n" +
-	"\x10SearchByNickname\x12W.github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameRequest\x1aX.github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/users/search\x12\xf5\x01\n" +
-	"\x11SendFriendRequest\x12Y.github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestRequest\x1aZ.github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestResponse\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/api/v1/social/friend-requests\x12\xe3\x01\n" +
-	"\fListRequests\x12T.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsRequest\x1aU.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/v1/social/friend-requests\x12\x8b\x02\n" +
-	"\x13AcceptFriendRequest\x12[.github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestRequest\x1a\\.github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestResponse\"9\x82\xd3\xe4\x93\x023\x1a1/api/v1/social/friend-requests/{requestId}/accept\x12\x8f\x02\n" +
-	"\x14DeclineFriendRequest\x12\\.github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestRequest\x1a].github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestResponse\":\x82\xd3\xe4\x93\x024\x1a2/api/v1/social/friend-requests/{requestId}/decline\x12\xe4\x01\n" +
-	"\fRemoveFriend\x12T.github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendRequest\x1aU.github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse\"'\x82\xd3\xe4\x93\x02!*\x1f/api/v1/social/friends/{userId}\x12\xd8\x01\n" +
-	"\vListFriends\x12S.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsRequest\x1aT.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/social/friends\x12\xe9\x01\n" +
-	"\x10CreateDirectChat\x12V.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatRequest\x1aW.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/api/v1/chat/direct-chats\x12\xcd\x01\n" +
-	"\aGetChat\x12M.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatRequest\x1aN.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/chat/chats/{chatId}\x12\xd6\x01\n" +
+	"\x19api/gateway/service.proto\x12@github.com.krus210.balun_microservices.protobuf.gateway.v1.proto\x1a\x13api/auth/auth.proto\x1a\x13api/chat/chat.proto\x1a\x17api/social/social.proto\x1a\x15api/users/users.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xc80\n" +
+	"\x0eGatewayService\x12\xc4\x02\n" +
+	"\bRegister\x12N.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest\x1aO.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse\"\x96\x01\x92AsJ6\n" +
+	"\x03400\x12/\n" +
+	"\x10Invalid argument\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ9\n" +
+	"\x03409\x122\n" +
+	"\x13User already exists\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/auth/register\x12\xb4\x02\n" +
+	"\x05Login\x12K.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest\x1aL.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse\"\x8f\x01\x92AoJ6\n" +
+	"\x03400\x12/\n" +
+	"\x10Invalid argument\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ5\n" +
+	"\x03401\x12.\n" +
+	"\x0fUnauthenticated\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12\xbc\x02\n" +
+	"\aRefresh\x12M.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest\x1aN.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse\"\x91\x01\x92AoJ6\n" +
+	"\x03400\x12/\n" +
+	"\x10Invalid argument\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ5\n" +
+	"\x03401\x12.\n" +
+	"\x0fUnauthenticated\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12\xd9\x02\n" +
+	"\rCreateProfile\x12T.github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest\x1aU.github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse\"\x9a\x01\x92AvJ6\n" +
+	"\x03400\x12/\n" +
+	"\x10Invalid argument\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ<\n" +
+	"\x03409\x125\n" +
+	"\x16Profile already exists\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/users/profiles\x12\xe4\x02\n" +
+	"\rUpdateProfile\x12T.github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileRequest\x1aU.github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileResponse\"\xa5\x01\x92AxJ7\n" +
+	"\x03404\x120\n" +
+	"\x11Profile not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ=\n" +
+	"\x03409\x126\n" +
+	"\x17Nickname already exists\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/api/v1/users/profiles/{userId}\x12\xa4\x02\n" +
+	"\x0eGetProfileByID\x12U.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDRequest\x1aV.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDResponse\"c\x92A9J7\n" +
+	"\x03404\x120\n" +
+	"\x11Profile not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/users/profiles/{userId}\x12\xc4\x02\n" +
+	"\x14GetProfileByNickname\x12[.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameRequest\x1a\\.github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse\"q\x92A9J7\n" +
+	"\x03404\x120\n" +
+	"\x11Profile not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02/\x12-/api/v1/users/profiles/by-nickname/{nickname}\x12\xe3\x01\n" +
+	"\x10SearchByNickname\x12W.github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameRequest\x1aX.github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/users/search\x12\xad\x03\n" +
+	"\x11SendFriendRequest\x12Y.github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestRequest\x1aZ.github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestResponse\"\xe0\x01\x92A\xb3\x01J6\n" +
+	"\x03400\x12/\n" +
+	"\x10Invalid argument\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ4\n" +
+	"\x03404\x12-\n" +
+	"\x0eUser not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJC\n" +
+	"\x03409\x12<\n" +
+	"\x1dFriend request already exists\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/api/v1/social/friend-requests\x12\xe3\x01\n" +
+	"\fListRequests\x12T.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsRequest\x1aU.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/v1/social/friend-requests\x12\x88\x03\n" +
+	"\x13AcceptFriendRequest\x12[.github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestRequest\x1a\\.github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestResponse\"\xb5\x01\x92AyJ7\n" +
+	"\x03403\x120\n" +
+	"\x11Permission denied\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ>\n" +
+	"\x03404\x127\n" +
+	"\x18Friend request not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x023\x1a1/api/v1/social/friend-requests/{requestId}/accept\x12\x8c\x03\n" +
+	"\x14DeclineFriendRequest\x12\\.github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestRequest\x1a].github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestResponse\"\xb6\x01\x92AyJ7\n" +
+	"\x03403\x120\n" +
+	"\x11Permission denied\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ>\n" +
+	"\x03404\x127\n" +
+	"\x18Friend request not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x024\x1a2/api/v1/social/friend-requests/{requestId}/decline\x12\x9f\x02\n" +
+	"\fRemoveFriend\x12T.github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendRequest\x1aU.github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse\"b\x92A8J6\n" +
+	"\x03404\x12/\n" +
+	"\x10Friend not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02!*\x1f/api/v1/social/friends/{userId}\x12\xd8\x01\n" +
+	"\vListFriends\x12S.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsRequest\x1aT.github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/social/friends\x12\xe0\x02\n" +
+	"\x10CreateDirectChat\x12V.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatRequest\x1aW.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatResponse\"\x9a\x01\x92AsJ6\n" +
+	"\x03400\x12/\n" +
+	"\x10Invalid argument\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ9\n" +
+	"\x03409\x122\n" +
+	"\x13Chat already exists\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/api/v1/chat/direct-chats\x12\xc0\x02\n" +
+	"\aGetChat\x12M.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatRequest\x1aN.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse\"\x95\x01\x92AoJ7\n" +
+	"\x03403\x120\n" +
+	"\x11Permission denied\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ4\n" +
+	"\x03404\x12-\n" +
+	"\x0eChat not found\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/chat/chats/{chatId}\x12\xd6\x01\n" +
 	"\rListUserChats\x12S.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsRequest\x1aT.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/chat/chats\x12\xed\x01\n" +
-	"\x0fListChatMembers\x12U.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest\x1aV.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/v1/chat/chats/{chatId}/members\x12\xe8\x01\n" +
-	"\vSendMessage\x12Q.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest\x1aR.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse\"2\x82\xd3\xe4\x93\x02,:\x04text\"$/api/v1/chat/chats/{chatId}/messages\x12\xe5\x01\n" +
+	"\x0fListChatMembers\x12U.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest\x1aV.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/v1/chat/chats/{chatId}/members\x12\xdd\x02\n" +
+	"\vSendMessage\x12Q.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest\x1aR.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse\"\xa6\x01\x92AqJ6\n" +
+	"\x03400\x12/\n" +
+	"\x10Invalid argument\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatusJ7\n" +
+	"\x03403\x120\n" +
+	"\x11Permission denied\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02,:\x04text\"$/api/v1/chat/chats/{chatId}/messages\x12\xe5\x01\n" +
 	"\fListMessages\x12R.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesRequest\x1aS.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesResponse\",\x82\xd3\xe4\x93\x02&\x12$/api/v1/chat/chats/{chatId}/messagesB\xd9\x04\x92A\xb8\x01\x12\x8d\x01\n" +
 	"\x19Microservices Gateway API\x12GHTTP Gateway для микросервисной архитектуры\"\"\n" +
 	"\vAPI Support\x1a\x13support@example.com2\x031.0*\x02\x01\x022\x10application/json:\x10application/json\n" +

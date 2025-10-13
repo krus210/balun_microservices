@@ -1,0 +1,46 @@
+package usecase
+
+import (
+	"context"
+	"fmt"
+
+	"chat/internal/app/models"
+	"chat/internal/app/usecase/dto"
+)
+
+const (
+	apiSendMessage = "[ChatService][SendMessage]"
+)
+
+func (c *ChatService) SendMessage(ctx context.Context, req dto.SendMessageDto) (*models.Message, error) {
+	chat, err := c.chatRepo.GetChat(ctx, req.ChatID)
+	if err != nil {
+		return nil, fmt.Errorf("%s: chatRepo GetChat error: %w", apiSendMessage, err)
+	}
+	if chat == nil {
+		return nil, models.ErrNotFound
+	}
+
+	// Проверяем, что пользователь является участником чата
+	isMember, err := c.chatRepo.IsChatMember(ctx, req.ChatID, req.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("%s: chatRepo IsChatMember error: %w", apiSendMessage, err)
+	}
+	if !isMember {
+		return nil, models.ErrPermissionDenied
+	}
+
+	// Создаем сообщение
+	message := &models.Message{
+		ChatID:  req.ChatID,
+		OwnerID: req.UserID,
+		Text:    req.Text,
+	}
+
+	savedMessage, err := c.chatRepo.SaveMessage(ctx, message)
+	if err != nil {
+		return nil, fmt.Errorf("%s: chatRepo SaveMessage error: %w", apiSendMessage, err)
+	}
+
+	return savedMessage, nil
+}
