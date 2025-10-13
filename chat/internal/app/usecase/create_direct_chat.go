@@ -8,20 +8,24 @@ import (
 	"chat/internal/app/usecase/dto"
 )
 
+const (
+	api = "[ChatService][CreateDirectChat]"
+)
+
 func (c *ChatService) CreateDirectChat(ctx context.Context, req dto.CreateDirectChatDto) (*models.Chat, error) {
 	// Проверяем существование участника
 	participantExists, err := c.usersService.CheckUserExists(ctx, req.ParticipantID)
 	if err != nil {
-		return nil, fmt.Errorf("[ChatService][CreateDirectChat] usersService CheckUserExists error: %w", err)
+		return nil, fmt.Errorf("%s: usersService CheckUserExists error: %w", api, err)
 	}
 	if !participantExists {
-		return nil, models.ErrNotFound
+		return nil, fmt.Errorf("%s: %w", api, models.ErrNotFound)
 	}
 
 	// Проверяем, что чат еще не существует
 	existingChat, err := c.chatRepo.GetDirectChatByParticipants(ctx, req.UserID, req.ParticipantID)
 	if err != nil {
-		return nil, fmt.Errorf("[ChatService][CreateDirectChat] chatRepo GetDirectChatByParticipants error: %w", err)
+		return nil, fmt.Errorf("%s: chatRepo GetDirectChatByParticipants error: %w", api, err)
 	}
 	if existingChat != nil {
 		return nil, models.ErrAlreadyExists
@@ -34,7 +38,7 @@ func (c *ChatService) CreateDirectChat(ctx context.Context, req dto.CreateDirect
 
 	savedChat, err := c.chatRepo.SaveChat(ctx, chat)
 	if err != nil {
-		return nil, fmt.Errorf("[ChatService][CreateDirectChat] chatRepo SaveChat error: %w", err)
+		return nil, fmt.Errorf("%s: chatRepo SaveChat error: %w", api, err)
 	}
 
 	return savedChat, nil

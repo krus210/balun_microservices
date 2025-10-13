@@ -12,10 +12,14 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	apiRefresh = "[AuthService][Refresh]"
+)
+
 func (s *AuthService) Refresh(ctx context.Context, req dto.RefreshRequest) (*models.User, error) {
 	user, err := s.usersRepo.GetUserByID(ctx, req.UserID)
 	if err != nil {
-		return nil, fmt.Errorf("[AuthService][Refresh] userRepo GetUserByID error: %w", err)
+		return nil, fmt.Errorf("%s: userRepo GetUserByID error: %w", apiRefresh, err)
 	}
 	if user == nil {
 		return nil, models.ErrNotFound
@@ -32,7 +36,7 @@ func (s *AuthService) Refresh(ctx context.Context, req dto.RefreshRequest) (*mod
 
 	err = s.usersRepo.UpdateUser(ctx, user)
 	if err != nil {
-		return nil, fmt.Errorf("[AuthService][Refresh] userRepo UpdateUser error: %w", err)
+		return nil, fmt.Errorf("%s: userRepo UpdateUser error: %w", apiRefresh, err)
 	}
 
 	return user, nil

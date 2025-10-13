@@ -8,15 +8,19 @@ import (
 	"social/internal/app/usecase/dto"
 )
 
+const (
+	apiRemoveFriend = "[SocialService][RemoveFriend]"
+)
+
 func (s *SocialService) RemoveFriend(ctx context.Context, req dto.FriendRequestDto) error {
 	friendRequest, err := s.getAcceptedFriendRequest(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
-		return fmt.Errorf("[SocialService][RemoveFriend] sociaRepo getAcceptedFriendRequest error: %w", err)
+		return fmt.Errorf("%s: getAcceptedFriendRequest error: %w", apiRemoveFriend, err)
 	}
 
 	err = s.socialRepo.DeleteFriendRequest(ctx, friendRequest.ID)
 	if err != nil {
-		return fmt.Errorf("[SocialService][RemoveFriend] sociaRepo DeleteFriendRequest error: %w", err)
+		return fmt.Errorf("%s: socialRepo DeleteFriendRequest error: %w", apiRemoveFriend, err)
 	}
 
 	return nil

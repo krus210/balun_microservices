@@ -11,7 +11,7 @@ import (
 func (c *ChatService) ListMessages(ctx context.Context, req dto.ListMessagesDto) (*dto.ListMessagesResponse, error) {
 	chat, err := c.chatRepo.GetChat(ctx, req.ChatID)
 	if err != nil {
-		return nil, fmt.Errorf("[ChatService][GetChat] chatRepo GetChat error: %w", err)
+		return nil, fmt.Errorf("[ChatService][ListMessages] chatRepo GetChat error: %w", err)
 	}
 	if chat == nil {
 		return nil, models.ErrNotFound

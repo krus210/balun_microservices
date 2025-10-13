@@ -8,10 +8,14 @@ import (
 	"users/internal/app/usecase/dto"
 )
 
+const (
+	apiCreateProfile = "[UsersService][CreateProfile]"
+)
+
 func (s *UsersService) CreateProfile(ctx context.Context, req dto.CreateProfileRequest) (*models.UserProfile, error) {
 	user, err := s.usersRepo.GetUserByID(ctx, req.UserID)
 	if err != nil {
-		return nil, fmt.Errorf("[UsersService][CreateProfile] usersRepo GetUserByID error: %w", err)
+		return nil, fmt.Errorf("%s: usersRepo GetUserByID error: %w", apiCreateProfile, err)
 	}
 	if user != nil {
 		return nil, models.ErrAlreadyExists
@@ -26,7 +30,7 @@ func (s *UsersService) CreateProfile(ctx context.Context, req dto.CreateProfileR
 
 	saveUser, err := s.usersRepo.SaveUser(ctx, user)
 	if err != nil {
-		return nil, fmt.Errorf("[UsersService][CreateProfile] usersRepo SaveUser error: %w", err)
+		return nil, fmt.Errorf("%s: usersRepo SaveUser error: %w", apiCreateProfile, err)
 	}
 
 	return saveUser, nil

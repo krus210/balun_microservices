@@ -9,10 +9,14 @@ import (
 	"social/internal/app/models"
 )
 
+const (
+	apiDeclineFriendRequest = "[SocialService][DeclineFriendRequest]"
+)
+
 func (s *SocialService) DeclineFriendRequest(ctx context.Context, req dto.ChangeFriendRequestDto) (*models.FriendRequest, error) {
 	friendRequest, err := s.socialRepo.GetFriendRequest(ctx, req.RequestID)
 	if err != nil {
-		return nil, fmt.Errorf("[SocialService][DeclineFriendRequest] sociaRepo GetFriendRequest error: %w", err)
+		return nil, fmt.Errorf("%s: socialRepo GetFriendRequest error: %w", apiDeclineFriendRequest, err)
 	}
 	if friendRequest == nil {
 		return nil, models.ErrNotFound
@@ -24,7 +28,7 @@ func (s *SocialService) DeclineFriendRequest(ctx context.Context, req dto.Change
 
 	updatedFriendRequest, err := s.socialRepo.UpdateFriendRequest(ctx, req.RequestID, models.FriendRequestDeclined)
 	if err != nil {
-		return nil, fmt.Errorf("[SocialService][DeclineFriendRequest] sociaRepo UpdateFriendRequest error: %w", err)
+		return nil, fmt.Errorf("%s: socialRepo UpdateFriendRequest error: %w", apiDeclineFriendRequest, err)
 	}
 
 	return updatedFriendRequest, nil

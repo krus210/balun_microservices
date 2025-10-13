@@ -8,10 +8,14 @@ import (
 	"users/internal/app/usecase/dto"
 )
 
+const (
+	apiUpdateProfile = "[UsersService][UpdateProfile]"
+)
+
 func (s *UsersService) UpdateProfile(ctx context.Context, req dto.UpdateProfileRequest) (*models.UserProfile, error) {
 	user, err := s.usersRepo.GetUserByID(ctx, req.UserID)
 	if err != nil {
-		return nil, fmt.Errorf("[UsersService][UpdateProfile] usersRepo GetUserByID error: %w", err)
+		return nil, fmt.Errorf("%s: usersRepo GetUserByID error: %w", apiUpdateProfile, err)
 	}
 	if user == nil {
 		return nil, models.ErrNotFound
@@ -29,7 +33,7 @@ func (s *UsersService) UpdateProfile(ctx context.Context, req dto.UpdateProfileR
 
 	updatedUser, err := s.usersRepo.UpdateUser(ctx, user)
 	if err != nil {
-		return nil, fmt.Errorf("[UsersService][UpdateProfile] usersRepo UpdateUser error: %w", err)
+		return nil, fmt.Errorf("%s: usersRepo UpdateUser error: %w", apiUpdateProfile, err)
 	}
 
 	return updatedUser, nil

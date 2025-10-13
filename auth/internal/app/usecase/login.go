@@ -12,10 +12,14 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	apiLogin = "[AuthService][Login]"
+)
+
 func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*models.User, error) {
 	user, err := s.usersRepo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		return nil, fmt.Errorf("[AuthService][Login] userRepo GetUserByEmail error: %w", err)
+		return nil, fmt.Errorf("%s: userRepo GetUserByEmail error: %w", apiLogin, err)
 	}
 	if user == nil {
 		return nil, models.ErrNotFound
@@ -32,7 +36,7 @@ func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*models.
 
 	err = s.usersRepo.UpdateUser(ctx, user)
 	if err != nil {
-		return nil, fmt.Errorf("[AuthService][Login] userRepo UpdateUser error: %w", err)
+		return nil, fmt.Errorf("%s: userRepo UpdateUser error: %w", apiLogin, err)
 	}
 
 	return user, nil
