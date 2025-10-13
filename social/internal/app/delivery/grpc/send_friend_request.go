@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"social/internal/app/models"
 	"social/internal/app/usecase/dto"
 
 	pb "social/pkg/api"
@@ -21,8 +22,8 @@ func (h *SocialController) SendFriendRequest(ctx context.Context, req *pb.SendFr
 	}
 
 	friendRequest, err := h.usecase.SendFriendRequest(ctx, dto.FriendRequestDto{
-		FromUserID: 1, // TODO: брать из хедера
-		ToUserID:   req.ToUserId,
+		FromUserID: models.UserID(1), // TODO: брать из хедера
+		ToUserID:   models.UserID(req.ToUserId),
 	})
 	if err != nil {
 		return nil, err

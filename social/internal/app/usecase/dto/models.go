@@ -3,17 +3,17 @@ package dto
 import "social/internal/app/models"
 
 type FriendRequestDto struct {
-	FromUserID int64
-	ToUserID   int64
+	FromUserID models.UserID
+	ToUserID   models.UserID
 }
 
 type ChangeFriendRequestDto struct {
-	UserID    int64
-	RequestID int64
+	UserID    models.UserID
+	RequestID models.FriendRequestID
 }
 
 type ListFriendsDto struct {
-	UserID int64
+	UserID models.UserID
 	Limit  int64
 	Cursor *string
 }

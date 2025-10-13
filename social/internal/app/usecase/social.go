@@ -10,17 +10,17 @@ import (
 // Порты вторичные
 type (
 	UsersService interface {
-		CheckUserExists(ctx context.Context, id int64) (bool, error)
+		CheckUserExists(ctx context.Context, id models.UserID) (bool, error)
 	}
 
 	SocialRepository interface {
 		SaveFriendRequest(ctx context.Context, req *models.FriendRequest) (*models.FriendRequest, error)
-		UpdateFriendRequest(ctx context.Context, requestID int64, status models.FriendRequestStatus) (*models.FriendRequest, error)
-		GetFriendRequest(ctx context.Context, requestID int64) (*models.FriendRequest, error)
-		GetFriendRequestsByToUserID(ctx context.Context, toUserID int64, limit *int64, cursor *string) (friends []*models.FriendRequest, nextCursor *string, err error)
-		GetFriendRequestsByFromUserID(ctx context.Context, fromUserID int64, limit *int64, cursor *string) (friends []*models.FriendRequest, nextCursor *string, err error)
-		GetFriendRequestByUserIDs(ctx context.Context, fromUserID int64, toUserID int64) (*models.FriendRequest, error)
-		DeleteFriendRequest(ctx context.Context, requestID int64) error
+		UpdateFriendRequest(ctx context.Context, requestID models.FriendRequestID, status models.FriendRequestStatus) (*models.FriendRequest, error)
+		GetFriendRequest(ctx context.Context, requestID models.FriendRequestID) (*models.FriendRequest, error)
+		GetFriendRequestsByToUserID(ctx context.Context, toUserID models.UserID, limit *int64, cursor *string) (friends []*models.FriendRequest, nextCursor *string, err error)
+		GetFriendRequestsByFromUserID(ctx context.Context, fromUserID models.UserID, limit *int64, cursor *string) (friends []*models.FriendRequest, nextCursor *string, err error)
+		GetFriendRequestByUserIDs(ctx context.Context, fromUserID models.UserID, toUserID models.UserID) (*models.FriendRequest, error)
+		DeleteFriendRequest(ctx context.Context, requestID models.FriendRequestID) error
 	}
 )
 
@@ -28,7 +28,7 @@ type Usecase interface {
 	// SendFriendRequest отправка заявки на друзья
 	SendFriendRequest(ctx context.Context, req dto.FriendRequestDto) (*models.FriendRequest, error)
 	// ListFriendRequests получение списка заявок на друзья
-	ListFriendRequests(ctx context.Context, toUserID int64) ([]*models.FriendRequest, error)
+	ListFriendRequests(ctx context.Context, toUserID models.UserID) ([]*models.FriendRequest, error)
 	// AcceptFriendRequest принятие заявки на друзья
 	AcceptFriendRequest(ctx context.Context, req dto.ChangeFriendRequestDto) (*models.FriendRequest, error)
 	// DeclineFriendRequest отказ от заявки на друзья

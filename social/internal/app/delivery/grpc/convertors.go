@@ -7,9 +7,9 @@ import (
 
 func newPbFriendRequestFromFriendRequest(fr *models.FriendRequest) *pb.FriendRequest {
 	return &pb.FriendRequest{
-		RequestId:  fr.ID,
-		FromUserId: fr.FromUserID,
-		ToUserId:   fr.ToUserID,
+		RequestId:  int64(fr.ID),
+		FromUserId: int64(fr.FromUserID),
+		ToUserId:   int64(fr.ToUserID),
 		Status:     pb.FriendRequestStatus(fr.Status),
 	}
 }
@@ -28,7 +28,7 @@ func newPbFriendRequestsIDsFromFriendRequests(frs []*models.FriendRequest) []int
 	results := make([]int64, len(frs), len(frs))
 
 	for i, fr := range frs {
-		results[i] = fr.ID
+		results[i] = int64(fr.ID)
 	}
 
 	return results

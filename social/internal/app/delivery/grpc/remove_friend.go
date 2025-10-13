@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"social/internal/app/models"
 	"social/internal/app/usecase/dto"
 
 	pb "social/pkg/api"
@@ -21,8 +22,8 @@ func (h *SocialController) RemoveFriend(ctx context.Context, req *pb.RemoveFrien
 	}
 
 	err := h.usecase.RemoveFriend(ctx, dto.FriendRequestDto{
-		FromUserID: 1, // TODO: брать из хедера
-		ToUserID:   req.UserId,
+		FromUserID: models.UserID(1), // TODO: брать из хедера
+		ToUserID:   models.UserID(req.UserId),
 	})
 	if err != nil {
 		return nil, err

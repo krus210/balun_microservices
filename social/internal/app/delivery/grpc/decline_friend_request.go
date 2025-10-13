@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"social/internal/app/models"
 	"social/internal/app/usecase/dto"
 
 	pb "social/pkg/api"
@@ -21,8 +22,8 @@ func (h *SocialController) DeclineFriendRequest(ctx context.Context, req *pb.Dec
 	}
 
 	friendRequest, err := h.usecase.DeclineFriendRequest(ctx, dto.ChangeFriendRequestDto{
-		UserID:    1, // TODO: брать из хедера
-		RequestID: req.RequestId,
+		UserID:    models.UserID(1), // TODO: брать из хедера
+		RequestID: models.FriendRequestID(req.RequestId),
 	})
 	if err != nil {
 		return nil, err

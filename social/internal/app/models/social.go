@@ -10,10 +10,14 @@ const (
 	FriendRequestDeclined FriendRequestStatus = 2
 )
 
+type UserID int64
+
+type FriendRequestID int64
+
 type FriendRequest struct {
-	ID         int64
-	FromUserID int64
-	ToUserID   int64
+	ID         FriendRequestID
+	FromUserID UserID
+	ToUserID   UserID
 	Status     FriendRequestStatus
 	CreatedAt  *time.Time
 	UpdatedAt  *time.Time

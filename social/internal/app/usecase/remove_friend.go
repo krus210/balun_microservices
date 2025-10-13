@@ -22,7 +22,7 @@ func (s *SocialService) RemoveFriend(ctx context.Context, req dto.FriendRequestD
 	return nil
 }
 
-func (s *SocialService) getAcceptedFriendRequest(ctx context.Context, firstUserID int64, secondUserID int64) (*models.FriendRequest, error) {
+func (s *SocialService) getAcceptedFriendRequest(ctx context.Context, firstUserID models.UserID, secondUserID models.UserID) (*models.FriendRequest, error) {
 	friendRequest, err := s.socialRepo.GetFriendRequestByUserIDs(ctx, firstUserID, secondUserID)
 	if err != nil {
 		return nil, err

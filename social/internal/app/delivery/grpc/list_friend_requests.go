@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"social/internal/app/models"
 	pb "social/pkg/api"
 
 	"google.golang.org/grpc/metadata"
@@ -18,7 +19,7 @@ func (h *SocialController) ListRequests(ctx context.Context, req *pb.ListRequest
 		log.Println(key, md.Get(key))
 	}
 
-	friendRequests, err := h.usecase.ListFriendRequests(ctx, req.GetToUserId())
+	friendRequests, err := h.usecase.ListFriendRequests(ctx, models.UserID(req.GetToUserId()))
 	if err != nil {
 		return nil, err
 	}

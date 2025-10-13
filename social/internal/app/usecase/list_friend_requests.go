@@ -7,7 +7,7 @@ import (
 	"social/internal/app/models"
 )
 
-func (s *SocialService) ListFriendRequests(ctx context.Context, toUserId int64) ([]*models.FriendRequest, error) {
+func (s *SocialService) ListFriendRequests(ctx context.Context, toUserId models.UserID) ([]*models.FriendRequest, error) {
 	toUserExists, err := s.usersService.CheckUserExists(ctx, toUserId)
 	if err != nil {
 		return nil, fmt.Errorf("[SocialService][ListFriendRequests] userService CheckUserExist error: %w", err)

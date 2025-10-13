@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"social/internal/app/models"
 	"social/internal/app/usecase/dto"
 
 	pb "social/pkg/api"
@@ -21,7 +22,7 @@ func (h *SocialController) ListFriends(ctx context.Context, req *pb.ListFriendsR
 	}
 
 	friendsResponse, err := h.usecase.ListFriends(ctx, dto.ListFriendsDto{
-		UserID: req.UserId,
+		UserID: models.UserID(req.UserId),
 		Limit:  req.Limit,
 		Cursor: req.Cursor,
 	})

@@ -13,13 +13,13 @@ import (
 
 type InMemorySocialRepository struct {
 	mu             sync.RWMutex
-	friendRequests map[int64]*models.FriendRequest
-	nextID         int64
+	friendRequests map[models.FriendRequestID]*models.FriendRequest
+	nextID         models.FriendRequestID
 }
 
 func NewInMemorySocialRepository() *InMemorySocialRepository {
 	return &InMemorySocialRepository{
-		friendRequests: make(map[int64]*models.FriendRequest),
+		friendRequests: make(map[models.FriendRequestID]*models.FriendRequest),
 		nextID:         1,
 	}
 }
@@ -38,7 +38,7 @@ func (r *InMemorySocialRepository) SaveFriendRequest(ctx context.Context, req *m
 	return req, nil
 }
 
-func (r *InMemorySocialRepository) UpdateFriendRequest(ctx context.Context, requestID int64, status models.FriendRequestStatus) (*models.FriendRequest, error) {
+func (r *InMemorySocialRepository) UpdateFriendRequest(ctx context.Context, requestID models.FriendRequestID, status models.FriendRequestStatus) (*models.FriendRequest, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -54,7 +54,7 @@ func (r *InMemorySocialRepository) UpdateFriendRequest(ctx context.Context, requ
 	return req, nil
 }
 
-func (r *InMemorySocialRepository) GetFriendRequest(ctx context.Context, requestID int64) (*models.FriendRequest, error) {
+func (r *InMemorySocialRepository) GetFriendRequest(ctx context.Context, requestID models.FriendRequestID) (*models.FriendRequest, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -66,7 +66,7 @@ func (r *InMemorySocialRepository) GetFriendRequest(ctx context.Context, request
 	return req, nil
 }
 
-func (r *InMemorySocialRepository) GetFriendRequestsByToUserID(ctx context.Context, toUserID int64, limit *int64, cursor *string) ([]*models.FriendRequest, *string, error) {
+func (r *InMemorySocialRepository) GetFriendRequestsByToUserID(ctx context.Context, toUserID models.UserID, limit *int64, cursor *string) ([]*models.FriendRequest, *string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -85,7 +85,7 @@ func (r *InMemorySocialRepository) GetFriendRequestsByToUserID(ctx context.Conte
 	return r.applyPagination(requests, limit, cursor)
 }
 
-func (r *InMemorySocialRepository) GetFriendRequestsByFromUserID(ctx context.Context, fromUserID int64, limit *int64, cursor *string) ([]*models.FriendRequest, *string, error) {
+func (r *InMemorySocialRepository) GetFriendRequestsByFromUserID(ctx context.Context, fromUserID models.UserID, limit *int64, cursor *string) ([]*models.FriendRequest, *string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -104,7 +104,7 @@ func (r *InMemorySocialRepository) GetFriendRequestsByFromUserID(ctx context.Con
 	return r.applyPagination(requests, limit, cursor)
 }
 
-func (r *InMemorySocialRepository) GetFriendRequestByUserIDs(ctx context.Context, fromUserID int64, toUserID int64) (*models.FriendRequest, error) {
+func (r *InMemorySocialRepository) GetFriendRequestByUserIDs(ctx context.Context, fromUserID models.UserID, toUserID models.UserID) (*models.FriendRequest, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -117,7 +117,7 @@ func (r *InMemorySocialRepository) GetFriendRequestByUserIDs(ctx context.Context
 	return nil, nil
 }
 
-func (r *InMemorySocialRepository) DeleteFriendRequest(ctx context.Context, requestID int64) error {
+func (r *InMemorySocialRepository) DeleteFriendRequest(ctx context.Context, requestID models.FriendRequestID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -142,7 +142,7 @@ func (r *InMemorySocialRepository) applyPagination(requests []*models.FriendRequ
 
 		startIdx = len(requests) // По умолчанию за пределами списка
 		for i, req := range requests {
-			if req.ID > cursorID {
+			if req.ID > models.FriendRequestID(cursorID) {
 				startIdx = i
 				break
 			}
@@ -165,7 +165,7 @@ func (r *InMemorySocialRepository) applyPagination(requests []*models.FriendRequ
 	// Формируем следующий курсор
 	var nextCursor *string
 	if len(result) > 0 && endIdx < len(requests) {
-		cursorStr := strconv.FormatInt(result[len(result)-1].ID, 10)
+		cursorStr := strconv.FormatInt(int64(result[len(result)-1].ID), 10)
 		nextCursor = &cursorStr
 	}
 
