@@ -32,7 +32,7 @@ func main() {
 
 	controller := deliveryGrpc.NewSocialController(socialUsecase)
 
-	lis, err := net.Listen("tcp", ":8083")
+	lis, err := net.Listen("tcp", ":8082")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

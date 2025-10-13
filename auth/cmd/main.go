@@ -33,7 +33,7 @@ func main() {
 
 	controller := deliveryGrpc.NewAuthController(authUsecase)
 
-	lis, err := net.Listen("tcp", ":8081")
+	lis, err := net.Listen("tcp", ":8082")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

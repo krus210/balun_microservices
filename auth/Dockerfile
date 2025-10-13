@@ -9,6 +9,6 @@ COPY . .
 RUN go mod download
 RUN go build -o auth ./cmd/
 
-EXPOSE 8081
+EXPOSE 8082
 
 CMD ["./auth"]

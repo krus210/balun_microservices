@@ -9,6 +9,6 @@ COPY . .
 RUN go mod download
 RUN go build -o social ./cmd/
 
-EXPOSE 8083
+EXPOSE 8082
 
 CMD ["./social"]
