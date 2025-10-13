@@ -12,9 +12,15 @@ func newPbChatFromChat(chat *models.Chat) *pb.Chat {
 		lastMessageUnixMs = &ms
 	}
 
+	// Конвертация []models.UserID в []int64
+	participantIDs := make([]int64, len(chat.ParticipantIDs))
+	for i, id := range chat.ParticipantIDs {
+		participantIDs[i] = int64(id)
+	}
+
 	return &pb.Chat{
-		ChatId:            chat.ID,
-		ParticipantIds:    chat.ParticipantIDs,
+		ChatId:            int64(chat.ID),
+		ParticipantIds:    participantIDs,
 		CreatedAtUnixMs:   chat.CreatedAt.UnixMilli(),
 		LastMessageUnixMs: lastMessageUnixMs,
 	}
@@ -32,9 +38,9 @@ func newPbChatsFromChats(chats []*models.Chat) []*pb.Chat {
 
 func newPbMessageFromMessage(msg *models.Message) *pb.Message {
 	return &pb.Message{
-		MessageId:    msg.ID,
-		ChatId:       msg.ChatID,
-		UserId:       msg.OwnerID,
+		MessageId:    int64(msg.ID),
+		ChatId:       int64(msg.ChatID),
+		UserId:       int64(msg.OwnerID),
 		Text:         msg.Text,
 		SentAtUnixMs: msg.CreatedAt.UnixMilli(),
 	}

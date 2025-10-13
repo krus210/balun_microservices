@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"chat/internal/app/models"
 	"chat/internal/app/usecase/dto"
 
 	pb "chat/pkg/api"
@@ -21,14 +22,14 @@ func (h *ChatController) CreateDirectChat(ctx context.Context, req *pb.CreateDir
 	}
 
 	chat, err := h.usecase.CreateDirectChat(ctx, dto.CreateDirectChatDto{
-		UserID:        1, // TODO: брать из хедера
-		ParticipantID: req.ParticipantId,
+		UserID:        models.UserID(1), // TODO: брать из хедера
+		ParticipantID: models.UserID(req.ParticipantId),
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.CreateDirectChatResponse{
-		ChatId: chat.ID,
+		ChatId: int64(chat.ID),
 	}, nil
 }

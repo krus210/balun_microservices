@@ -12,16 +12,16 @@ import (
 
 type InMemoryChatRepository struct {
 	mu           sync.RWMutex
-	chats        map[int64]*models.Chat
-	messages     map[int64][]*models.Message
-	chatIDSeq    int64
-	messageIDSeq int64
+	chats        map[models.ChatID]*models.Chat
+	messages     map[models.ChatID][]*models.Message
+	chatIDSeq    models.ChatID
+	messageIDSeq models.MessageID
 }
 
 func NewInMemoryChatRepository() *InMemoryChatRepository {
 	return &InMemoryChatRepository{
-		chats:    make(map[int64]*models.Chat),
-		messages: make(map[int64][]*models.Message),
+		chats:    make(map[models.ChatID]*models.Chat),
+		messages: make(map[models.ChatID][]*models.Message),
 	}
 }
 
@@ -39,7 +39,7 @@ func (r *InMemoryChatRepository) SaveChat(ctx context.Context, chat *models.Chat
 	// Deep copy to avoid external modifications
 	chatCopy := &models.Chat{
 		ID:             chat.ID,
-		ParticipantIDs: make([]int64, len(chat.ParticipantIDs)),
+		ParticipantIDs: make([]models.UserID, len(chat.ParticipantIDs)),
 		Messages:       make([]models.Message, len(chat.Messages)),
 		CreatedAt:      chat.CreatedAt,
 		UpdatedAt:      chat.UpdatedAt,
@@ -51,7 +51,7 @@ func (r *InMemoryChatRepository) SaveChat(ctx context.Context, chat *models.Chat
 	return chat, nil
 }
 
-func (r *InMemoryChatRepository) GetChat(ctx context.Context, chatID int64) (*models.Chat, error) {
+func (r *InMemoryChatRepository) GetChat(ctx context.Context, chatID models.ChatID) (*models.Chat, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -63,7 +63,7 @@ func (r *InMemoryChatRepository) GetChat(ctx context.Context, chatID int64) (*mo
 	// Deep copy to avoid external modifications
 	chatCopy := &models.Chat{
 		ID:             chat.ID,
-		ParticipantIDs: make([]int64, len(chat.ParticipantIDs)),
+		ParticipantIDs: make([]models.UserID, len(chat.ParticipantIDs)),
 		Messages:       make([]models.Message, len(chat.Messages)),
 		CreatedAt:      chat.CreatedAt,
 		UpdatedAt:      chat.UpdatedAt,
@@ -74,7 +74,7 @@ func (r *InMemoryChatRepository) GetChat(ctx context.Context, chatID int64) (*mo
 	return chatCopy, nil
 }
 
-func (r *InMemoryChatRepository) GetDirectChatByParticipants(ctx context.Context, userID1, userID2 int64) (*models.Chat, error) {
+func (r *InMemoryChatRepository) GetDirectChatByParticipants(ctx context.Context, userID1, userID2 models.UserID) (*models.Chat, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -94,7 +94,7 @@ func (r *InMemoryChatRepository) GetDirectChatByParticipants(ctx context.Context
 				// Deep copy
 				chatCopy := &models.Chat{
 					ID:             chat.ID,
-					ParticipantIDs: make([]int64, len(chat.ParticipantIDs)),
+					ParticipantIDs: make([]models.UserID, len(chat.ParticipantIDs)),
 					Messages:       make([]models.Message, len(chat.Messages)),
 					CreatedAt:      chat.CreatedAt,
 					UpdatedAt:      chat.UpdatedAt,
@@ -109,7 +109,7 @@ func (r *InMemoryChatRepository) GetDirectChatByParticipants(ctx context.Context
 	return nil, nil
 }
 
-func (r *InMemoryChatRepository) ListChatsByUserID(ctx context.Context, userID int64) ([]*models.Chat, error) {
+func (r *InMemoryChatRepository) ListChatsByUserID(ctx context.Context, userID models.UserID) ([]*models.Chat, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -120,7 +120,7 @@ func (r *InMemoryChatRepository) ListChatsByUserID(ctx context.Context, userID i
 				// Deep copy
 				chatCopy := &models.Chat{
 					ID:             chat.ID,
-					ParticipantIDs: make([]int64, len(chat.ParticipantIDs)),
+					ParticipantIDs: make([]models.UserID, len(chat.ParticipantIDs)),
 					Messages:       make([]models.Message, len(chat.Messages)),
 					CreatedAt:      chat.CreatedAt,
 					UpdatedAt:      chat.UpdatedAt,
@@ -136,7 +136,7 @@ func (r *InMemoryChatRepository) ListChatsByUserID(ctx context.Context, userID i
 	return result, nil
 }
 
-func (r *InMemoryChatRepository) GetChatMembers(ctx context.Context, chatID int64) ([]int64, error) {
+func (r *InMemoryChatRepository) GetChatMembers(ctx context.Context, chatID models.ChatID) ([]models.UserID, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -145,12 +145,12 @@ func (r *InMemoryChatRepository) GetChatMembers(ctx context.Context, chatID int6
 		return nil, nil
 	}
 
-	members := make([]int64, len(chat.ParticipantIDs))
+	members := make([]models.UserID, len(chat.ParticipantIDs))
 	copy(members, chat.ParticipantIDs)
 	return members, nil
 }
 
-func (r *InMemoryChatRepository) IsChatMember(ctx context.Context, chatID int64, userID int64) (bool, error) {
+func (r *InMemoryChatRepository) IsChatMember(ctx context.Context, chatID models.ChatID, userID models.UserID) (bool, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -198,7 +198,7 @@ func (r *InMemoryChatRepository) SaveMessage(ctx context.Context, msg *models.Me
 	return msg, nil
 }
 
-func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID int64, limit int64, cursor *string) (messages []*models.Message, nextCursor *string, err error) {
+func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID models.ChatID, limit int64, cursor *string) (messages []*models.Message, nextCursor *string, err error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -229,7 +229,7 @@ func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID int64,
 
 		// Find the position after the cursor
 		for i, msg := range sortedMessages {
-			if msg.ID == cursorID {
+			if msg.ID == models.MessageID(cursorID) {
 				startIdx = i + 1
 				break
 			}
@@ -258,7 +258,7 @@ func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID int64,
 
 	// Set next cursor if there are more messages
 	if endIdx < len(sortedMessages) {
-		lastID := strconv.FormatInt(result[len(result)-1].ID, 10)
+		lastID := strconv.FormatInt(int64(result[len(result)-1].ID), 10)
 		nextCursor = &lastID
 	}
 

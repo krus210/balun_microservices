@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"chat/internal/app/models"
 	"chat/internal/app/usecase/dto"
 
 	pb "chat/pkg/api"
@@ -21,8 +22,8 @@ func (h *ChatController) ListMessages(ctx context.Context, req *pb.ListMessagesR
 	}
 
 	response, err := h.usecase.ListMessages(ctx, dto.ListMessagesDto{
-		UserID: 1, // TODO: брать из хедера
-		ChatID: req.ChatId,
+		UserID: models.UserID(1), // TODO: брать из хедера
+		ChatID: models.ChatID(req.ChatId),
 		Limit:  req.Limit,
 		Cursor: req.Cursor,
 	})

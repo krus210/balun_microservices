@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"chat/internal/app/models"
 	"chat/internal/app/usecase/dto"
 
 	pb "chat/pkg/api"
@@ -21,8 +22,8 @@ func (h *ChatController) GetChat(ctx context.Context, req *pb.GetChatRequest) (*
 	}
 
 	chat, err := h.usecase.GetChat(ctx, dto.GetChatDto{
-		UserID: 1, // TODO: брать из хедера
-		ChatID: req.ChatId,
+		UserID: models.UserID(1), // TODO: брать из хедера
+		ChatID: models.ChatID(req.ChatId),
 	})
 	if err != nil {
 		return nil, err

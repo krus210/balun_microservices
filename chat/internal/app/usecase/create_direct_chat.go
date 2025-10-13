@@ -29,7 +29,7 @@ func (c *ChatService) CreateDirectChat(ctx context.Context, req dto.CreateDirect
 
 	// Создаем чат
 	chat := &models.Chat{
-		ParticipantIDs: []int64{req.UserID, req.ParticipantID},
+		ParticipantIDs: []models.UserID{req.UserID, req.ParticipantID},
 	}
 
 	savedChat, err := c.chatRepo.SaveChat(ctx, chat)

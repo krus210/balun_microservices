@@ -8,7 +8,7 @@ import (
 	"chat/internal/app/usecase/dto"
 )
 
-func (c *ChatService) ListChatMembers(ctx context.Context, req dto.ListChatMembersDto) ([]int64, error) {
+func (c *ChatService) ListChatMembers(ctx context.Context, req dto.ListChatMembersDto) ([]models.UserID, error) {
 	chat, err := c.chatRepo.GetChat(ctx, req.ChatID)
 	if err != nil {
 		return nil, fmt.Errorf("[ChatService][GetChat] chatRepo GetChat error: %w", err)

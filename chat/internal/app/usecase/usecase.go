@@ -10,19 +10,19 @@ import (
 // Порты вторичные
 type (
 	UsersService interface {
-		CheckUserExists(ctx context.Context, id int64) (bool, error)
+		CheckUserExists(ctx context.Context, id models.UserID) (bool, error)
 	}
 
 	ChatRepository interface {
 		SaveChat(ctx context.Context, chat *models.Chat) (*models.Chat, error)
-		GetChat(ctx context.Context, chatID int64) (*models.Chat, error)
-		GetDirectChatByParticipants(ctx context.Context, userID1, userID2 int64) (*models.Chat, error)
-		ListChatsByUserID(ctx context.Context, userID int64) ([]*models.Chat, error)
-		GetChatMembers(ctx context.Context, chatID int64) ([]int64, error)
-		IsChatMember(ctx context.Context, chatID int64, userID int64) (bool, error)
+		GetChat(ctx context.Context, chatID models.ChatID) (*models.Chat, error)
+		GetDirectChatByParticipants(ctx context.Context, userID1, userID2 models.UserID) (*models.Chat, error)
+		ListChatsByUserID(ctx context.Context, userID models.UserID) ([]*models.Chat, error)
+		GetChatMembers(ctx context.Context, chatID models.ChatID) ([]models.UserID, error)
+		IsChatMember(ctx context.Context, chatID models.ChatID, userID models.UserID) (bool, error)
 
 		SaveMessage(ctx context.Context, msg *models.Message) (*models.Message, error)
-		ListMessages(ctx context.Context, chatID int64, limit int64, cursor *string) (messages []*models.Message, nextCursor *string, err error)
+		ListMessages(ctx context.Context, chatID models.ChatID, limit int64, cursor *string) (messages []*models.Message, nextCursor *string, err error)
 	}
 )
 
@@ -34,7 +34,7 @@ type Usecase interface {
 	// ListUserChats получение списка чатов пользователя
 	ListUserChats(ctx context.Context, req dto.ListUserChatsDto) ([]*models.Chat, error)
 	// ListChatMembers получение участников чата
-	ListChatMembers(ctx context.Context, req dto.ListChatMembersDto) ([]int64, error)
+	ListChatMembers(ctx context.Context, req dto.ListChatMembersDto) ([]models.UserID, error)
 	// SendMessage отправка сообщения
 	SendMessage(ctx context.Context, req dto.SendMessageDto) (*models.Message, error)
 	// ListMessages получение истории сообщений

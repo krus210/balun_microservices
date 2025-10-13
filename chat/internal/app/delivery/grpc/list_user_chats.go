@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"chat/internal/app/models"
 	"chat/internal/app/usecase/dto"
 
 	pb "chat/pkg/api"
@@ -21,7 +22,7 @@ func (h *ChatController) ListUserChats(ctx context.Context, req *pb.ListUserChat
 	}
 
 	chats, err := h.usecase.ListUserChats(ctx, dto.ListUserChatsDto{
-		UserID: req.UserId,
+		UserID: models.UserID(req.UserId),
 	})
 	if err != nil {
 		return nil, err

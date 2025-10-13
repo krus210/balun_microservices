@@ -3,6 +3,7 @@ package adapters
 import (
 	"context"
 
+	"chat/internal/app/models"
 	pb "chat/pkg/users/api"
 )
 
@@ -15,8 +16,8 @@ func NewUsersClient(client pb.UsersServiceClient) *UsersClient {
 }
 
 // CheckUserExists - Проверка существования пользователя
-func (c *UsersClient) CheckUserExists(ctx context.Context, id int64) (bool, error) {
-	userProfile, err := c.client.GetProfileByID(ctx, &pb.GetProfileByIDRequest{UserId: id})
+func (c *UsersClient) CheckUserExists(ctx context.Context, id models.UserID) (bool, error) {
+	userProfile, err := c.client.GetProfileByID(ctx, &pb.GetProfileByIDRequest{UserId: int64(id)})
 	if err != nil {
 		return false, err
 	}
