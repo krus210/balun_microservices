@@ -6,8 +6,8 @@ import (
 	"chat/internal/app/models"
 )
 
-// MessageRow — «плоская» проекция строки таблицы messages
-type MessageRow struct {
+// Row — «плоская» проекция строки таблицы messages
+type Row struct {
 	ID        int64     `db:"id"`
 	Text      string    `db:"text"`
 	ChatID    int64     `db:"chat_id"`
@@ -16,14 +16,14 @@ type MessageRow struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func (row *MessageRow) Values() []any {
+func (row *Row) Values() []any {
 	return []any{
 		row.ID, row.Text, row.ChatID, row.OwnerID, row.CreatedAt, row.UpdatedAt,
 	}
 }
 
-// ToMessageModel конвертирует MessageRow в доменную модель models.Message
-func ToMessageModel(r *MessageRow) *models.Message {
+// ToModel конвертирует Row в доменную модель models.Message
+func ToModel(r *Row) *models.Message {
 	if r == nil {
 		return nil
 	}
@@ -37,12 +37,12 @@ func ToMessageModel(r *MessageRow) *models.Message {
 	}
 }
 
-// FromMessageModel конвертирует доменную модель в MessageRow (для INSERT/UPDATE)
-func FromMessageModel(m *models.Message) MessageRow {
+// FromModel конвертирует доменную модель в Row (для INSERT/UPDATE)
+func FromModel(m *models.Message) Row {
 	if m == nil {
-		return MessageRow{}
+		return Row{}
 	}
-	return MessageRow{
+	return Row{
 		ID:        int64(m.ID),
 		Text:      m.Text,
 		ChatID:    int64(m.ChatID),

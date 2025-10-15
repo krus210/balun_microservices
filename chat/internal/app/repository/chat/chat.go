@@ -6,14 +6,14 @@ import (
 	"chat/internal/app/models"
 )
 
-// ChatRow — «плоская» проекция строки таблицы chats
-type ChatRow struct {
+// Row — «плоская» проекция строки таблицы chats
+type Row struct {
 	ID        int64     `db:"id"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func (row *ChatRow) Values() []any {
+func (row *Row) Values() []any {
 	return []any{
 		row.ID, row.CreatedAt, row.UpdatedAt,
 	}
@@ -21,7 +21,7 @@ func (row *ChatRow) Values() []any {
 
 // ToModel конвертирует ChatRow в доменную модель models.Chat
 // ParticipantIDs и Messages должны быть загружены отдельными запросами
-func ToModel(r *ChatRow) *models.Chat {
+func ToModel(r *Row) *models.Chat {
 	if r == nil {
 		return nil
 	}
@@ -35,11 +35,11 @@ func ToModel(r *ChatRow) *models.Chat {
 }
 
 // FromModel конвертирует доменную модель в ChatRow (для INSERT/UPDATE)
-func FromModel(m *models.Chat) ChatRow {
+func FromModel(m *models.Chat) Row {
 	if m == nil {
-		return ChatRow{}
+		return Row{}
 	}
-	return ChatRow{
+	return Row{
 		ID:        int64(m.ID),
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
