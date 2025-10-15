@@ -18,6 +18,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
@@ -272,6 +273,17 @@ func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest
 
 func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectChatRequest) (*chat.CreateDirectChatResponse, error) {
 	log.Printf("Gateway: CreateDirectChat for participantId: %d", req.GetParticipantId())
+
+	// Извлекаем Idempotency-Key из входящих метаданных
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		if idempotencyKeys := md.Get("idempotency-key"); len(idempotencyKeys) > 0 {
+			// Создаем новый контекст с исходящими метаданными
+			outgoingMD := metadata.Pairs("idempotency-key", idempotencyKeys[0])
+			ctx = metadata.NewOutgoingContext(ctx, outgoingMD)
+			log.Printf("Gateway: Forwarding Idempotency-Key: %s", idempotencyKeys[0])
+		}
+	}
 
 	resp, err := s.chatClient.CreateDirectChat(ctx, req)
 	if err != nil {
