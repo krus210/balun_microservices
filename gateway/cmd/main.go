@@ -278,9 +278,8 @@ func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectCha
 	md, ok := metadata.FromIncomingContext(ctx)
 	if ok {
 		if idempotencyKeys := md.Get("idempotency-key"); len(idempotencyKeys) > 0 {
-			// Создаем новый контекст с исходящими метаданными
-			outgoingMD := metadata.Pairs("idempotency-key", idempotencyKeys[0])
-			ctx = metadata.NewOutgoingContext(ctx, outgoingMD)
+			// Добавляем idempotency-key в исходящие метаданные
+			ctx = metadata.AppendToOutgoingContext(ctx, "idempotency-key", idempotencyKeys[0])
 			log.Printf("Gateway: Forwarding Idempotency-Key: %s", idempotencyKeys[0])
 		}
 	}
@@ -393,6 +392,16 @@ func main() {
 		// Создаем ServeMux с кастомным обработчиком ошибок
 		mux := runtime.NewServeMux(
 			runtime.WithErrorHandler(customHTTPError),
+			runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
+				// Пробрасываем idempotency-key в metadata
+				// HTTP заголовки приходят в разных регистрах
+				switch key {
+				case "Idempotency-Key", "idempotency-key", "X-Idempotency-Key", "x-idempotency-key":
+					return "idempotency-key", true
+				}
+				// Стандартные заголовки (Authorization и т.д.)
+				return runtime.DefaultHeaderMatcher(key)
+			}),
 		)
 		if err = pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
 			log.Fatalf("failed to register gateway handler: %v", err)

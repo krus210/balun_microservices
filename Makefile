@@ -14,7 +14,29 @@ migrate-chat-db:
 .up-chat-service:
 	@docker-compose up chat --build -d
 
+.up-auth-service:
+	@docker-compose up auth --build -d
+
+.up-users-service:
+	@docker-compose up users --build -d
+
+.up-social-service:
+	@docker-compose up social --build -d
+
+.up-gateway-service:
+	@docker-compose up gateway --build -d
+
 up-chat: .up-chat-db migrate-chat-db .up-chat-service
+
+up-auth: .up-auth-service
+
+up-users: .up-users-service
+
+up-social:  .up-social-service
+
+up-gateway: .up-gateway-service
+
+up: up-chat up-auth up-users up-social up-gateway
 
 down:
 	@docker-compose down
@@ -24,4 +46,5 @@ down:
 	.up-chat-db \
 	.up-chat-service \
 	up-chat \
+	up \
 	down

@@ -1,13 +1,13 @@
 package chat_member
 
-const chatMembersTable = "chat_members"
+const ChatMembersTable = "chat_members"
 
 const (
-	chatMembersTableColumnChatID = "chat_id"
-	chatMembersTableColumnUserID = "user_id"
+	ChatMembersTableColumnChatID = "chat_id"
+	ChatMembersTableColumnUserID = "user_id"
 )
 
-var chatMembersTableColumns = []string{
-	chatMembersTableColumnChatID,
-	chatMembersTableColumnUserID,
+var ChatMembersTableColumns = []string{
+	ChatMembersTableColumnChatID,
+	ChatMembersTableColumnUserID,
 }

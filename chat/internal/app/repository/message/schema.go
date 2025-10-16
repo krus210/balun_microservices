@@ -1,21 +1,21 @@
 package message
 
-const messagesTable = "messages"
+const MessagesTable = "messages"
 
 const (
-	messagesTableColumnID        = "id"
-	messagesTableColumnText      = "text"
-	messagesTableColumnChatID    = "chat_id"
-	messagesTableColumnOwnerID   = "owner_id"
-	messagesTableColumnCreatedAt = "created_at"
-	messagesTableColumnUpdatedAt = "updated_at"
+	MessagesTableColumnID        = "id"
+	MessagesTableColumnText      = "text"
+	MessagesTableColumnChatID    = "chat_id"
+	MessagesTableColumnOwnerID   = "owner_id"
+	MessagesTableColumnCreatedAt = "created_at"
+	MessagesTableColumnUpdatedAt = "updated_at"
 )
 
-var messagesTableColumns = []string{
-	messagesTableColumnID,
-	messagesTableColumnText,
-	messagesTableColumnChatID,
-	messagesTableColumnOwnerID,
-	messagesTableColumnCreatedAt,
-	messagesTableColumnUpdatedAt,
+var MessagesTableColumns = []string{
+	MessagesTableColumnID,
+	MessagesTableColumnText,
+	MessagesTableColumnChatID,
+	MessagesTableColumnOwnerID,
+	MessagesTableColumnCreatedAt,
+	MessagesTableColumnUpdatedAt,
 }

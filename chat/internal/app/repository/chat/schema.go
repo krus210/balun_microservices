@@ -1,15 +1,15 @@
 package chat
 
-const chatsTable = "chats"
+const ChatsTable = "chats"
 
 const (
-	chatsTableColumnID        = "id"
-	chatsTableColumnCreatedAt = "created_at"
-	chatsTableColumnUpdatedAt = "updated_at"
+	ChatsTableColumnID        = "id"
+	ChatsTableColumnCreatedAt = "created_at"
+	ChatsTableColumnUpdatedAt = "updated_at"
 )
 
-var chatsTableColumns = []string{
-	chatsTableColumnID,
-	chatsTableColumnCreatedAt,
-	chatsTableColumnUpdatedAt,
+var ChatsTableColumns = []string{
+	ChatsTableColumnID,
+	ChatsTableColumnCreatedAt,
+	ChatsTableColumnUpdatedAt,
 }
