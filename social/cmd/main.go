@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
+	"time"
 
 	"social/internal/app/adapters"
 	"social/internal/app/repository"
 	"social/internal/app/usecase"
+	"social/pkg/postgres"
+	"social/pkg/postgres/transaction_manager"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,6 +23,9 @@ import (
 )
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
@@ -26,7 +33,16 @@ func main() {
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 
-	repo := repository.NewInMemorySocialRepository()
+	conn, err := postgres.NewConnectionPool(ctx, DSN(),
+		postgres.WithMaxConnIdleTime(time.Minute),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	txMngr := transaction_manager.New(conn)
+	repo := repository.NewRepository(txMngr)
 
 	socialUsecase := usecase.NewUsecase(usersClient, repo)
 
