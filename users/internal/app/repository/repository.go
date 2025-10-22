@@ -1,16 +1,16 @@
 package repository
 
 import (
-	"social/internal/app/usecase"
-	"social/pkg/postgres/transaction_manager"
+	"users/internal/app/usecase"
+	"users/pkg/postgres/transaction_manager"
 
 	"github.com/Masterminds/squirrel"
 )
 
-// Проверка удовлетворению интерфейсу usecase.SocialRepository
-var _ usecase.SocialRepository = (*Repository)(nil)
+// Проверка удовлетворению интерфейсу usecase.UsersRepository
+var _ usecase.UsersRepository = (*Repository)(nil)
 
-// Repository реализация usecase.SocialRepository
+// Repository реализация usecase.UsersRepository
 type Repository struct {
 	tm transaction_manager.TransactionManagerAPI
 	sb squirrel.StatementBuilderType

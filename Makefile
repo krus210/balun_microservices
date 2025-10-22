@@ -17,6 +17,13 @@ migrate-chat-db:
 .up-auth-service:
 	@docker-compose up auth --build -d
 
+.up-users-db:
+	@docker-compose up users-db -d
+
+migrate-users-db:
+	@sleep 1
+	@goose postgres "user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${USERS_POSTGRES_DB} host=127.0.0.1 port=5434 sslmode=disable" up -dir ./users/migrations
+
 .up-users-service:
 	@docker-compose up users --build -d
 
@@ -37,7 +44,7 @@ up-chat: .up-chat-db migrate-chat-db .up-chat-service
 
 up-auth: .up-auth-service
 
-up-users: .up-users-service
+up-users: .up-users-db migrate-users-db .up-users-service
 
 up-social:  .up-social-db migrate-social-db .up-social-service
 

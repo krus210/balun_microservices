@@ -1,15 +1,20 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 )
 
 func main() {
-	server, err := InitializeApp()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	server, cleanup, err := InitializeApp(ctx)
 	if err != nil {
 		log.Fatalf("failed to initialize app: %v", err)
 	}
+	defer cleanup()
 
 	lis, err := net.Listen("tcp", ":8082")
 	if err != nil {
