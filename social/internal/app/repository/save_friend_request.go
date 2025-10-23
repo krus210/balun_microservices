@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"social/pkg/postgres"
 	"time"
 
 	"social/internal/app/models"
@@ -38,7 +39,7 @@ func (r *Repository) SaveFriendRequest(ctx context.Context, req *models.FriendRe
 	// Выполняем вставку заявки и получаем сгенерированный ID
 	var requestID int64
 	if err := conn.Getx(ctx, &requestID, insertQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", saveFriendRequestApi, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", saveFriendRequestApi, postgres.ConvertPGError(err))
 	}
 
 	req.ID = models.FriendRequestID(requestID)

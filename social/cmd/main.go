@@ -4,7 +4,11 @@ import (
 	"context"
 	"log"
 	"net"
+	"strings"
 	"time"
+
+	"social/internal/app/delivery/friend_request_handler"
+	"social/pkg/kafka"
 
 	"social/internal/app/adapters"
 	"social/internal/app/repository"
@@ -17,6 +21,8 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	deliveryGrpc "social/internal/app/delivery/grpc"
+	outboxProcessor "social/internal/app/outbox/processor"
+	outboxRepository "social/internal/app/outbox/repository"
 	errorsMiddleware "social/internal/middleware/errors"
 	socialPb "social/pkg/api"
 	usersPb "social/pkg/users/api"
@@ -41,10 +47,33 @@ func main() {
 	}
 	defer conn.Close()
 
-	txMngr := transaction_manager.New(conn)
-	repo := repository.NewRepository(txMngr)
+	producer, err := kafka.NewSyncProducer(strings.Split(kafkaBrokers, ","), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	socialUsecase := usecase.NewUsecase(usersClient, repo)
+	friendRequestEventsHanler := friend_request_handler.NewKafkaOrderBatchHandler(producer,
+		friend_request_handler.WithMaxBatchSize(100),
+		friend_request_handler.WithTopic(kafkaFriendRequestEventTopicName),
+	)
+
+	txMngr := transaction_manager.New(conn)
+
+	friendRequestRepo := repository.NewRepository(txMngr)
+	outboxRepo := outboxRepository.NewRepository(txMngr)
+
+	worker := outboxProcessor.NewOutboxFriendRequestWorker(outboxRepo, txMngr, friendRequestEventsHanler,
+		outboxProcessor.WithBatchSize(10),
+		outboxProcessor.WithMaxRetry(10),
+		outboxProcessor.WithRetryInterval(30*time.Second),
+		outboxProcessor.WithWindow(time.Hour),
+	)
+
+	go worker.Run(ctx)
+
+	outboxProc := outboxProcessor.NewProcessor(outboxProcessor.Deps{Repository: outboxRepo})
+
+	socialUsecase := usecase.NewUsecase(usersClient, friendRequestRepo, outboxProc, txMngr)
 
 	controller := deliveryGrpc.NewSocialController(socialUsecase)
 

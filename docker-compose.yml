@@ -1,6 +1,55 @@
 version: '3.8'
 
 services:
+  # Apache Kafka broker
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      # KRaft (single-node broker+controller)
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+
+      # Листенеры: внешний и внутренний (для контейнеров)
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,INTERNAL://:29092,CONTROLLER://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092,INTERNAL://kafka:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+
+      # Обязательные dev-настройки для одиночного брокера
+      CLUSTER_ID: "4L6g3nShT-eMCtK--X86sw"         # можно оставить так для локалки
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_NUM_PARTITIONS: "3"
+    volumes:
+      - ./docker/kafka:/tmp/kraft-combined-logs
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - microservices
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+    networks:
+      - microservices
+
   auth:
     build:
       context: ./auth
@@ -50,6 +99,9 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SSLMODE: disable
+    depends_on:
+      users-db:
+        condition: service_healthy
     ports:
       - "8082:8082"
     networks:
@@ -95,8 +147,12 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SSLMODE: disable
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_FRIEND_REQUEST_EVENTS_TOPIC_NAME: friend-request-events
     depends_on:
-      chat-db:
+      kafka:
+        condition: service_healthy
+      social-db:
         condition: service_healthy
     ports:
       - "8083:8082"
@@ -147,6 +203,8 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SSLMODE: disable
     depends_on:
+      kafka:
+        condition: service_healthy
       chat-db:
         condition: service_healthy
     networks:

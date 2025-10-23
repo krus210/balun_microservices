@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"social/pkg/postgres"
 
 	"social/internal/app/models"
 	"social/internal/app/repository/friend_request"
@@ -33,7 +34,7 @@ func (r *Repository) GetFriendRequestByUserIDs(ctx context.Context, fromUserID m
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("%s: %w", GetFriendRequestByUserIDsApi, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", GetFriendRequestByUserIDsApi, postgres.ConvertPGError(err))
 	}
 
 	// Конвертируем строку в модель

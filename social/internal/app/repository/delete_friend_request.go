@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"social/pkg/postgres"
 
 	"social/internal/app/models"
 	"social/internal/app/repository/friend_request"
@@ -23,7 +24,7 @@ func (r *Repository) DeleteFriendRequest(ctx context.Context, requestID models.F
 
 	// Выполняем удаление
 	if _, err := conn.Execx(ctx, deleteQuery); err != nil {
-		return fmt.Errorf("%s: %w", deleteFriendRequestApi, ConvertPGError(err))
+		return fmt.Errorf("%s: %w", deleteFriendRequestApi, postgres.ConvertPGError(err))
 	}
 
 	return nil

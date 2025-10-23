@@ -21,6 +21,7 @@ func DSN() string {
 		PostgresUser, PostgresPassword, PostgresHost, PostgresPort, PostgresDB,
 	)
 }
+
 func NewPostgresConnection(ctx context.Context) (*pgxpool.Pool, error) {
 	cfg, err := pgxpool.ParseConfig(DSN())
 	if err != nil {

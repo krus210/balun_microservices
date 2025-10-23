@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"social/pkg/postgres"
 	"time"
 
 	"social/internal/app/models"
@@ -40,7 +41,7 @@ func (r *Repository) UpdateFriendRequest(ctx context.Context, requestID models.F
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("%s: %w", updateFriendRequestApi, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", updateFriendRequestApi, postgres.ConvertPGError(err))
 	}
 
 	return friend_request.ToModel(&row), nil

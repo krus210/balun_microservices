@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"social/pkg/postgres"
 	"strconv"
 
 	"social/internal/app/models"
@@ -45,7 +46,7 @@ func (r *Repository) GetFriendRequestsByToUserID(ctx context.Context, toUserID m
 	// Выполняем запрос
 	var rows []friend_request.Row
 	if err := conn.Selectx(ctx, &rows, listQuery); err != nil {
-		return nil, nil, fmt.Errorf("%s: %w", GetFriendRequestsByToUserIDApi, ConvertPGError(err))
+		return nil, nil, fmt.Errorf("%s: %w", GetFriendRequestsByToUserIDApi, postgres.ConvertPGError(err))
 	}
 
 	// Если записей нет, возвращаем пустой список
