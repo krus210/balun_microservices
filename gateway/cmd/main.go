@@ -6,7 +6,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"gateway/pkg/api/auth"
 	"gateway/pkg/api/chat"
@@ -200,7 +202,7 @@ func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNickna
 }
 
 func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRequestRequest) (*social.SendFriendRequestResponse, error) {
-	log.Printf("Gateway: SendFriendRequest from userId: %d", req.GetUserId())
+	log.Printf("Gateway: SendFriendRequest from userId: %d", req.GetToUserId())
 
 	resp, err := s.socialClient.SendFriendRequest(ctx, req)
 	if err != nil {
@@ -212,7 +214,7 @@ func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRe
 }
 
 func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsRequest) (*social.ListRequestsResponse, error) {
-	log.Printf("Gateway: ListRequests for userId: %d", req.GetUserId())
+	log.Printf("Gateway: ListRequests for userId: %d", req.GetToUserId())
 
 	resp, err := s.socialClient.ListRequests(ctx, req)
 	if err != nil {
@@ -354,8 +356,7 @@ func (s *Server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest
 }
 
 func main() {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	server, err := NewServer()

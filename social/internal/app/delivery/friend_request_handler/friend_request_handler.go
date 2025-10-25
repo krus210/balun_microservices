@@ -56,14 +56,14 @@ func WithCloseTimeout(d time.Duration) KafkaHandlerOption {
 
 // ===== Конструктор =====
 
-// NewKafkaOrderBatchHandler создаёт идемпотентный sync-producer.
-func NewKafkaOrderBatchHandler(producer sarama.SyncProducer, opts ...KafkaHandlerOption) *KafkaFriendRequestBatchHandler {
+// NewKafkaFriendRequestBatchHandler создаёт идемпотентный sync-producer.
+func NewKafkaFriendRequestBatchHandler(producer sarama.SyncProducer, opts ...KafkaHandlerOption) *KafkaFriendRequestBatchHandler {
 	h := &KafkaFriendRequestBatchHandler{
 		producer:     producer,
 		maxBatchSize: 500,
 		closeTimeout: 5 * time.Second,
-		// по умолчанию — один топик "orders", ключ = AggregateID
-		resolve: func(e *outbox.Event) (string, string) { return "orders", e.AggregateID },
+		// по умолчанию — один топик "friend-request-events", ключ = AggregateID
+		resolve: func(e *outbox.Event) (string, string) { return "friend-request-events", e.AggregateID },
 	}
 	for _, opt := range opts {
 		opt(h)

@@ -6,6 +6,8 @@ import (
 	"context"
 	"log"
 	"net"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"chat/internal/app/adapters"
@@ -23,7 +25,7 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))

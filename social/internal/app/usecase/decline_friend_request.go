@@ -30,12 +30,12 @@ func (s *SocialService) DeclineFriendRequest(ctx context.Context, req dto.Change
 	err = s.transactionalManager.RunReadCommitted(ctx,
 		func(txCtx context.Context) error { // TRANSANCTION SCOPE
 
-			updatedFriendRequest, err = s.socialRepo.UpdateFriendRequest(ctx, req.RequestID, models.FriendRequestDeclined)
+			updatedFriendRequest, err = s.socialRepo.UpdateFriendRequest(txCtx, req.RequestID, models.FriendRequestDeclined)
 			if err != nil {
 				return fmt.Errorf("%s: socialRepo UpdateFriendRequest error: %w", apiAcceptFriendRequest, err)
 			}
 
-			err := s.outboxRepository.SaveFriendRequestUpdatedID(ctx, updatedFriendRequest.ID, models.FriendRequestDeclined)
+			err = s.outboxRepository.SaveFriendRequestUpdatedID(txCtx, updatedFriendRequest.ID, models.FriendRequestDeclined)
 			if err != nil {
 				return fmt.Errorf("%s: outboxRepository SaveFriendRequestUpdatedID error: %w", apiSendFriendRequest, err)
 			}

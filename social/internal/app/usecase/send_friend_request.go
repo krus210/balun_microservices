@@ -48,12 +48,12 @@ func (s *SocialService) SendFriendRequest(ctx context.Context, req dto.FriendReq
 	err = s.transactionalManager.RunReadCommitted(ctx,
 		func(txCtx context.Context) error { // TRANSANCTION SCOPE
 
-			savedFriendRequest, err = s.socialRepo.SaveFriendRequest(ctx, friendRequest)
+			savedFriendRequest, err = s.socialRepo.SaveFriendRequest(txCtx, friendRequest)
 			if err != nil {
 				return fmt.Errorf("%s: socialRepo SaveFriendRequest error: %w", apiSendFriendRequest, err)
 			}
 
-			err := s.outboxRepository.SaveFriendRequestCreatedID(ctx, savedFriendRequest.ID)
+			err = s.outboxRepository.SaveFriendRequestCreatedID(txCtx, savedFriendRequest.ID)
 			if err != nil {
 				return fmt.Errorf("%s: outboxRepository SaveFriendRequestCreatedID error: %w", apiSendFriendRequest, err)
 			}

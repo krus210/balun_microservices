@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 	"net"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"social/internal/app/delivery/friend_request_handler"
@@ -29,7 +31,7 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -52,7 +54,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	friendRequestEventsHanler := friend_request_handler.NewKafkaOrderBatchHandler(producer,
+	friendRequestEventsHandler := friend_request_handler.NewKafkaFriendRequestBatchHandler(producer,
 		friend_request_handler.WithMaxBatchSize(100),
 		friend_request_handler.WithTopic(kafkaFriendRequestEventTopicName),
 	)
@@ -62,7 +64,7 @@ func main() {
 	friendRequestRepo := repository.NewRepository(txMngr)
 	outboxRepo := outboxRepository.NewRepository(txMngr)
 
-	worker := outboxProcessor.NewOutboxFriendRequestWorker(outboxRepo, txMngr, friendRequestEventsHanler,
+	worker := outboxProcessor.NewOutboxFriendRequestWorker(outboxRepo, txMngr, friendRequestEventsHandler,
 		outboxProcessor.WithBatchSize(10),
 		outboxProcessor.WithMaxRetry(10),
 		outboxProcessor.WithRetryInterval(30*time.Second),

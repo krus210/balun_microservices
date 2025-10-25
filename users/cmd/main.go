@@ -4,10 +4,12 @@ import (
 	"context"
 	"log"
 	"net"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	server, cleanup, err := InitializeApp(ctx)

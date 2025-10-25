@@ -27,8 +27,37 @@ VENDOR_PROTO_PATH := $(CURDIR)/vendor.protobuf
 	go install github.com/bufbuild/buf/cmd/buf@latest
 	go install github.com/yoheimuta/protolint/cmd/protolint@latest
 
+# Путь до protobuf файлов
+PROTO_PATH := $(CURDIR)/proto
+
+# Путь до сгенеренных .pb.go файлов
+PKG_PROTO_PATH := $(CURDIR)/pkg
+
+# Путь до завендореных protobuf файлов
+VENDOR_PROTO_PATH := $(CURDIR)/vendor.protobuf
+
+# генерация .go файлов из vendor.protobuf с помощью protoc
+.protoc-generate-vendor:
+	mkdir -p $(PKG_PROTO_PATH)
+	$(PROTOC) -I $(VENDOR_PROTO_PATH) --proto_path=$(CURDIR) \
+	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
+	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
+	$(VENDOR_PROTO_PATH)/api/auth/auth.proto
+	$(PROTOC) -I $(VENDOR_PROTO_PATH) --proto_path=$(CURDIR) \
+	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
+	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
+	$(VENDOR_PROTO_PATH)/api/chat/chat.proto
+	$(PROTOC) -I $(VENDOR_PROTO_PATH) --proto_path=$(CURDIR) \
+	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
+	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
+	$(VENDOR_PROTO_PATH)/api/social/social.proto
+	$(PROTOC) -I $(VENDOR_PROTO_PATH) --proto_path=$(CURDIR) \
+	--go_out=$(PKG_PROTO_PATH) --go_opt paths=source_relative \
+	--go-grpc_out=$(PKG_PROTO_PATH) --go-grpc_opt paths=source_relative \
+	$(VENDOR_PROTO_PATH)/api/users/users.proto
+
 generate: export GOBIN := $(LOCAL_BIN)
-generate:
+generate: .protoc-generate-vendor
 	PATH=$(LOCAL_BIN):PATH $(LOCAL_BIN)/buf generate
 
 # Билд приложения
@@ -52,6 +81,7 @@ proto-format:
 .PHONY: \
 	.bin-deps \
 	.protoc-generate \
+	.protoc-generate-vendor \
 	.tidy \
 	.proto-lint \
 	proto-format \

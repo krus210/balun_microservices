@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 
 	appoutbox "social/internal/app/outbox/processor"
@@ -11,7 +12,8 @@ import (
 )
 
 func (r *Repository) SaveEvent(ctx context.Context, e *appoutbox.Event) error {
-	const api = "outbox.Repository.SaveOrderCreatedID"
+	const api = "outbox.Repository.SaveEvents"
+	log.Println(api, "saving event", e.ID)
 
 	row := outboxEvent{
 		ID:            e.ID,
@@ -35,9 +37,11 @@ func (r *Repository) SaveEvent(ctx context.Context, e *appoutbox.Event) error {
 
 	conn := r.db.GetQueryEngine(ctx)
 	if _, err := conn.Execx(ctx, qb); err != nil {
+		log.Println(api, "error saving event", e.ID, err)
 		return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
+	log.Println(api, "successfully saved event", e.ID)
 	return nil
 }
 
