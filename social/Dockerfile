@@ -9,6 +9,9 @@ COPY . .
 RUN go mod download
 RUN go build -o social ./cmd/
 
+# Копируем файл конфигурации
+COPY config.yaml .
+
 EXPOSE 8082
 
 CMD ["./social"]

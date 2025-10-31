@@ -1,0 +1,31 @@
+service:
+  name: social
+  version: 1.0.0
+  environment: dev
+
+server:
+  grpc:
+    port: 8082
+
+database:
+  host: social-db
+  port: 5432
+  name: social
+  sslmode: disable
+  max_conn_idle_time: 1m
+
+kafka:
+  brokers:
+    - kafka:29092
+  topics:
+    friend_request_events: friend-request-events
+
+outbox:
+  processor:
+    batch_size: 10
+    max_retry: 10
+    retry_interval: 30s
+    window: 1h
+
+friend_request_handler:
+  batch_size: 100
