@@ -16,6 +16,7 @@ type Config struct {
 	Kafka                KafkaConfig                `mapstructure:"kafka"`
 	Outbox               OutboxConfig               `mapstructure:"outbox"`
 	FriendRequestHandler FriendRequestHandlerConfig `mapstructure:"friend_request_handler"`
+	Secrets              SecretsConfig              `mapstructure:"secrets"`
 }
 
 // ServiceConfig содержит общую информацию о сервисе
@@ -55,12 +56,12 @@ func (c DatabaseConfig) DSN() string {
 
 // KafkaConfig содержит настройки Kafka
 type KafkaConfig struct {
-	Brokers []string     `mapstructure:"brokers"`
+	Brokers string       `mapstructure:"brokers"`
 	Topics  TopicsConfig `mapstructure:"topics"`
 }
 
-// BrokersList возвращает список брокеров в виде строки через запятую
-func (c KafkaConfig) BrokersList() []string {
+// Brokers возвращает список брокеров в виде строки через запятую
+func (c KafkaConfig) GetBrokers() string {
 	return c.Brokers
 }
 
@@ -85,6 +86,30 @@ type ProcessorConfig struct {
 // FriendRequestHandlerConfig содержит настройки обработчика заявок в друзья
 type FriendRequestHandlerConfig struct {
 	BatchSize int `mapstructure:"batch_size"`
+}
+
+// SecretsConfig содержит настройки провайдера секретов для разных окружений
+type SecretsConfig struct {
+	Dev  SecretsProviderConfig `mapstructure:"dev"`
+	Prod SecretsProviderConfig `mapstructure:"prod"`
+}
+
+// SecretsProviderConfig содержит настройки провайдера секретов
+type SecretsProviderConfig struct {
+	EnvPrefix string             `mapstructure:"env_prefix"`
+	FilePath  string             `mapstructure:"file_path"`
+	Vault     VaultSecretsConfig `mapstructure:"vault"`
+}
+
+// VaultSecretsConfig содержит настройки HashiCorp Vault
+type VaultSecretsConfig struct {
+	Enabled    bool   `mapstructure:"enabled"`
+	Address    string `mapstructure:"address"`
+	Token      string `mapstructure:"token"`
+	RoleID     string `mapstructure:"role_id"`
+	SecretID   string `mapstructure:"secret_id"`
+	MountPath  string `mapstructure:"mount_path"`
+	SecretPath string `mapstructure:"secret_path"`
 }
 
 // Load загружает конфигурацию из файла и переменных окружения с префиксом APP_
@@ -146,7 +171,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("database.max_conn_idle_time", time.Minute)
 
 	// Kafka defaults
-	v.SetDefault("kafka.brokers", []string{"localhost:9092"})
+	v.SetDefault("kafka.brokers", "localhost:9092")
 	v.SetDefault("kafka.topics.friend_request_events", "friend-request-events")
 
 	// Outbox defaults
@@ -157,6 +182,19 @@ func setDefaults(v *viper.Viper) {
 
 	// Friend request handler defaults
 	v.SetDefault("friend_request_handler.batch_size", 100)
+
+	// Secrets defaults для dev
+	v.SetDefault("secrets.dev.env_prefix", "APP_")
+	v.SetDefault("secrets.dev.file_path", "./secrets.yaml")
+	v.SetDefault("secrets.dev.vault.enabled", false)
+
+	// Secrets defaults для prod
+	v.SetDefault("secrets.prod.env_prefix", "APP_")
+	v.SetDefault("secrets.prod.file_path", "/etc/secrets/secrets.yaml")
+	v.SetDefault("secrets.prod.vault.enabled", true)
+	v.SetDefault("secrets.prod.vault.address", "http://vault:8200")
+	v.SetDefault("secrets.prod.vault.mount_path", "secret")
+	v.SetDefault("secrets.prod.vault.secret_path", "social/production")
 }
 
 // Validate проверяет корректность конфигурации
@@ -176,7 +214,7 @@ func (c *Config) Validate() error {
 	}
 
 	// Проверка Kafka
-	if len(c.Kafka.Brokers) == 0 {
+	if c.Kafka.GetBrokers() == "" {
 		return fmt.Errorf("kafka.brokers is required")
 	}
 	if c.Kafka.Topics.FriendRequestEvents == "" {

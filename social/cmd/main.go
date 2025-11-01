@@ -34,8 +34,8 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	// Загружаем конфигурацию
-	cfg, err := config.Load()
+	// Загружаем конфигурацию с интеграцией secrets
+	cfg, err := config.LoadWithSecrets(ctx)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
@@ -61,7 +61,7 @@ func main() {
 	defer conn.Close()
 
 	// Создаем Kafka producer
-	producer, err := kafka.NewSyncProducer(cfg.Kafka.BrokersList(), nil)
+	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

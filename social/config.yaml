@@ -15,8 +15,7 @@ database:
   max_conn_idle_time: 1m
 
 kafka:
-  brokers:
-    - kafka:29092
+  brokers: kafka:29092
   topics:
     friend_request_events: friend-request-events
 
@@ -29,3 +28,18 @@ outbox:
 
 friend_request_handler:
   batch_size: 100
+
+secrets:
+  dev:
+    env_prefix: "APP_"
+    file_path: "./secrets.yaml"
+    vault:
+      enabled: false
+  prod:
+    env_prefix: "APP_"
+    file_path: "/etc/secrets/secrets.yaml"
+    vault:
+      enabled: true
+      address: "http://vault:8200"
+      mount_path: "secret"
+      secret_path: "social/production"

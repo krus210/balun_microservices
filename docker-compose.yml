@@ -50,6 +50,30 @@ services:
     networks:
       - microservices
 
+  # HashiCorp Vault для управления секретами
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "dev-root-token"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    command: server -dev
+    volumes:
+      - ./docker/vault/data:/vault/data
+      - ./docker/vault/init.sh:/vault/init.sh
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices
+
   auth:
     build:
       context: ./auth
