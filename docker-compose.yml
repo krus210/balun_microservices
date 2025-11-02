@@ -78,6 +78,11 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile
+    environment:
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_GRPC_PORT: 8082
+      APP_USERS_SERVICE_HOST: users
+      APP_USERS_SERVICE_PORT: 8082
     ports:
       - "8081:8082"
     networks:
@@ -300,6 +305,18 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
+    environment:
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_HTTP_PORT: 8080
+      APP_SERVER_GRPC_PORT: 8085
+      APP_SERVICES_AUTH_HOST: auth
+      APP_SERVICES_AUTH_PORT: 8082
+      APP_SERVICES_USERS_HOST: users
+      APP_SERVICES_USERS_PORT: 8082
+      APP_SERVICES_SOCIAL_HOST: social
+      APP_SERVICES_SOCIAL_PORT: 8082
+      APP_SERVICES_CHAT_HOST: chat
+      APP_SERVICES_CHAT_PORT: 8082
     ports:
       - "8080:8080"
       - "8085:8085"

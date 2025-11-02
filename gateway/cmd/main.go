@@ -10,6 +10,7 @@ import (
 	"sync"
 	"syscall"
 
+	"gateway/internal/config"
 	"gateway/pkg/api/auth"
 	"gateway/pkg/api/chat"
 	pb "gateway/pkg/api/gateway"
@@ -34,25 +35,51 @@ type Server struct {
 	chatClient   chat.ChatServiceClient
 }
 
-func NewServer() (*Server, error) {
-	authConn, err := grpc.NewClient("auth:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to auth service: %w", err)
+func NewServer(cfg *config.Config) (*Server, func(), error) {
+	var conns []*grpc.ClientConn
+
+	closeConns := func() {
+		for _, conn := range conns {
+			if err := conn.Close(); err != nil {
+				log.Printf("failed to close connection: %v", err)
+			}
+		}
 	}
 
-	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authAddr := fmt.Sprintf("%s:%d", cfg.Services.Auth.Host, cfg.Services.Auth.Port)
+	authConn, err := grpc.NewClient(authAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to users service: %w", err)
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to auth service (%s): %w", authAddr, err)
 	}
+	conns = append(conns, authConn)
 
-	socialConn, err := grpc.NewClient("social:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersAddr := fmt.Sprintf("%s:%d", cfg.Services.Users.Host, cfg.Services.Users.Port)
+	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to social service: %w", err)
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to users service (%s): %w", usersAddr, err)
 	}
+	conns = append(conns, usersConn)
 
-	chatConn, err := grpc.NewClient("chat:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	socialAddr := fmt.Sprintf("%s:%d", cfg.Services.Social.Host, cfg.Services.Social.Port)
+	socialConn, err := grpc.NewClient(socialAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to chat service: %w", err)
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to social service (%s): %w", socialAddr, err)
+	}
+	conns = append(conns, socialConn)
+
+	chatAddr := fmt.Sprintf("%s:%d", cfg.Services.Chat.Host, cfg.Services.Chat.Port)
+	chatConn, err := grpc.NewClient(chatAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to chat service (%s): %w", chatAddr, err)
+	}
+	conns = append(conns, chatConn)
+
+	cleanup := func() {
+		closeConns()
 	}
 
 	srv := &Server{
@@ -62,7 +89,7 @@ func NewServer() (*Server, error) {
 		chatClient:   chat.NewChatServiceClient(chatConn),
 	}
 
-	return srv, nil
+	return srv, cleanup, nil
 }
 
 // customHTTPError обрабатывает gRPC ошибки и возвращает соответствующие HTTP коды
@@ -359,10 +386,19 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	server, err := NewServer()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	log.Printf("Starting %s service (version: %s, environment: %s)",
+		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
+
+	server, cleanup, err := NewServer(cfg)
 	if err != nil {
 		log.Fatalf("failed to create Server: %v", err)
 	}
+	defer cleanup()
 
 	var wg sync.WaitGroup
 
@@ -375,7 +411,7 @@ func main() {
 
 		reflection.Register(grpcServer)
 
-		lis, err := net.Listen("tcp", ":8085")
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.GRPC.Port))
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
@@ -410,7 +446,7 @@ func main() {
 
 		httpServer := &http.Server{Handler: mux}
 
-		lis, err := net.Listen("tcp", ":8080")
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.HTTP.Port))
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
