@@ -2,15 +2,11 @@ package postgres
 
 import (
 	"context"
-	"crypto/tls"
-	"fmt"
-	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
 )
 
 // PgxCommonAPI - pgx common api
@@ -56,58 +52,6 @@ type ConnectionAPI interface {
 	TransactionAPI
 }
 
-const (
-	maxConnIdleTimeDefault     = time.Minute
-	maxConnLifeTimeDefault     = time.Hour
-	minConnectionsCountDefault = 2
-	maxConnectionsCountDefault = 10
-)
-
-type connectionPoolOptions struct {
-	maxConnIdleTime     time.Duration
-	maxConnLifeTime     time.Duration
-	minConnectionsCount int32
-	maxConnectionsCount int32
-	tlsConfig           *tls.Config
-}
-
-type ConnectionPoolOption func(options *connectionPoolOptions)
-
-// WithMaxConnIdleTime ...
-func WithMaxConnIdleTime(d time.Duration) ConnectionPoolOption {
-	return func(opts *connectionPoolOptions) {
-		opts.maxConnIdleTime = d
-	}
-}
-
-// WithMaxConnLifeTime ...
-func WithMaxConnLifeTime(d time.Duration) ConnectionPoolOption {
-	return func(opts *connectionPoolOptions) {
-		opts.maxConnLifeTime = d
-	}
-}
-
-// WithMinConnectionsCount ...
-func WithMinConnectionsCount(c int32) ConnectionPoolOption {
-	return func(opts *connectionPoolOptions) {
-		opts.minConnectionsCount = c
-	}
-}
-
-// WithMaxConnectionsCount ...
-func WithMaxConnectionsCount(c int32) ConnectionPoolOption {
-	return func(opts *connectionPoolOptions) {
-		opts.maxConnectionsCount = c
-	}
-}
-
-// WithTLS ...
-func WithTLS(cfg *tls.Config) ConnectionPoolOption {
-	return func(opts *connectionPoolOptions) {
-		opts.tlsConfig = cfg
-	}
-}
-
 // Connection - postgres connection pool
 type Connection struct {
 	pool *pgxpool.Pool
@@ -120,64 +64,6 @@ var (
 	_ TransactionAPI   = (*Connection)(nil)
 )
 
-// NewConnectionPool - returns new Connection (connection pool for postgres)
-//
-// See Config for definitions of these arguments.
-//
-//	# Example Keyword/Value
-//	user=jack password=secret host=pg.example.com port=5432 dbname=mydb sslmode=verify-ca pool_max_conns=10
-//
-//	# Example URL
-//	postgres://jack:secret@pg.example.com:5432/mydb?sslmode=verify-ca&pool_max_conns=10
-//
-// Обязательно при завершении работы требуется вызвать Close()
-func NewConnectionPool(ctx context.Context, connString string, opts ...ConnectionPoolOption) (*Connection, error) {
-	// parse connString
-	connConfig, err := pgxpool.ParseConfig(connString)
-	if err != nil {
-		return nil, fmt.Errorf("can't parse connection string to config: %w", err)
-	}
-
-	// ...
-	connConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		pgxUUID.Register(conn.TypeMap())
-		return nil
-	}
-
-	// make options
-	options := &connectionPoolOptions{
-		maxConnIdleTime:     maxConnIdleTimeDefault,
-		maxConnLifeTime:     maxConnLifeTimeDefault,
-		minConnectionsCount: minConnectionsCountDefault,
-		maxConnectionsCount: maxConnectionsCountDefault,
-	}
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	// apply options
-	connConfig.MaxConnIdleTime = options.maxConnIdleTime
-	connConfig.MaxConnLifetime = options.maxConnLifeTime
-	connConfig.MinConns = options.minConnectionsCount
-	connConfig.MaxConns = options.maxConnectionsCount
-	connConfig.ConnConfig.Config.TLSConfig = options.tlsConfig
-
-	// connect to database
-	p, err := pgxpool.NewWithConfig(ctx, connConfig)
-	if err != nil {
-		return nil, fmt.Errorf("can't connect to database: %w", err)
-	}
-
-	// ping database
-	if err := p.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("ping database error: %w", err)
-	}
-
-	return &Connection{
-		pool: p,
-	}, nil
-}
-
 func (c *Connection) Close() error {
 	c.pool.Close()
 	return nil
@@ -188,12 +74,12 @@ func (c *Connection) Query(ctx context.Context, sql string, args ...any) (pgx.Ro
 	return c.pool.Query(ctx, sql, args...)
 }
 
-// Query - pgx.Exec
+// Exec - pgx.Exec
 func (c *Connection) Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error) {
 	return c.pool.Exec(ctx, sql, args...)
 }
 
-// Query - pgx.QueryRow
+// QueryRow - pgx.QueryRow
 func (c *Connection) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
 	return c.pool.QueryRow(ctx, sql, args...)
 }
@@ -202,7 +88,7 @@ func (c *Connection) QueryRow(ctx context.Context, sql string, args ...any) pgx.
 func (c *Connection) Begin(ctx context.Context) (*Transaction, error) {
 	tx, err := c.pool.Begin(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("postgres: %w", err)
+		return nil, err
 	}
 	return &Transaction{tx}, nil
 }
@@ -211,7 +97,7 @@ func (c *Connection) Begin(ctx context.Context) (*Transaction, error) {
 func (c *Connection) BeginTx(ctx context.Context, txOptions pgx.TxOptions) (*Transaction, error) {
 	tx, err := c.pool.BeginTx(ctx, txOptions)
 	if err != nil {
-		return nil, fmt.Errorf("postgres: %w", err)
+		return nil, err
 	}
 	return &Transaction{tx}, nil
 }
@@ -235,7 +121,7 @@ type Sqlizer interface {
 func (c *Connection) Getx(ctx context.Context, dest any, sqlizer Sqlizer) error {
 	query, args, err := sqlizer.ToSql()
 	if err != nil {
-		return fmt.Errorf("postgres: to sql: %w", err)
+		return err
 	}
 
 	return pgxscan.Get(ctx, c.pool, dest, query, args...)
@@ -245,7 +131,7 @@ func (c *Connection) Getx(ctx context.Context, dest any, sqlizer Sqlizer) error 
 func (c *Connection) Selectx(ctx context.Context, dest any, sqlizer Sqlizer) error {
 	query, args, err := sqlizer.ToSql()
 	if err != nil {
-		return fmt.Errorf("postgres: to sql: %w", err)
+		return err
 	}
 
 	return pgxscan.Select(ctx, c.pool, dest, query, args...)
@@ -255,7 +141,7 @@ func (c *Connection) Selectx(ctx context.Context, dest any, sqlizer Sqlizer) err
 func (c *Connection) Execx(ctx context.Context, sqlizer Sqlizer) (pgconn.CommandTag, error) {
 	query, args, err := sqlizer.ToSql()
 	if err != nil {
-		return pgconn.CommandTag{}, fmt.Errorf("postgres: to sql: %w", err)
+		return pgconn.CommandTag{}, err
 	}
 
 	return c.pool.Exec(ctx, query, args...)

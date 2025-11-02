@@ -3,7 +3,8 @@ package repository
 import (
 	"context"
 	"fmt"
-	"social/pkg/postgres"
+
+	"lib/postgres"
 
 	"social/internal/app/models"
 	"social/internal/app/repository/friend_request"

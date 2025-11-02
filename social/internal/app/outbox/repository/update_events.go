@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"social/pkg/postgres"
+	"lib/postgres"
 
 	appoutbox "social/internal/app/outbox/processor"
 

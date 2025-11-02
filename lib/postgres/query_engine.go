@@ -1,16 +1,14 @@
-package transaction_manager
+package postgres
 
 import (
-	"social/pkg/postgres"
-
 	"github.com/jackc/pgx/v5"
 )
 
 // QueryEngine is a common database query interface.
 type QueryEngine interface {
-	postgres.PgxCommonAPI
-	postgres.PgxCommonScanAPI
-	postgres.PgxExtendedAPI
+	PgxCommonAPI
+	PgxCommonScanAPI
+	PgxExtendedAPI
 }
 
 // TxAccessMode is the transaction access mode (read write or read only)

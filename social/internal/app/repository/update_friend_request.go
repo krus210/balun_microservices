@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"social/pkg/postgres"
 	"time"
+
+	"lib/postgres"
 
 	"social/internal/app/models"
 	"social/internal/app/repository/friend_request"

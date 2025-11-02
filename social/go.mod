@@ -15,6 +15,7 @@ require (
 	github.com/vgarvardt/pgx-google-uuid/v5 v5.6.0
 	google.golang.org/grpc v1.75.0
 	google.golang.org/protobuf v1.36.9
+	lib/postgres v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -75,3 +76,5 @@ require (
 )
 
 replace github.com/sskorolev/balun_microservices/lib/secrets => ../lib/secrets
+
+replace lib/postgres => ../lib/postgres

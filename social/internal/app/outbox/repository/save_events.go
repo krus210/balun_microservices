@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
+	"lib/postgres"
+
 	appoutbox "social/internal/app/outbox/processor"
-	"social/pkg/postgres"
 )
 
 func (r *Repository) SaveEvent(ctx context.Context, e *appoutbox.Event) error {

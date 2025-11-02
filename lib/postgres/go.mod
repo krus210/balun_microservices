@@ -1,0 +1,20 @@
+module lib/postgres
+
+go 1.25.1
+
+require (
+	github.com/georgysavva/scany/v2 v2.1.4
+	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
+	github.com/jackc/pgx/v5 v5.7.6
+	github.com/vgarvardt/pgx-google-uuid/v5 v5.6.0
+)
+
+require (
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
+)

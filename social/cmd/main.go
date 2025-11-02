@@ -15,8 +15,8 @@ import (
 	"social/internal/app/adapters"
 	"social/internal/app/repository"
 	"social/internal/app/usecase"
-	"social/pkg/postgres"
-	"social/pkg/postgres/transaction_manager"
+
+	"lib/postgres"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -52,7 +52,13 @@ func main() {
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 
 	// Подключаемся к PostgreSQL
-	conn, err := postgres.NewConnectionPool(ctx, cfg.Database.DSN(),
+	conn, txMngr, err := postgres.New(ctx,
+		postgres.WithHost(cfg.Database.Host),
+		postgres.WithPort(cfg.Database.Port),
+		postgres.WithDatabase(cfg.Database.Name),
+		postgres.WithUser(cfg.Database.User),
+		postgres.WithPassword(cfg.Database.Password),
+		postgres.WithSSLMode(cfg.Database.SSLMode),
 		postgres.WithMaxConnIdleTime(cfg.Database.MaxConnIdleTime),
 	)
 	if err != nil {
@@ -71,8 +77,6 @@ func main() {
 		friend_request_handler.WithMaxBatchSize(cfg.FriendRequestHandler.BatchSize),
 		friend_request_handler.WithTopic(cfg.Kafka.Topics.FriendRequestEvents),
 	)
-
-	txMngr := transaction_manager.New(conn)
 
 	friendRequestRepo := repository.NewRepository(txMngr)
 	outboxRepo := outboxRepository.NewRepository(txMngr)
