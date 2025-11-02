@@ -30,7 +30,7 @@ var File_api_gateway_service_proto protoreflect.FileDescriptor
 
 const file_api_gateway_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19api/gateway/service.proto\x12@github.com.krus210.balun_microservices.protobuf.gateway.v1.proto\x1a\x13api/auth/auth.proto\x1a\x13api/chat/chat.proto\x1a\x17api/social/social.proto\x1a\x15api/users/users.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xc80\n" +
+	"\x19api/gateway/service.proto\x12@github.com.krus210.balun_microservices.protobuf.gateway.v1.proto\x1a\x13api/auth/auth.proto\x1a\x13api/chat/chat.proto\x1a\x17api/social/social.proto\x1a\x15api/users/users.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xc50\n" +
 	"\x0eGatewayService\x12\xc4\x02\n" +
 	"\bRegister\x12N.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest\x1aO.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse\"\x96\x01\x92AsJ6\n" +
 	"\x03400\x12/\n" +
@@ -121,14 +121,14 @@ const file_api_gateway_service_proto_rawDesc = "" +
 	"\x0eChat not found\x12\x1b\n" +
 	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/chat/chats/{chatId}\x12\xd6\x01\n" +
 	"\rListUserChats\x12S.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsRequest\x1aT.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/chat/chats\x12\xed\x01\n" +
-	"\x0fListChatMembers\x12U.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest\x1aV.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/v1/chat/chats/{chatId}/members\x12\xdd\x02\n" +
-	"\vSendMessage\x12Q.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest\x1aR.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse\"\xa6\x01\x92AqJ6\n" +
+	"\x0fListChatMembers\x12U.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest\x1aV.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/v1/chat/chats/{chatId}/members\x12\xda\x02\n" +
+	"\vSendMessage\x12Q.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest\x1aR.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse\"\xa3\x01\x92AqJ6\n" +
 	"\x03400\x12/\n" +
 	"\x10Invalid argument\x12\x1b\n" +
 	"\x19\x1a\x17#/definitions/rpcStatusJ7\n" +
 	"\x03403\x120\n" +
 	"\x11Permission denied\x12\x1b\n" +
-	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02,:\x04text\"$/api/v1/chat/chats/{chatId}/messages\x12\xe5\x01\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/chat/chats/{chatId}/messages\x12\xe5\x01\n" +
 	"\fListMessages\x12R.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesRequest\x1aS.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesResponse\",\x82\xd3\xe4\x93\x02&\x12$/api/v1/chat/chats/{chatId}/messagesB\xd9\x04\x92A\xb8\x01\x12\x8d\x01\n" +
 	"\x19Microservices Gateway API\x12GHTTP Gateway для микросервисной архитектуры\"\"\n" +
 	"\vAPI Support\x1a\x13support@example.com2\x031.0*\x02\x01\x022\x10application/json:\x10application/json\n" +

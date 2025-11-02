@@ -434,7 +434,7 @@ service GatewayService {
     returns (github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse) {
     option (google.api.http) = {
       post: "/api/v1/chat/chats/{chatId}/messages"
-      body: "text"
+      body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       responses: {

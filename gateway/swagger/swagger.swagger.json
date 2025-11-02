@@ -357,12 +357,11 @@
             "format": "int64"
           },
           {
-            "name": "text",
-            "description": "text - текст сообщения",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/GatewayServiceSendMessageBody"
             }
           }
         ],
@@ -890,6 +889,16 @@
     }
   },
   "definitions": {
+    "GatewayServiceSendMessageBody": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "title": "text - текст сообщения"
+        }
+      },
+      "title": "SendMessageRequest - запрос SendMessage"
+    },
     "GatewayServiceUpdateProfileBody": {
       "type": "object",
       "properties": {

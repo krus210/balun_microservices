@@ -22,6 +22,18 @@ type (
 		GetFriendRequestByUserIDs(ctx context.Context, fromUserID models.UserID, toUserID models.UserID) (*models.FriendRequest, error)
 		DeleteFriendRequest(ctx context.Context, requestID models.FriendRequestID) error
 	}
+
+	// OutboxRepository - репозиторий outbox
+	OutboxRepository interface {
+		// SaveFriendRequestCreatedID - запись в Outbox сообщения по заказу
+		SaveFriendRequestCreatedID(ctx context.Context, id models.FriendRequestID) error
+		SaveFriendRequestUpdatedID(ctx context.Context, id models.FriendRequestID, status models.FriendRequestStatus) error
+	}
+
+	// TransactionManager
+	TransactionManager interface {
+		RunReadCommitted(ctx context.Context, f func(ctx context.Context) error) error
+	}
 )
 
 type Usecase interface {
@@ -40,15 +52,24 @@ type Usecase interface {
 }
 
 type SocialService struct {
-	usersService UsersService
-	socialRepo   SocialRepository
+	usersService         UsersService
+	socialRepo           SocialRepository
+	outboxRepository     OutboxRepository
+	transactionalManager TransactionManager
 }
 
 var _ Usecase = (*SocialService)(nil)
 
-func NewUsecase(service UsersService, repo SocialRepository) *SocialService {
+func NewUsecase(
+	service UsersService,
+	repo SocialRepository,
+	outboxRepo OutboxRepository,
+	manager TransactionManager,
+) *SocialService {
 	return &SocialService{
-		usersService: service,
-		socialRepo:   repo,
+		usersService:         service,
+		socialRepo:           repo,
+		outboxRepository:     outboxRepo,
+		transactionalManager: manager,
 	}
 }

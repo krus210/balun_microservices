@@ -26,9 +26,25 @@ func (s *SocialService) AcceptFriendRequest(ctx context.Context, req dto.ChangeF
 		return nil, models.ErrPermissionDenied
 	}
 
-	updatedFriendRequest, err := s.socialRepo.UpdateFriendRequest(ctx, req.RequestID, models.FriendRequestAccepted)
+	updatedFriendRequest := &models.FriendRequest{}
+	err = s.transactionalManager.RunReadCommitted(ctx,
+		func(txCtx context.Context) error { // TRANSANCTION SCOPE
+
+			updatedFriendRequest, err = s.socialRepo.UpdateFriendRequest(txCtx, req.RequestID, models.FriendRequestAccepted)
+			if err != nil {
+				return fmt.Errorf("%s: socialRepo UpdateFriendRequest error: %w", apiAcceptFriendRequest, err)
+			}
+
+			err = s.outboxRepository.SaveFriendRequestUpdatedID(txCtx, updatedFriendRequest.ID, models.FriendRequestAccepted)
+			if err != nil {
+				return fmt.Errorf("%s: outboxRepository SaveFriendRequestUpdatedID error: %w", apiSendFriendRequest, err)
+			}
+
+			return nil
+		},
+	)
 	if err != nil {
-		return nil, fmt.Errorf("%s: socialRepo UpdateFriendRequest error: %w", apiAcceptFriendRequest, err)
+		return nil, err
 	}
 
 	return updatedFriendRequest, nil

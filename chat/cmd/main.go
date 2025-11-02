@@ -1,8 +1,14 @@
 package main
 
 import (
+	"chat/pkg/postgres"
+	"chat/pkg/postgres/transaction_manager"
+	"context"
 	"log"
 	"net"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"chat/internal/app/adapters"
 	"chat/internal/app/repository"
@@ -19,6 +25,9 @@ import (
 )
 
 func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
 	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
@@ -26,7 +35,16 @@ func main() {
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 
-	repo := repository.NewInMemoryChatRepository()
+	conn, err := postgres.NewConnectionPool(ctx, DSN(),
+		postgres.WithMaxConnIdleTime(time.Minute),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	txMngr := transaction_manager.New(conn)
+	repo := repository.NewRepository(txMngr)
 
 	chatUsecase := usecase.NewUsecase(usersClient, repo)
 

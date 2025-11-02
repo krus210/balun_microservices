@@ -6,7 +6,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"gateway/pkg/api/auth"
 	"gateway/pkg/api/chat"
@@ -18,6 +20,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
@@ -199,7 +202,7 @@ func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNickna
 }
 
 func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRequestRequest) (*social.SendFriendRequestResponse, error) {
-	log.Printf("Gateway: SendFriendRequest from userId: %d", req.GetUserId())
+	log.Printf("Gateway: SendFriendRequest from userId: %d", req.GetToUserId())
 
 	resp, err := s.socialClient.SendFriendRequest(ctx, req)
 	if err != nil {
@@ -211,7 +214,7 @@ func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRe
 }
 
 func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsRequest) (*social.ListRequestsResponse, error) {
-	log.Printf("Gateway: ListRequests for userId: %d", req.GetUserId())
+	log.Printf("Gateway: ListRequests for userId: %d", req.GetToUserId())
 
 	resp, err := s.socialClient.ListRequests(ctx, req)
 	if err != nil {
@@ -272,6 +275,16 @@ func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest
 
 func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectChatRequest) (*chat.CreateDirectChatResponse, error) {
 	log.Printf("Gateway: CreateDirectChat for participantId: %d", req.GetParticipantId())
+
+	// Извлекаем Idempotency-Key из входящих метаданных
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		if idempotencyKeys := md.Get("idempotency-key"); len(idempotencyKeys) > 0 {
+			// Добавляем idempotency-key в исходящие метаданные
+			ctx = metadata.AppendToOutgoingContext(ctx, "idempotency-key", idempotencyKeys[0])
+			log.Printf("Gateway: Forwarding Idempotency-Key: %s", idempotencyKeys[0])
+		}
+	}
 
 	resp, err := s.chatClient.CreateDirectChat(ctx, req)
 	if err != nil {
@@ -343,8 +356,7 @@ func (s *Server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest
 }
 
 func main() {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	server, err := NewServer()
@@ -381,6 +393,16 @@ func main() {
 		// Создаем ServeMux с кастомным обработчиком ошибок
 		mux := runtime.NewServeMux(
 			runtime.WithErrorHandler(customHTTPError),
+			runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
+				// Пробрасываем idempotency-key в metadata
+				// HTTP заголовки приходят в разных регистрах
+				switch key {
+				case "Idempotency-Key", "idempotency-key", "X-Idempotency-Key", "x-idempotency-key":
+					return "idempotency-key", true
+				}
+				// Стандартные заголовки (Authorization и т.д.)
+				return runtime.DefaultHeaderMatcher(key)
+			}),
 		)
 		if err = pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
 			log.Fatalf("failed to register gateway handler: %v", err)

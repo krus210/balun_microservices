@@ -1,15 +1,22 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	server, err := InitializeApp()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	server, cleanup, err := InitializeApp(ctx)
 	if err != nil {
 		log.Fatalf("failed to initialize app: %v", err)
 	}
+	defer cleanup()
 
 	lis, err := net.Listen("tcp", ":8082")
 	if err != nil {
