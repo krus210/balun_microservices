@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"lib/postgres"
+
 	"users/internal/app/models"
 	"users/internal/app/repository/user"
 
@@ -28,7 +30,7 @@ func (r *Repository) SearchByNickname(ctx context.Context, query string, limit i
 	// Выполняем запрос
 	var rows []user.Row
 	if err := conn.Selectx(ctx, &rows, searchQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", searchByNicknameApi, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", searchByNicknameApi, postgres.ConvertPGError(err))
 	}
 
 	// Конвертируем строки в модели

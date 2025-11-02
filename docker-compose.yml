@@ -117,12 +117,14 @@ services:
       context: ./users
       dockerfile: Dockerfile
     environment:
-      DB_HOST: ${USERS_POSTGRES_HOST}
-      DB_PORT: 5432
-      DB_NAME: ${USERS_POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SSLMODE: disable
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_GRPC_PORT: 8082
+      APP_DATABASE_HOST: ${USERS_POSTGRES_HOST:-users-db}
+      APP_DATABASE_PORT: 5432
+      APP_DATABASE_NAME: ${USERS_POSTGRES_DB:-users}
+      APP_DATABASE_USER: ${POSTGRES_USER}
+      APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DATABASE_SSLMODE: disable
     depends_on:
       users-db:
         condition: service_healthy

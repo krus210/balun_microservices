@@ -7,6 +7,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
+
+	"lib/postgres"
+
 	"users/internal/app/models"
 	"users/internal/app/repository/user"
 
@@ -47,7 +52,11 @@ func (r *Repository) UpdateUser(ctx context.Context, profile *models.UserProfile
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("%s: %w", updateUserApi, ConvertPGError(err))
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return nil, fmt.Errorf("%s: %w", updateUserApi, models.ErrAlreadyExists)
+		}
+		return nil, fmt.Errorf("%s: %w", updateUserApi, postgres.ConvertPGError(err))
 	}
 
 	return user.ToModel(&row), nil

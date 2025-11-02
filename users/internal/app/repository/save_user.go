@@ -2,8 +2,14 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
+
+	"lib/postgres"
 
 	"users/internal/app/models"
 	"users/internal/app/repository/user"
@@ -37,7 +43,11 @@ func (r *Repository) SaveUser(ctx context.Context, profile *models.UserProfile) 
 
 	// Выполняем вставку профиля
 	if _, err := conn.Execx(ctx, insertQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", saveUserApi, ConvertPGError(err))
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return nil, fmt.Errorf("%s: %w", saveUserApi, models.ErrAlreadyExists)
+		}
+		return nil, fmt.Errorf("%s: %w", saveUserApi, postgres.ConvertPGError(err))
 	}
 
 	return profile, nil
