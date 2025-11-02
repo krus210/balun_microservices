@@ -7,6 +7,8 @@ import (
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/message"
+
+	"lib/postgres"
 )
 
 // SaveMessage сохраняет новое сообщение в базе данных
@@ -40,7 +42,7 @@ func (r *Repository) SaveMessage(ctx context.Context, msg *models.Message) (*mod
 		// Выполняем вставку сообщения и получаем сгенерированный ID
 		var messageID int64
 		if err := conn.Getx(txCtx, &messageID, insertMessageQuery); err != nil {
-			return fmt.Errorf("%s: %w", api, ConvertPGError(err))
+			return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 		}
 
 		msg.ID = models.MessageID(messageID)

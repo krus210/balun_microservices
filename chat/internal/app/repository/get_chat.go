@@ -10,6 +10,8 @@ import (
 	"chat/internal/app/repository/chat"
 	"chat/internal/app/repository/chat_member"
 
+	"lib/postgres"
+
 	"github.com/Masterminds/squirrel"
 )
 
@@ -31,7 +33,7 @@ func (r *Repository) GetChat(ctx context.Context, chatID models.ChatID) (*models
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Конвертируем строку в модель
@@ -45,7 +47,7 @@ func (r *Repository) GetChat(ctx context.Context, chatID models.ChatID) (*models
 	// Выполняем запрос для получения участников
 	var memberRows []chat_member.Row
 	if err := conn.Selectx(ctx, &memberRows, getMembersQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Заполняем список участников

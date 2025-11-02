@@ -175,6 +175,8 @@ services:
       APP_DATABASE_SSLMODE: disable
       APP_KAFKA_BROKERS: kafka:29092
       APP_KAFKA_TOPICS_FRIEND_REQUEST_EVENTS: friend-request-events
+      APP_USERS_SERVICE_HOST: users
+      APP_USERS_SERVICE_PORT: 8082
     depends_on:
       kafka:
         condition: service_healthy
@@ -222,12 +224,16 @@ services:
     ports:
       - "8084:8082"
     environment:
-      DB_HOST: ${CHAT_POSTGRES_HOST}
-      DB_PORT: 5432
-      DB_NAME: ${CHAT_POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SSLMODE: disable
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_GRPC_PORT: 8082
+      APP_DATABASE_HOST: ${CHAT_POSTGRES_HOST}
+      APP_DATABASE_PORT: 5432
+      APP_DATABASE_NAME: ${CHAT_POSTGRES_DB}
+      APP_DATABASE_USER: ${POSTGRES_USER}
+      APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DATABASE_SSLMODE: disable
+      APP_USERS_SERVICE_HOST: users
+      APP_USERS_SERVICE_PORT: 8082
     depends_on:
       chat-db:
         condition: service_healthy

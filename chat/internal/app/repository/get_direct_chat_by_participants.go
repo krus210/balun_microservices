@@ -10,6 +10,8 @@ import (
 	"chat/internal/app/repository/chat"
 	"chat/internal/app/repository/chat_member"
 
+	"lib/postgres"
+
 	"github.com/Masterminds/squirrel"
 )
 
@@ -33,7 +35,7 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 	// Выполняем запрос для получения ID чатов-кандидатов
 	var candidateRows []chat_member.Row
 	if err := conn.Selectx(ctx, &candidateRows, findChatsQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Если нет чатов с обоими участниками, возвращаем nil
@@ -56,7 +58,7 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 
 		var count int
 		if err := conn.Getx(ctx, &count, countQuery); err != nil {
-			return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+			return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 		}
 
 		// Если в чате ровно 2 участника, это наш чат
@@ -71,7 +73,7 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 				if errors.Is(err, sql.ErrNoRows) {
 					continue
 				}
-				return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+				return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 			}
 
 			// Конвертируем в модель (ToModel уже инициализирует пустые слайсы)
@@ -84,7 +86,7 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 
 			var memberRows []chat_member.Row
 			if err := conn.Selectx(ctx, &memberRows, getMembersQuery); err != nil {
-				return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+				return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 			}
 
 			// Заполняем список участников

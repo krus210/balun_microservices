@@ -7,6 +7,8 @@ import (
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat_member"
 
+	"lib/postgres"
+
 	"github.com/Masterminds/squirrel"
 )
 
@@ -28,7 +30,7 @@ func (r *Repository) IsChatMember(ctx context.Context, chatID models.ChatID, use
 	// Выполняем запрос
 	var count int
 	if err := conn.Getx(ctx, &count, countQuery); err != nil {
-		return false, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return false, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	return count > 0, nil

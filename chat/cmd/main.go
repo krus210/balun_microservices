@@ -1,18 +1,19 @@
 package main
 
 import (
-	"chat/pkg/postgres"
-	"chat/pkg/postgres/transaction_manager"
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"chat/internal/app/adapters"
 	"chat/internal/app/repository"
 	"chat/internal/app/usecase"
+	"chat/internal/config"
+
+	"lib/postgres"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,29 +29,48 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Загружаем конфигурацию с интеграцией secrets
+	cfg, err := config.LoadWithSecrets(ctx)
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	log.Printf("Starting %s service (version: %s, environment: %s)",
+		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
+
+	// Подключаемся к Users сервису
+	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
+	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 
-	conn, err := postgres.NewConnectionPool(ctx, DSN(),
-		postgres.WithMaxConnIdleTime(time.Minute),
+	// Подключаемся к PostgreSQL
+	conn, txMngr, err := postgres.New(ctx,
+		postgres.WithHost(cfg.Database.Host),
+		postgres.WithPort(cfg.Database.Port),
+		postgres.WithDatabase(cfg.Database.Name),
+		postgres.WithUser(cfg.Database.User),
+		postgres.WithPassword(cfg.Database.Password),
+		postgres.WithSSLMode(cfg.Database.SSLMode),
+		postgres.WithMaxConnIdleTime(cfg.Database.MaxConnIdleTime),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
 
-	txMngr := transaction_manager.New(conn)
 	repo := repository.NewRepository(txMngr)
 
 	chatUsecase := usecase.NewUsecase(usersClient, repo)
 
 	controller := deliveryGrpc.NewChatController(chatUsecase)
 
-	lis, err := net.Listen("tcp", ":8082")
+	// Запускаем gRPC сервер
+	listenAddr := fmt.Sprintf(":%d", cfg.Server.GRPC.Port)
+	lis, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -60,11 +80,11 @@ func main() {
 			errorsMiddleware.ErrorsUnaryInterceptor(),
 		),
 	)
-	chatPb.RegisterChatServiceServer(server, controller) // регистрация обработчиков
+	chatPb.RegisterChatServiceServer(server, controller)
 
-	reflection.Register(server) // регистрируем дополнительные обработчики
+	reflection.Register(server)
 
-	log.Printf("server listening at %v", lis.Addr())
+	log.Printf("gRPC server listening at %v", lis.Addr())
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

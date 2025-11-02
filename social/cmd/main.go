@@ -44,7 +44,8 @@ func main() {
 		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
 
 	// Подключаемся к Users сервису
-	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
+	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}

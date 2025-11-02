@@ -8,6 +8,8 @@ import (
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat"
 	"chat/internal/app/repository/chat_member"
+
+	"lib/postgres"
 )
 
 // SaveChat создает новый чат с участниками в рамках транзакции
@@ -35,7 +37,7 @@ func (r *Repository) SaveChat(ctx context.Context, chatModel *models.Chat) (*mod
 		// Выполняем вставку чата и получаем сгенерированный ID
 		var chatID int64
 		if err := conn.Getx(txCtx, &chatID, insertChatQuery); err != nil {
-			return fmt.Errorf("%s: %w", api, ConvertPGError(err))
+			return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 		}
 
 		chatModel.ID = models.ChatID(chatID)
@@ -51,7 +53,7 @@ func (r *Repository) SaveChat(ctx context.Context, chatModel *models.Chat) (*mod
 			}
 
 			if _, err := conn.Execx(txCtx, insertMembersQuery); err != nil {
-				return fmt.Errorf("%s: %w", api, ConvertPGError(err))
+				return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 			}
 		}
 

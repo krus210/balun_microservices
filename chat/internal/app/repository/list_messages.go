@@ -8,6 +8,8 @@ import (
 	"chat/internal/app/models"
 	"chat/internal/app/repository/message"
 
+	"lib/postgres"
+
 	"github.com/Masterminds/squirrel"
 )
 
@@ -39,7 +41,7 @@ func (r *Repository) ListMessages(ctx context.Context, chatID models.ChatID, lim
 	// Выполняем запрос
 	var messageRows []message.Row
 	if err := conn.Selectx(ctx, &messageRows, listMessagesQuery); err != nil {
-		return nil, nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Если сообщений нет, возвращаем пустой список

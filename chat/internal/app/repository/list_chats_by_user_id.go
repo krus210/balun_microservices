@@ -8,6 +8,8 @@ import (
 	"chat/internal/app/repository/chat"
 	"chat/internal/app/repository/chat_member"
 
+	"lib/postgres"
+
 	"github.com/Masterminds/squirrel"
 )
 
@@ -34,7 +36,7 @@ func (r *Repository) ListChatsByUserID(ctx context.Context, userID models.UserID
 	// Выполняем запрос
 	var chatRows []chat.Row
 	if err := conn.Selectx(ctx, &chatRows, listChatsQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Если чатов нет, возвращаем пустой список
@@ -60,7 +62,7 @@ func (r *Repository) ListChatsByUserID(ctx context.Context, userID models.UserID
 	// Выполняем запрос для получения всех участников
 	var memberRows []chat_member.Row
 	if err := conn.Selectx(ctx, &memberRows, getMembersQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Группируем участников по чатам
