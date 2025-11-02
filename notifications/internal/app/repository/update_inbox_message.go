@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"notifications/pkg/postgres"
+	"lib/postgres"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"

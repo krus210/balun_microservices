@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	tm "notifications/pkg/postgres/transaction_manager"
+	"lib/postgres"
 )
 
 const (
@@ -26,14 +26,14 @@ type deleteRepository interface {
 // DeleteWorker воркер для удаления старых обработанных событий из inbox
 type DeleteWorker struct {
 	repo            deleteRepository
-	tm              tm.TransactionManagerAPI
+	tm              postgres.TransactionManagerAPI
 	tickInterval    time.Duration
 	batchSize       int
 	retentionPeriod time.Duration
 }
 
 // NewDeleteWorker создает новый воркер удаления с настройками по умолчанию
-func NewDeleteWorker(repo deleteRepository, tm tm.TransactionManagerAPI) *DeleteWorker {
+func NewDeleteWorker(repo deleteRepository, tm postgres.TransactionManagerAPI) *DeleteWorker {
 	return &DeleteWorker{
 		repo:            repo,
 		tm:              tm,

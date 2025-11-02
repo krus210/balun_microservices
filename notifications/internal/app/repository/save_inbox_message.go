@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"lib/postgres"
+
 	"notifications/internal/app/models"
-	"notifications/pkg/postgres"
 )
 
 func (r *Repository) SaveInboxMessage(ctx context.Context, msg *models.InboxMessage) error {
