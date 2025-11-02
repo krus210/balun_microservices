@@ -16,6 +16,7 @@ database:
 
 kafka:
   brokers: kafka:29092
+  client_id: social-service
   topics:
     friend_request_events: friend-request-events
 

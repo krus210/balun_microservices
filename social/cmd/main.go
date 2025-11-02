@@ -67,7 +67,7 @@ func main() {
 	defer conn.Close()
 
 	// Создаем Kafka producer
-	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, nil)
+	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, cfg.Kafka.ClientID, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

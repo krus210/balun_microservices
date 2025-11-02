@@ -56,8 +56,9 @@ func (c DatabaseConfig) DSN() string {
 
 // KafkaConfig содержит настройки Kafka
 type KafkaConfig struct {
-	Brokers string       `mapstructure:"brokers"`
-	Topics  TopicsConfig `mapstructure:"topics"`
+	Brokers  string       `mapstructure:"brokers"`
+	ClientID string       `mapstructure:"client_id"`
+	Topics   TopicsConfig `mapstructure:"topics"`
 }
 
 // Brokers возвращает список брокеров в виде строки через запятую
@@ -172,6 +173,7 @@ func setDefaults(v *viper.Viper) {
 
 	// Kafka defaults
 	v.SetDefault("kafka.brokers", "localhost:9092")
+	v.SetDefault("kafka.client_id", "social-service")
 	v.SetDefault("kafka.topics.friend_request_events", "friend-request-events")
 
 	// Outbox defaults
