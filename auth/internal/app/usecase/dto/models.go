@@ -11,6 +11,6 @@ type LoginRequest struct {
 }
 
 type RefreshRequest struct {
-	UserID       int64
+	UserID       string
 	RefreshToken string
 }

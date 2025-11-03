@@ -163,7 +163,7 @@ func request_GatewayService_UpdateProfile_0(ctx context.Context, marshaler runti
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -184,7 +184,7 @@ func local_request_GatewayService_UpdateProfile_0(ctx context.Context, marshaler
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -205,7 +205,7 @@ func request_GatewayService_GetProfileByID_0(ctx context.Context, marshaler runt
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -223,7 +223,7 @@ func local_request_GatewayService_GetProfileByID_0(ctx context.Context, marshale
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}

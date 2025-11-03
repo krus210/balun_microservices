@@ -1,15 +1,16 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"net"
+
 	"auth/internal/app/adapters"
 	deliveryGrpc "auth/internal/app/delivery/grpc"
 	"auth/internal/app/repository"
 	"auth/internal/app/usecase"
 	"auth/internal/config"
 	errorsMiddleware "auth/internal/middleware/errors"
-	"fmt"
-	"log"
-	"net"
 
 	authPb "auth/pkg/api"
 	usersPb "auth/pkg/users/api"

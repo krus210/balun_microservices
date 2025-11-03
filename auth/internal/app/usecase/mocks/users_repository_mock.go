@@ -24,9 +24,9 @@ type UsersRepositoryMock struct {
 	beforeGetUserByEmailCounter uint64
 	GetUserByEmailMock          mUsersRepositoryMockGetUserByEmail
 
-	funcGetUserByID          func(ctx context.Context, userID int64) (up1 *models.User, err error)
+	funcGetUserByID          func(ctx context.Context, userID string) (up1 *models.User, err error)
 	funcGetUserByIDOrigin    string
-	inspectFuncGetUserByID   func(ctx context.Context, userID int64)
+	inspectFuncGetUserByID   func(ctx context.Context, userID string)
 	afterGetUserByIDCounter  uint64
 	beforeGetUserByIDCounter uint64
 	GetUserByIDMock          mUsersRepositoryMockGetUserByID
@@ -441,13 +441,13 @@ type UsersRepositoryMockGetUserByIDExpectation struct {
 // UsersRepositoryMockGetUserByIDParams contains parameters of the UsersRepository.GetUserByID
 type UsersRepositoryMockGetUserByIDParams struct {
 	ctx    context.Context
-	userID int64
+	userID string
 }
 
 // UsersRepositoryMockGetUserByIDParamPtrs contains pointers to parameters of the UsersRepository.GetUserByID
 type UsersRepositoryMockGetUserByIDParamPtrs struct {
 	ctx    *context.Context
-	userID *int64
+	userID *string
 }
 
 // UsersRepositoryMockGetUserByIDResults contains results of the UsersRepository.GetUserByID
@@ -474,7 +474,7 @@ func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Optional() *mUsersReposito
 }
 
 // Expect sets up expected params for UsersRepository.GetUserByID
-func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Expect(ctx context.Context, userID int64) *mUsersRepositoryMockGetUserByID {
+func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Expect(ctx context.Context, userID string) *mUsersRepositoryMockGetUserByID {
 	if mmGetUserByID.mock.funcGetUserByID != nil {
 		mmGetUserByID.mock.t.Fatalf("UsersRepositoryMock.GetUserByID mock is already set by Set")
 	}
@@ -522,7 +522,7 @@ func (mmGetUserByID *mUsersRepositoryMockGetUserByID) ExpectCtxParam1(ctx contex
 }
 
 // ExpectUserIDParam2 sets up expected param userID for UsersRepository.GetUserByID
-func (mmGetUserByID *mUsersRepositoryMockGetUserByID) ExpectUserIDParam2(userID int64) *mUsersRepositoryMockGetUserByID {
+func (mmGetUserByID *mUsersRepositoryMockGetUserByID) ExpectUserIDParam2(userID string) *mUsersRepositoryMockGetUserByID {
 	if mmGetUserByID.mock.funcGetUserByID != nil {
 		mmGetUserByID.mock.t.Fatalf("UsersRepositoryMock.GetUserByID mock is already set by Set")
 	}
@@ -545,7 +545,7 @@ func (mmGetUserByID *mUsersRepositoryMockGetUserByID) ExpectUserIDParam2(userID 
 }
 
 // Inspect accepts an inspector function that has same arguments as the UsersRepository.GetUserByID
-func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Inspect(f func(ctx context.Context, userID int64)) *mUsersRepositoryMockGetUserByID {
+func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Inspect(f func(ctx context.Context, userID string)) *mUsersRepositoryMockGetUserByID {
 	if mmGetUserByID.mock.inspectFuncGetUserByID != nil {
 		mmGetUserByID.mock.t.Fatalf("Inspect function is already set for UsersRepositoryMock.GetUserByID")
 	}
@@ -570,7 +570,7 @@ func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Return(up1 *models.User, e
 }
 
 // Set uses given function f to mock the UsersRepository.GetUserByID method
-func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Set(f func(ctx context.Context, userID int64) (up1 *models.User, err error)) *UsersRepositoryMock {
+func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Set(f func(ctx context.Context, userID string) (up1 *models.User, err error)) *UsersRepositoryMock {
 	if mmGetUserByID.defaultExpectation != nil {
 		mmGetUserByID.mock.t.Fatalf("Default expectation is already set for the UsersRepository.GetUserByID method")
 	}
@@ -586,7 +586,7 @@ func (mmGetUserByID *mUsersRepositoryMockGetUserByID) Set(f func(ctx context.Con
 
 // When sets expectation for the UsersRepository.GetUserByID which will trigger the result defined by the following
 // Then helper
-func (mmGetUserByID *mUsersRepositoryMockGetUserByID) When(ctx context.Context, userID int64) *UsersRepositoryMockGetUserByIDExpectation {
+func (mmGetUserByID *mUsersRepositoryMockGetUserByID) When(ctx context.Context, userID string) *UsersRepositoryMockGetUserByIDExpectation {
 	if mmGetUserByID.mock.funcGetUserByID != nil {
 		mmGetUserByID.mock.t.Fatalf("UsersRepositoryMock.GetUserByID mock is already set by Set")
 	}
@@ -628,7 +628,7 @@ func (mmGetUserByID *mUsersRepositoryMockGetUserByID) invocationsDone() bool {
 }
 
 // GetUserByID implements mm_usecase.UsersRepository
-func (mmGetUserByID *UsersRepositoryMock) GetUserByID(ctx context.Context, userID int64) (up1 *models.User, err error) {
+func (mmGetUserByID *UsersRepositoryMock) GetUserByID(ctx context.Context, userID string) (up1 *models.User, err error) {
 	mm_atomic.AddUint64(&mmGetUserByID.beforeGetUserByIDCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetUserByID.afterGetUserByIDCounter, 1)
 

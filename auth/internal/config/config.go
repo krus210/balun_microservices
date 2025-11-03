@@ -80,7 +80,6 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("users_service.host", "users")
 	v.SetDefault("users_service.port", 8082)
-
 }
 
 // Validate проверяет корректность конфигурации.

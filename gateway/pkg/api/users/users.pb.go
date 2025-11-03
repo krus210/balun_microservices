@@ -25,7 +25,7 @@ const (
 type UserProfile struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// userId - идентификатор пользователя
-	UserId int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId string `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	// nickname - никнейм пользователя
 	Nickname string `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
 	// bio - биография пользователя
@@ -66,11 +66,11 @@ func (*UserProfile) Descriptor() ([]byte, []int) {
 	return file_api_users_users_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *UserProfile) GetUserId() int64 {
+func (x *UserProfile) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *UserProfile) GetNickname() string {
@@ -217,7 +217,7 @@ func (x *CreateProfileResponse) GetUserProfile() *UserProfile {
 type UpdateProfileRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// userId - идентификатор пользователя
-	UserId int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId string `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	// nickname - никнейм пользователя
 	Nickname *string `protobuf:"bytes,2,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`
 	// bio - биография пользователя
@@ -258,11 +258,11 @@ func (*UpdateProfileRequest) Descriptor() ([]byte, []int) {
 	return file_api_users_users_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *UpdateProfileRequest) GetUserId() int64 {
+func (x *UpdateProfileRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *UpdateProfileRequest) GetNickname() string {
@@ -336,7 +336,7 @@ func (x *UpdateProfileResponse) GetUserProfile() *UserProfile {
 type GetProfileByIDRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// userId - идентификатор пользователя
-	UserId        int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId        string `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -371,11 +371,11 @@ func (*GetProfileByIDRequest) Descriptor() ([]byte, []int) {
 	return file_api_users_users_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetProfileByIDRequest) GetUserId() int64 {
+func (x *GetProfileByIDRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 // GetProfileByIDResponse - ответ GetProfileByID
@@ -623,7 +623,7 @@ const file_api_users_users_proto_rawDesc = "" +
 	"\n" +
 	"\x15api/users/users.proto\x12>github.com.krus210.balun_microservices.protobuf.users.v1.proto\x1a\x1bbuf/validate/validate.proto\"\x91\x01\n" +
 	"\vUserProfile\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\x12\x1a\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
 	"\bnickname\x18\x02 \x01(\tR\bnickname\x12\x15\n" +
 	"\x03bio\x18\x03 \x01(\tH\x00R\x03bio\x88\x01\x01\x12!\n" +
 	"\tavatarUrl\x18\x04 \x01(\tH\x01R\tavatarUrl\x88\x01\x01B\x06\n" +
@@ -641,7 +641,7 @@ const file_api_users_users_proto_rawDesc = "" +
 	"\x15CreateProfileResponse\x12m\n" +
 	"\vuserProfile\x18\x01 \x01(\v2K.github.com.krus210.balun_microservices.protobuf.users.v1.proto.UserProfileR\vuserProfile\"\xc6\x01\n" +
 	"\x14UpdateProfileRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\x129\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\x129\n" +
 	"\bnickname\x18\x02 \x01(\tB\x18\xbaH\x15r\x132\x11^[a-z0-9_]{3,20}$H\x00R\bnickname\x88\x01\x01\x12\x15\n" +
 	"\x03bio\x18\x03 \x01(\tH\x01R\x03bio\x88\x01\x01\x12!\n" +
 	"\tavatarUrl\x18\x04 \x01(\tH\x02R\tavatarUrl\x88\x01\x01B\v\n" +
@@ -652,7 +652,7 @@ const file_api_users_users_proto_rawDesc = "" +
 	"\x15UpdateProfileResponse\x12m\n" +
 	"\vuserProfile\x18\x01 \x01(\v2K.github.com.krus210.balun_microservices.protobuf.users.v1.proto.UserProfileR\vuserProfile\"/\n" +
 	"\x15GetProfileByIDRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\"\x87\x01\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\"\x87\x01\n" +
 	"\x16GetProfileByIDResponse\x12m\n" +
 	"\vuserProfile\x18\x01 \x01(\v2K.github.com.krus210.balun_microservices.protobuf.users.v1.proto.UserProfileR\vuserProfile\"9\n" +
 	"\x1bGetProfileByNicknameRequest\x12\x1a\n" +

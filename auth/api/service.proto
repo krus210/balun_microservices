@@ -27,7 +27,7 @@ message RegisterRequest {
 // RegisterResponse - ответ Register
 message RegisterResponse {
   // userId - уникальный идентификатор пользователя
-  int64 userId = 1;
+  string userId = 1;
 }
 
 // LoginRequest - запрос Login
@@ -45,7 +45,7 @@ message LoginResponse {
   // refreshToken - токен после протухания accessToken
   string refreshToken = 2;
   // userId - уникальный идентификатор пользователя
-  int64 userId = 3;
+  string userId = 3;
 }
 
 // RefreshRequest - запрос Refresh
@@ -61,5 +61,5 @@ message RefreshResponse {
   // refreshToken - токен после протухания accessToken
   string refreshToken = 2;
   // userId - уникальный идентификатор пользователя
-  int64 userId = 3;
+  string userId = 3;
 }

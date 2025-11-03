@@ -3,7 +3,7 @@ package models
 import "time"
 
 type User struct {
-	ID        int64
+	ID        string
 	Email     string
 	Password  string
 	Token     *UserToken

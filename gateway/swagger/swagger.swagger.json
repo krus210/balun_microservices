@@ -787,8 +787,7 @@
             "description": "userId - идентификатор пользователя",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -830,8 +829,7 @@
             "description": "userId - идентификатор пользователя",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           {
             "name": "body",
@@ -1248,7 +1246,6 @@
         },
         "userId": {
           "type": "string",
-          "format": "int64",
           "title": "userId - уникальный идентификатор пользователя"
         }
       },
@@ -1273,7 +1270,6 @@
       "properties": {
         "userId": {
           "type": "string",
-          "format": "int64",
           "title": "userId - уникальный идентификатор пользователя"
         }
       },
@@ -1344,7 +1340,6 @@
       "properties": {
         "userId": {
           "type": "string",
-          "format": "int64",
           "title": "userId - идентификатор пользователя"
         },
         "nickname": {

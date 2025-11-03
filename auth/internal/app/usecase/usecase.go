@@ -13,14 +13,14 @@ import (
 // Порты вторичные
 type (
 	UsersService interface {
-		CreateUser(ctx context.Context, userID int64, nickname string) error
+		CreateUser(ctx context.Context, userID string, nickname string) error
 	}
 
 	UsersRepository interface {
 		SaveUser(ctx context.Context, email, password string) (*models.User, error)
 		UpdateUser(ctx context.Context, user *models.User) error
 		GetUserByEmail(ctx context.Context, email string) (*models.User, error)
-		GetUserByID(ctx context.Context, userID int64) (*models.User, error)
+		GetUserByID(ctx context.Context, userID string) (*models.User, error)
 	}
 )
 

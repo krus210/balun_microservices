@@ -80,7 +80,7 @@ func (x *RegisterRequest) GetPassword() string {
 type RegisterResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// userId - уникальный идентификатор пользователя
-	UserId        int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId        string `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -115,11 +115,11 @@ func (*RegisterResponse) Descriptor() ([]byte, []int) {
 	return file_api_auth_auth_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *RegisterResponse) GetUserId() int64 {
+func (x *RegisterResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 // LoginRequest - запрос Login
@@ -295,7 +295,7 @@ type RefreshResponse struct {
 	// refreshToken - токен после протухания accessToken
 	RefreshToken string `protobuf:"bytes,2,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
 	// userId - уникальный идентификатор пользователя
-	UserId        int64 `protobuf:"varint,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId        string `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -344,11 +344,11 @@ func (x *RefreshResponse) GetRefreshToken() string {
 	return ""
 }
 
-func (x *RefreshResponse) GetUserId() int64 {
+func (x *RefreshResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 var File_api_auth_auth_proto protoreflect.FileDescriptor
@@ -360,7 +360,7 @@ const file_api_auth_auth_proto_rawDesc = "" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"*\n" +
 	"\x10RegisterResponse\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\"@\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"m\n" +
@@ -373,7 +373,7 @@ const file_api_auth_auth_proto_rawDesc = "" +
 	"\x0fRefreshResponse\x12 \n" +
 	"\vaccessToken\x18\x01 \x01(\tR\vaccessToken\x12\"\n" +
 	"\frefreshToken\x18\x02 \x01(\tR\frefreshToken\x12\x16\n" +
-	"\x06userId\x18\x03 \x01(\x03R\x06userId2\x91\x04\n" +
+	"\x06userId\x18\x03 \x01(\tR\x06userId2\x91\x04\n" +
 	"\vAuthService\x12\xad\x01\n" +
 	"\bRegister\x12N.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest\x1aO.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse\"\x00\x12\xa4\x01\n" +
 	"\x05Login\x12K.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest\x1aL.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse\"\x00\x12\xaa\x01\n" +

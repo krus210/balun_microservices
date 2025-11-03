@@ -22,7 +22,7 @@ service UsersService {
 
 message UserProfile {
   // userId - идентификатор пользователя
-  int64 userId = 1;
+  string userId = 1;
   // nickname - никнейм пользователя
   string nickname = 2;
   // bio - биография пользователя
@@ -34,7 +34,7 @@ message UserProfile {
 // CreateProfileRequest - запрос CreateProfile
 message CreateProfileRequest {
   // userId - идентификатор пользователя
-  int64 userId = 1;
+  string userId = 1;
   // nickname - никнейм пользователя
   string nickname = 2 [
     json_name = "nickname",
@@ -58,7 +58,7 @@ message CreateProfileResponse {
 // UpdateProfileRequest - запрос UpdateProfile
 message UpdateProfileRequest {
   // userId - идентификатор пользователя
-  int64 userId = 1;
+  string userId = 1;
   // nickname - никнейм пользователя
   optional string nickname = 2 [
     json_name = "nickname",
@@ -82,7 +82,7 @@ message UpdateProfileResponse {
 // GetProfileByIDRequest - запрос GetProfileByID
 message GetProfileByIDRequest {
   // userId - идентификатор пользователя
-  int64 userId = 1;
+  string userId = 1;
 }
 
 // GetProfileByIDResponse - ответ GetProfileByID
