@@ -65,7 +65,7 @@ up-gateway: .up-gateway-service
 
 up-notifications: .up-notifications-db migrate-notifications-db .up-notifications-service
 
-up: .up-kafka up-chat up-auth up-users up-social up-notifications up-gateway
+up: up-auth up-users up-social up-notifications up-gateway
 
 down:
 	@docker-compose down

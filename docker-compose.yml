@@ -74,8 +74,8 @@ services:
 
   auth:
     build:
-      context: ./auth
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./auth/Dockerfile
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_SERVER_GRPC_PORT: 8082
@@ -117,8 +117,8 @@ services:
 
   users:
     build:
-      context: ./users
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./users/Dockerfile
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_SERVER_GRPC_PORT: 8082
@@ -128,6 +128,7 @@ services:
       APP_DATABASE_USER: ${POSTGRES_USER}
       APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       APP_DATABASE_SSLMODE: disable
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       users-db:
         condition: service_healthy
@@ -167,8 +168,8 @@ services:
 
   social:
     build:
-      context: ./social
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./social/Dockerfile
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_SERVER_GRPC_PORT: 8082
@@ -182,6 +183,7 @@ services:
       APP_KAFKA_TOPICS_FRIEND_REQUEST_EVENTS: friend-request-events
       APP_USERS_SERVICE_HOST: users
       APP_USERS_SERVICE_PORT: 8082
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       kafka:
         condition: service_healthy
@@ -224,8 +226,8 @@ services:
 
   chat:
     build:
-      context: ./chat
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./chat/Dockerfile
     ports:
       - "8084:8082"
     environment:
@@ -239,6 +241,7 @@ services:
       APP_DATABASE_SSLMODE: disable
       APP_USERS_SERVICE_HOST: users
       APP_USERS_SERVICE_PORT: 8082
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       chat-db:
         condition: service_healthy
@@ -277,8 +280,8 @@ services:
 
   notifications:
     build:
-      context: ./notifications
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./notifications/Dockerfile
     ports:
       - "8079:8082"
     environment:
@@ -291,6 +294,7 @@ services:
       APP_DATABASE_SSLMODE: disable
       APP_KAFKA_BROKERS: kafka:29092
       APP_KAFKA_TOPICS_FRIEND_REQUEST_EVENTS: friend-request-events
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       kafka:
         condition: service_healthy
@@ -301,8 +305,8 @@ services:
 
   gateway:
     build:
-      context: ./gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./gateway/Dockerfile
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_SERVER_HTTP_PORT: 8080

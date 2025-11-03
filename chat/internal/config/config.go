@@ -108,6 +108,15 @@ func Load() (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
+	// Явный биндинг для вложенных Vault переменных окружения
+	// (AutomaticEnv не всегда корректно мапит глубоко вложенные структуры)
+	_ = v.BindEnv("secrets.prod.vault.token")
+	_ = v.BindEnv("secrets.prod.vault.role_id")
+	_ = v.BindEnv("secrets.prod.vault.secret_id")
+	_ = v.BindEnv("secrets.dev.vault.token")
+	_ = v.BindEnv("secrets.dev.vault.role_id")
+	_ = v.BindEnv("secrets.dev.vault.secret_id")
+
 	// Десериализация в структуру
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
@@ -166,12 +175,6 @@ func (c *Config) Validate() error {
 	}
 	if c.Database.Name == "" {
 		return fmt.Errorf("database.name is required")
-	}
-	if c.Database.User == "" {
-		return fmt.Errorf("database.user is required")
-	}
-	if c.Database.Password == "" {
-		return fmt.Errorf("database.password is required")
 	}
 
 	// Проверка портов

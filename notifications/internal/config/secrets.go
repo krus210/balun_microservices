@@ -47,6 +47,14 @@ func LoadWithSecrets(ctx context.Context) (*Config, error) {
 		cfg.Database.Password = dbPassword
 	}
 
+	// Финальная валидация database credentials после всех попыток загрузки
+	if cfg.Database.User == "" {
+		return nil, fmt.Errorf("database.user is required")
+	}
+	if cfg.Database.Password == "" {
+		return nil, fmt.Errorf("database.password is required")
+	}
+
 	return cfg, nil
 }
 
