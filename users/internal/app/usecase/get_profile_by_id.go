@@ -11,7 +11,7 @@ const (
 	apiGetProfileByID = "[UsersService][GetProfileByID]"
 )
 
-func (s *UsersService) GetProfileByID(ctx context.Context, id int64) (*models.UserProfile, error) {
+func (s *UsersService) GetProfileByID(ctx context.Context, id string) (*models.UserProfile, error) {
 	user, err := s.usersRepo.GetUserByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("%s: usersRepo GetUserByID error: %w", apiGetProfileByID, err)

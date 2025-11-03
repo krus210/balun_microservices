@@ -1,14 +1,14 @@
 package dto
 
 type CreateProfileRequest struct {
-	UserID    int64
+	UserID    string
 	Nickname  string
 	Bio       *string
 	AvatarURL *string
 }
 
 type UpdateProfileRequest struct {
-	UserID    int64
+	UserID    string
 	Nickname  *string
 	Bio       *string
 	AvatarURL *string

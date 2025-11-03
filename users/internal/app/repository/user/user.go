@@ -8,7 +8,7 @@ import (
 
 // Row — «плоская» проекция строки таблицы user_profiles
 type Row struct {
-	ID        int64      `db:"id"`
+	ID        string     `db:"id"`
 	Nickname  string     `db:"nickname"`
 	Bio       *string    `db:"bio"`
 	AvatarURL *string    `db:"avatar_url"`
