@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 	"log"
 	"net"
 	"os/signal"
@@ -15,8 +16,6 @@ import (
 	"social/internal/app/adapters"
 	"social/internal/app/repository"
 	"social/internal/app/usecase"
-
-	"lib/postgres"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

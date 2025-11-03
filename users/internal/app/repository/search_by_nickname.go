@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-
 	"lib/postgres"
 
 	"users/internal/app/models"

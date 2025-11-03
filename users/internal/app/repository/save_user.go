@@ -4,12 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"lib/postgres"
 	"time"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
-
-	"lib/postgres"
 
 	"users/internal/app/models"
 	"users/internal/app/repository/user"

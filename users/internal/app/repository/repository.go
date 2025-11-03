@@ -1,11 +1,11 @@
 package repository
 
 import (
+	"lib/postgres"
+
 	"users/internal/app/usecase"
 
 	"github.com/Masterminds/squirrel"
-
-	"lib/postgres"
 )
 
 // Проверка удовлетворению интерфейсу usecase.UsersRepository

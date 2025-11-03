@@ -2,7 +2,6 @@ package processor
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"social/internal/app/models"
@@ -14,7 +13,7 @@ func (p *Processor) SaveFriendRequestCreatedID(ctx context.Context, id models.Fr
 	e := Event{
 		ID:            uuid.New(),
 		AggregateType: AggregateTypeFriendRequest,
-		AggregateID:   strconv.FormatInt(int64(id), 10),
+		AggregateID:   string(id),
 		EventType:     EventTypeFriendRequestCreated,
 		Payload:       nil,
 		CreatedAt:     time.Now().UTC(),

@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
+	"lib/postgres"
 	"log"
 	"os/signal"
 	"syscall"
-
-	"lib/postgres"
 
 	"notifications/internal/app/consumer"
 	"notifications/internal/app/delivery"

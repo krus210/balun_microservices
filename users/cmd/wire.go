@@ -5,7 +5,6 @@ package main
 
 import (
 	"context"
-
 	"lib/postgres"
 
 	"users/internal/app/delivery/grpc"

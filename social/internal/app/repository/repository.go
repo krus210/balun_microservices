@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"social/internal/app/usecase"
-
 	"lib/postgres"
+
+	"social/internal/app/usecase"
 
 	"github.com/Masterminds/squirrel"
 )

@@ -5,9 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
-
 	"lib/postgres"
+	"time"
 
 	"social/internal/app/models"
 	"social/internal/app/repository/friend_request"
@@ -25,7 +24,7 @@ func (r *Repository) UpdateFriendRequest(ctx context.Context, requestID models.F
 	updateQuery := r.sb.Update(friend_request.FriendRequestsTable).
 		Set(friend_request.FriendRequestsTableColumnStatus, int(status)).
 		Set(friend_request.FriendRequestsTableColumnUpdatedAt, now).
-		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnID: int64(requestID)}).
+		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnID: string(requestID)}).
 		Suffix("RETURNING " + friend_request.FriendRequestsTableColumnID + ", " +
 			friend_request.FriendRequestsTableColumnFromUserID + ", " +
 			friend_request.FriendRequestsTableColumnToUserID + ", " +

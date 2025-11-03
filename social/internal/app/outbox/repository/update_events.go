@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-
 	"lib/postgres"
 
 	appoutbox "social/internal/app/outbox/processor"

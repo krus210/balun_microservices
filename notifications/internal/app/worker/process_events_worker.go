@@ -3,10 +3,9 @@ package worker
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 	"log"
 	"time"
-
-	"lib/postgres"
 
 	"notifications/internal/app/models"
 	"notifications/internal/app/repository"

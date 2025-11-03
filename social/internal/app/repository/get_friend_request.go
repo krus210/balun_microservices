@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-
 	"lib/postgres"
 
 	"social/internal/app/models"
@@ -24,7 +23,7 @@ func (r *Repository) GetFriendRequest(ctx context.Context, requestID models.Frie
 	// Запрос для получения информации о заявке
 	getQuery := r.sb.Select(friend_request.FriendRequestsTableColumns...).
 		From(friend_request.FriendRequestsTable).
-		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnID: int64(requestID)})
+		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnID: string(requestID)})
 
 	// Выполняем запрос
 	var row friend_request.Row

@@ -6,13 +6,9 @@ require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.9-20250912141014-52f32327d4b0.1
 	github.com/IBM/sarama v1.46.1
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
-	github.com/jackc/pgx/v5 v5.7.6
 	github.com/spf13/viper v1.21.0
 	github.com/sskorolev/balun_microservices/lib/secrets v0.0.0
-	github.com/vgarvardt/pgx-google-uuid/v5 v5.6.0
 	google.golang.org/grpc v1.75.0
 	google.golang.org/protobuf v1.36.9
 	lib/postgres v0.0.0-00010101000000-000000000000
@@ -25,6 +21,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/georgysavva/scany/v2 v2.1.4 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -40,8 +37,10 @@ require (
 	github.com/hashicorp/hcl v1.0.1-vault-7 // indirect
 	github.com/hashicorp/vault/api v1.21.0 // indirect
 	github.com/hashicorp/vault/api/auth/approle v0.10.0 // indirect
+	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/pgx/v5 v5.7.6 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
@@ -64,6 +63,7 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/vgarvardt/pgx-google-uuid/v5 v5.6.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/net v0.44.0 // indirect

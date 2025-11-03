@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-
 	"lib/postgres"
 
 	"users/internal/app/models"

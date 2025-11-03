@@ -3,10 +3,9 @@ package worker
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 	"log"
 	"time"
-
-	"lib/postgres"
 )
 
 const (

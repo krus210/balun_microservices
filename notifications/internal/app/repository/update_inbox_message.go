@@ -3,9 +3,8 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"lib/postgres"
+	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"

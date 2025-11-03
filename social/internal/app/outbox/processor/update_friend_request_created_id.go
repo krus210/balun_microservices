@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 
 	"social/internal/app/models"
@@ -24,7 +23,7 @@ func (p *Processor) SaveFriendRequestUpdatedID(
 	e := Event{
 		ID:            uuid.New(),
 		AggregateType: AggregateTypeFriendRequest,
-		AggregateID:   strconv.FormatInt(int64(id), 10),
+		AggregateID:   string(id),
 		EventType:     EventTypeFriendRequestUpdated,
 		Payload:       payload,
 		CreatedAt:     time.Now().UTC(),

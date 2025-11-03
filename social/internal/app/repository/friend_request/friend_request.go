@@ -8,9 +8,9 @@ import (
 
 // Row — «плоская» проекция строки таблицы friend_requests
 type Row struct {
-	ID         int64      `db:"id"`
-	FromUserID int64      `db:"from_user_id"`
-	ToUserID   int64      `db:"to_user_id"`
+	ID         string     `db:"id"`
+	FromUserID string     `db:"from_user_id"`
+	ToUserID   string     `db:"to_user_id"`
 	Status     int        `db:"status"`
 	CreatedAt  time.Time  `db:"created_at"`
 	UpdatedAt  *time.Time `db:"updated_at"`
@@ -49,9 +49,9 @@ func FromModel(m *models.FriendRequest) Row {
 	}
 
 	return Row{
-		ID:         int64(m.ID),
-		FromUserID: int64(m.FromUserID),
-		ToUserID:   int64(m.ToUserID),
+		ID:         string(m.ID),
+		FromUserID: string(m.FromUserID),
+		ToUserID:   string(m.ToUserID),
 		Status:     int(m.Status),
 		CreatedAt:  createdAt,
 		UpdatedAt:  m.UpdatedAt,

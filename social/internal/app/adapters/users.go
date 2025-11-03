@@ -17,7 +17,7 @@ func NewUsersClient(client pb.UsersServiceClient) *UsersClient {
 
 // CheckUserExists - Проверка существования пользователя
 func (c *UsersClient) CheckUserExists(ctx context.Context, id models.UserID) (bool, error) {
-	userProfile, err := c.client.GetProfileByID(ctx, &pb.GetProfileByIDRequest{UserId: int64(id)})
+	userProfile, err := c.client.GetProfileByID(ctx, &pb.GetProfileByIDRequest{UserId: string(id)})
 	if err != nil {
 		return false, err
 	}
