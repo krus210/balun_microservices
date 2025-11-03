@@ -25,9 +25,9 @@ const (
 type Chat struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// chatId - идентификатор чата
-	ChatId int64 `protobuf:"varint,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId string `protobuf:"bytes,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	// participantIds - список участников чата
-	ParticipantIds []int64 `protobuf:"varint,2,rep,packed,name=participantIds,proto3" json:"participantIds,omitempty"`
+	ParticipantIds []string `protobuf:"bytes,2,rep,name=participantIds,proto3" json:"participantIds,omitempty"`
 	// createdAtUnixMs - время создания чата в миллисекундах
 	CreatedAtUnixMs int64 `protobuf:"varint,3,opt,name=createdAtUnixMs,proto3" json:"createdAtUnixMs,omitempty"`
 	// lastMessageUnixMs - время последнего сообщения в миллисекундах
@@ -66,14 +66,14 @@ func (*Chat) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Chat) GetChatId() int64 {
+func (x *Chat) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
-func (x *Chat) GetParticipantIds() []int64 {
+func (x *Chat) GetParticipantIds() []string {
 	if x != nil {
 		return x.ParticipantIds
 	}
@@ -97,11 +97,11 @@ func (x *Chat) GetLastMessageUnixMs() int64 {
 type Message struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// messageId - идентификатор сообщения
-	MessageId int64 `protobuf:"varint,1,opt,name=messageId,proto3" json:"messageId,omitempty"`
+	MessageId string `protobuf:"bytes,1,opt,name=messageId,proto3" json:"messageId,omitempty"`
 	// chatId - идентификатор чата
-	ChatId int64 `protobuf:"varint,2,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId string `protobuf:"bytes,2,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	// userId - идентификатор отправителя
-	UserId int64 `protobuf:"varint,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId string `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
 	// text - текст сообщения
 	Text string `protobuf:"bytes,4,opt,name=text,proto3" json:"text,omitempty"`
 	// sentAtUnixMs - время отправки в миллисекундах
@@ -140,25 +140,25 @@ func (*Message) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Message) GetMessageId() int64 {
+func (x *Message) GetMessageId() string {
 	if x != nil {
 		return x.MessageId
 	}
-	return 0
+	return ""
 }
 
-func (x *Message) GetChatId() int64 {
+func (x *Message) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
-func (x *Message) GetUserId() int64 {
+func (x *Message) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *Message) GetText() string {
@@ -179,7 +179,7 @@ func (x *Message) GetSentAtUnixMs() int64 {
 type CreateDirectChatRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// participantId - идентификатор участника чата
-	ParticipantId int64 `protobuf:"varint,1,opt,name=participantId,proto3" json:"participantId,omitempty"`
+	ParticipantId string `protobuf:"bytes,1,opt,name=participantId,proto3" json:"participantId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -214,18 +214,18 @@ func (*CreateDirectChatRequest) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CreateDirectChatRequest) GetParticipantId() int64 {
+func (x *CreateDirectChatRequest) GetParticipantId() string {
 	if x != nil {
 		return x.ParticipantId
 	}
-	return 0
+	return ""
 }
 
 // CreateDirectChatResponse - ответ CreateDirectChat
 type CreateDirectChatResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// chatId - идентификатор созданного чата
-	ChatId        int64 `protobuf:"varint,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId        string `protobuf:"bytes,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -260,18 +260,18 @@ func (*CreateDirectChatResponse) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateDirectChatResponse) GetChatId() int64 {
+func (x *CreateDirectChatResponse) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
 // GetChatRequest - запрос GetChat
 type GetChatRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// chatId - идентификатор чата
-	ChatId        int64 `protobuf:"varint,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId        string `protobuf:"bytes,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -306,11 +306,11 @@ func (*GetChatRequest) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetChatRequest) GetChatId() int64 {
+func (x *GetChatRequest) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
 // GetChatResponse - ответ GetChat
@@ -363,7 +363,7 @@ func (x *GetChatResponse) GetChat() *Chat {
 type ListUserChatsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// userId - идентификатор пользователя
-	UserId        int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId        string `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -398,11 +398,11 @@ func (*ListUserChatsRequest) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ListUserChatsRequest) GetUserId() int64 {
+func (x *ListUserChatsRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 // ListUserChatsResponse - ответ ListUserChats
@@ -455,7 +455,7 @@ func (x *ListUserChatsResponse) GetChats() []*Chat {
 type ListChatMembersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// chatId - идентификатор чата
-	ChatId        int64 `protobuf:"varint,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId        string `protobuf:"bytes,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -490,18 +490,18 @@ func (*ListChatMembersRequest) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *ListChatMembersRequest) GetChatId() int64 {
+func (x *ListChatMembersRequest) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
 // ListChatMembersResponse - ответ ListChatMembers
 type ListChatMembersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// userIds - список идентификаторов пользователей
-	UserIds       []int64 `protobuf:"varint,1,rep,packed,name=userIds,proto3" json:"userIds,omitempty"`
+	UserIds       []string `protobuf:"bytes,1,rep,name=userIds,proto3" json:"userIds,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -536,7 +536,7 @@ func (*ListChatMembersResponse) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *ListChatMembersResponse) GetUserIds() []int64 {
+func (x *ListChatMembersResponse) GetUserIds() []string {
 	if x != nil {
 		return x.UserIds
 	}
@@ -547,7 +547,7 @@ func (x *ListChatMembersResponse) GetUserIds() []int64 {
 type SendMessageRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// chatId - идентификатор чата
-	ChatId int64 `protobuf:"varint,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId string `protobuf:"bytes,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	// text - текст сообщения
 	Text          string `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -584,11 +584,11 @@ func (*SendMessageRequest) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *SendMessageRequest) GetChatId() int64 {
+func (x *SendMessageRequest) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
 func (x *SendMessageRequest) GetText() string {
@@ -648,7 +648,7 @@ func (x *SendMessageResponse) GetMessage() *Message {
 type ListMessagesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// chatId - идентификатор чата
-	ChatId int64 `protobuf:"varint,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId string `protobuf:"bytes,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	// limit - лимит результатов
 	Limit int64 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	// cursor - курсор для пагинации
@@ -687,11 +687,11 @@ func (*ListMessagesRequest) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *ListMessagesRequest) GetChatId() int64 {
+func (x *ListMessagesRequest) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
 func (x *ListMessagesRequest) GetLimit() int64 {
@@ -767,7 +767,7 @@ func (x *ListMessagesResponse) GetNextCursor() string {
 type StreamMessagesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// chatId - идентификатор чата
-	ChatId int64 `protobuf:"varint,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	ChatId string `protobuf:"bytes,1,opt,name=chatId,proto3" json:"chatId,omitempty"`
 	// sinceUnixMs - время с которого получать сообщения в миллисекундах
 	SinceUnixMs   *int64 `protobuf:"varint,2,opt,name=sinceUnixMs,proto3,oneof" json:"sinceUnixMs,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -804,11 +804,11 @@ func (*StreamMessagesRequest) Descriptor() ([]byte, []int) {
 	return file_api_chat_chat_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *StreamMessagesRequest) GetChatId() int64 {
+func (x *StreamMessagesRequest) GetChatId() string {
 	if x != nil {
 		return x.ChatId
 	}
-	return 0
+	return ""
 }
 
 func (x *StreamMessagesRequest) GetSinceUnixMs() int64 {
@@ -870,41 +870,41 @@ const file_api_chat_chat_proto_rawDesc = "" +
 	"\n" +
 	"\x13api/chat/chat.proto\x12=github.com.krus210.balun_microservices.protobuf.chat.v1.proto\x1a\x1bbuf/validate/validate.proto\"\xb9\x01\n" +
 	"\x04Chat\x12\x16\n" +
-	"\x06chatId\x18\x01 \x01(\x03R\x06chatId\x12&\n" +
-	"\x0eparticipantIds\x18\x02 \x03(\x03R\x0eparticipantIds\x12(\n" +
+	"\x06chatId\x18\x01 \x01(\tR\x06chatId\x12&\n" +
+	"\x0eparticipantIds\x18\x02 \x03(\tR\x0eparticipantIds\x12(\n" +
 	"\x0fcreatedAtUnixMs\x18\x03 \x01(\x03R\x0fcreatedAtUnixMs\x121\n" +
 	"\x11lastMessageUnixMs\x18\x04 \x01(\x03H\x00R\x11lastMessageUnixMs\x88\x01\x01B\x14\n" +
 	"\x12_lastMessageUnixMs\"\x8f\x01\n" +
 	"\aMessage\x12\x1c\n" +
-	"\tmessageId\x18\x01 \x01(\x03R\tmessageId\x12\x16\n" +
-	"\x06chatId\x18\x02 \x01(\x03R\x06chatId\x12\x16\n" +
-	"\x06userId\x18\x03 \x01(\x03R\x06userId\x12\x12\n" +
+	"\tmessageId\x18\x01 \x01(\tR\tmessageId\x12\x16\n" +
+	"\x06chatId\x18\x02 \x01(\tR\x06chatId\x12\x16\n" +
+	"\x06userId\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
 	"\x04text\x18\x04 \x01(\tR\x04text\x12\"\n" +
 	"\fsentAtUnixMs\x18\x05 \x01(\x03R\fsentAtUnixMs\"?\n" +
 	"\x17CreateDirectChatRequest\x12$\n" +
-	"\rparticipantId\x18\x01 \x01(\x03R\rparticipantId\"2\n" +
+	"\rparticipantId\x18\x01 \x01(\tR\rparticipantId\"2\n" +
 	"\x18CreateDirectChatResponse\x12\x16\n" +
-	"\x06chatId\x18\x01 \x01(\x03R\x06chatId\"(\n" +
+	"\x06chatId\x18\x01 \x01(\tR\x06chatId\"(\n" +
 	"\x0eGetChatRequest\x12\x16\n" +
-	"\x06chatId\x18\x01 \x01(\x03R\x06chatId\"j\n" +
+	"\x06chatId\x18\x01 \x01(\tR\x06chatId\"j\n" +
 	"\x0fGetChatResponse\x12W\n" +
 	"\x04chat\x18\x01 \x01(\v2C.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatR\x04chat\".\n" +
 	"\x14ListUserChatsRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\"r\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\"r\n" +
 	"\x15ListUserChatsResponse\x12Y\n" +
 	"\x05chats\x18\x01 \x03(\v2C.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ChatR\x05chats\"0\n" +
 	"\x16ListChatMembersRequest\x12\x16\n" +
-	"\x06chatId\x18\x01 \x01(\x03R\x06chatId\"3\n" +
+	"\x06chatId\x18\x01 \x01(\tR\x06chatId\"3\n" +
 	"\x17ListChatMembersResponse\x12\x18\n" +
-	"\auserIds\x18\x01 \x03(\x03R\auserIds\"L\n" +
+	"\auserIds\x18\x01 \x03(\tR\auserIds\"L\n" +
 	"\x12SendMessageRequest\x12\x16\n" +
-	"\x06chatId\x18\x01 \x01(\x03R\x06chatId\x12\x1e\n" +
+	"\x06chatId\x18\x01 \x01(\tR\x06chatId\x12\x1e\n" +
 	"\x04text\x18\x02 \x01(\tB\n" +
 	"\xbaH\ar\x05\x10\x01\x18\xe8\aR\x04text\"w\n" +
 	"\x13SendMessageResponse\x12`\n" +
 	"\amessage\x18\x01 \x01(\v2F.github.com.krus210.balun_microservices.protobuf.chat.v1.proto.MessageR\amessage\"k\n" +
 	"\x13ListMessagesRequest\x12\x16\n" +
-	"\x06chatId\x18\x01 \x01(\x03R\x06chatId\x12\x14\n" +
+	"\x06chatId\x18\x01 \x01(\tR\x06chatId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x03R\x05limit\x12\x1b\n" +
 	"\x06cursor\x18\x03 \x01(\tH\x00R\x06cursor\x88\x01\x01B\t\n" +
 	"\a_cursor\"\xae\x01\n" +
@@ -915,7 +915,7 @@ const file_api_chat_chat_proto_rawDesc = "" +
 	"nextCursor\x88\x01\x01B\r\n" +
 	"\v_nextCursor\"f\n" +
 	"\x15StreamMessagesRequest\x12\x16\n" +
-	"\x06chatId\x18\x01 \x01(\x03R\x06chatId\x12%\n" +
+	"\x06chatId\x18\x01 \x01(\tR\x06chatId\x12%\n" +
 	"\vsinceUnixMs\x18\x02 \x01(\x03H\x00R\vsinceUnixMs\x88\x01\x01B\x0e\n" +
 	"\f_sinceUnixMs\"z\n" +
 	"\x16StreamMessagesResponse\x12`\n" +

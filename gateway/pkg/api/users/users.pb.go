@@ -98,7 +98,7 @@ func (x *UserProfile) GetAvatarUrl() string {
 type CreateProfileRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// userId - идентификатор пользователя
-	UserId int64 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId string `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	// nickname - никнейм пользователя
 	Nickname string `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
 	// bio - биография пользователя
@@ -139,11 +139,11 @@ func (*CreateProfileRequest) Descriptor() ([]byte, []int) {
 	return file_api_users_users_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateProfileRequest) GetUserId() int64 {
+func (x *CreateProfileRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *CreateProfileRequest) GetNickname() string {
@@ -631,7 +631,7 @@ const file_api_users_users_proto_rawDesc = "" +
 	"\n" +
 	"_avatarUrl\"\xb4\x01\n" +
 	"\x14CreateProfileRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\x03R\x06userId\x124\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\x124\n" +
 	"\bnickname\x18\x02 \x01(\tB\x18\xbaH\x15r\x132\x11^[a-z0-9_]{3,20}$R\bnickname\x12\x15\n" +
 	"\x03bio\x18\x03 \x01(\tH\x00R\x03bio\x88\x01\x01\x12!\n" +
 	"\tavatarUrl\x18\x04 \x01(\tH\x01R\tavatarUrl\x88\x01\x01B\x06\n" +

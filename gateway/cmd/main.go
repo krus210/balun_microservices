@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -181,7 +182,7 @@ func (s *Server) CreateProfile(ctx context.Context, req *users.CreateProfileRequ
 }
 
 func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequest) (*users.UpdateProfileResponse, error) {
-	log.Printf("Gateway: UpdateProfile request for userId: %d", req.GetUserId())
+	log.Printf("Gateway: UpdateProfile request for userId: %s", req.GetUserId())
 
 	resp, err := s.usersClient.UpdateProfile(ctx, req)
 	if err != nil {
@@ -193,7 +194,7 @@ func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequ
 }
 
 func (s *Server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRequest) (*users.GetProfileByIDResponse, error) {
-	log.Printf("Gateway: GetProfileByID request for userId: %d", req.GetUserId())
+	log.Printf("Gateway: GetProfileByID request for userId: %s", req.GetUserId())
 
 	resp, err := s.usersClient.GetProfileByID(ctx, req)
 	if err != nil {
@@ -229,7 +230,7 @@ func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNickna
 }
 
 func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRequestRequest) (*social.SendFriendRequestResponse, error) {
-	log.Printf("Gateway: SendFriendRequest from userId: %d", req.GetToUserId())
+	log.Printf("Gateway: SendFriendRequest from userId: %s", req.GetToUserId())
 
 	resp, err := s.socialClient.SendFriendRequest(ctx, req)
 	if err != nil {
@@ -241,7 +242,7 @@ func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRe
 }
 
 func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsRequest) (*social.ListRequestsResponse, error) {
-	log.Printf("Gateway: ListRequests for userId: %d", req.GetToUserId())
+	log.Printf("Gateway: ListRequests for userId: %s", req.GetToUserId())
 
 	resp, err := s.socialClient.ListRequests(ctx, req)
 	if err != nil {
@@ -253,7 +254,7 @@ func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsReque
 }
 
 func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFriendRequestRequest) (*social.AcceptFriendRequestResponse, error) {
-	log.Printf("Gateway: AcceptFriendRequest requestId: %d", req.GetRequestId())
+	log.Printf("Gateway: AcceptFriendRequest requestId: %s", req.GetRequestId())
 
 	resp, err := s.socialClient.AcceptFriendRequest(ctx, req)
 	if err != nil {
@@ -265,7 +266,7 @@ func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFrie
 }
 
 func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFriendRequestRequest) (*social.DeclineFriendRequestResponse, error) {
-	log.Printf("Gateway: DeclineFriendRequest requestId: %d", req.GetRequestId())
+	log.Printf("Gateway: DeclineFriendRequest requestId: %s", req.GetRequestId())
 
 	resp, err := s.socialClient.DeclineFriendRequest(ctx, req)
 	if err != nil {
@@ -277,7 +278,7 @@ func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFr
 }
 
 func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendRequest) (*social.RemoveFriendResponse, error) {
-	log.Printf("Gateway: RemoveFriend userId: %d", req.GetUserId())
+	log.Printf("Gateway: RemoveFriend userId: %s", req.GetUserId())
 
 	resp, err := s.socialClient.RemoveFriend(ctx, req)
 	if err != nil {
@@ -289,7 +290,7 @@ func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendReque
 }
 
 func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest) (*social.ListFriendsResponse, error) {
-	log.Printf("Gateway: ListFriends for userId: %d", req.GetUserId())
+	log.Printf("Gateway: ListFriends for userId: %s", req.GetUserId())
 
 	resp, err := s.socialClient.ListFriends(ctx, req)
 	if err != nil {
@@ -301,7 +302,7 @@ func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest
 }
 
 func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectChatRequest) (*chat.CreateDirectChatResponse, error) {
-	log.Printf("Gateway: CreateDirectChat for participantId: %d", req.GetParticipantId())
+	log.Printf("Gateway: CreateDirectChat for participantId: %s", req.GetParticipantId())
 
 	// Извлекаем Idempotency-Key из входящих метаданных
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -323,7 +324,7 @@ func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectCha
 }
 
 func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.GetChatResponse, error) {
-	log.Printf("Gateway: GetChat chatId: %d", req.GetChatId())
+	log.Printf("Gateway: GetChat chatId: %s", req.GetChatId())
 
 	resp, err := s.chatClient.GetChat(ctx, req)
 	if err != nil {
@@ -335,7 +336,7 @@ func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.G
 }
 
 func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsRequest) (*chat.ListUserChatsResponse, error) {
-	log.Printf("Gateway: ListUserChats for userId: %d", req.GetUserId())
+	log.Printf("Gateway: ListUserChats for userId: %s", req.GetUserId())
 
 	resp, err := s.chatClient.ListUserChats(ctx, req)
 	if err != nil {
@@ -347,7 +348,7 @@ func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsReque
 }
 
 func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersRequest) (*chat.ListChatMembersResponse, error) {
-	log.Printf("Gateway: ListChatMembers for chatId: %d", req.GetChatId())
+	log.Printf("Gateway: ListChatMembers for chatId: %s", req.GetChatId())
 
 	resp, err := s.chatClient.ListChatMembers(ctx, req)
 	if err != nil {
@@ -359,7 +360,7 @@ func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersR
 }
 
 func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
-	log.Printf("Gateway: SendMessage in chatId: %d, text: %s", req.GetChatId(), req.GetText())
+	log.Printf("Gateway: SendMessage in chatId: %s, text: %s", req.GetChatId(), req.GetText())
 
 	resp, err := s.chatClient.SendMessage(ctx, req)
 	if err != nil {
@@ -371,7 +372,7 @@ func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) 
 }
 
 func (s *Server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest) (*chat.ListMessagesResponse, error) {
-	log.Printf("Gateway: ListMessages for chatId: %d", req.GetChatId())
+	log.Printf("Gateway: ListMessages for chatId: %s", req.GetChatId())
 
 	resp, err := s.chatClient.ListMessages(ctx, req)
 	if err != nil {
@@ -437,7 +438,7 @@ func main() {
 					return "idempotency-key", true
 				}
 				// Стандартные заголовки (Authorization и т.д.)
-				return runtime.DefaultHeaderMatcher(key)
+				return runtime.DefaultHeaderMatcher(strings.ToLower(key))
 			}),
 		)
 		if err = pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {

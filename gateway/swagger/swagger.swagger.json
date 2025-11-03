@@ -184,8 +184,7 @@
             "description": "userId - идентификатор пользователя",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -229,8 +228,7 @@
             "description": "chatId - идентификатор чата",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -262,8 +260,7 @@
             "description": "chatId - идентификатор чата",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -295,8 +292,7 @@
             "description": "chatId - идентификатор чата",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           {
             "name": "limit",
@@ -353,8 +349,7 @@
             "description": "chatId - идентификатор чата",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           {
             "name": "body",
@@ -439,8 +434,7 @@
             "description": "toUserId - идентификатор пользователя получающего заявку",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -533,8 +527,7 @@
             "description": "requestId - идентификатор заявки",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -578,8 +571,7 @@
             "description": "requestId - идентификатор заявки",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -611,8 +603,7 @@
             "description": "userId - идентификатор пользователя",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           {
             "name": "limit",
@@ -665,8 +656,7 @@
             "description": "userId - идентификатор пользователя для удаления из друзей",
             "in": "path",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -930,14 +920,12 @@
       "properties": {
         "chatId": {
           "type": "string",
-          "format": "int64",
           "title": "chatId - идентификатор чата"
         },
         "participantIds": {
           "type": "array",
           "items": {
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           "title": "participantIds - список участников чата"
         },
@@ -958,7 +946,6 @@
       "properties": {
         "participantId": {
           "type": "string",
-          "format": "int64",
           "title": "participantId - идентификатор участника чата"
         }
       },
@@ -969,7 +956,6 @@
       "properties": {
         "chatId": {
           "type": "string",
-          "format": "int64",
           "title": "chatId - идентификатор созданного чата"
         }
       },
@@ -980,7 +966,6 @@
       "properties": {
         "userId": {
           "type": "string",
-          "format": "int64",
           "title": "userId - идентификатор пользователя"
         },
         "nickname": {
@@ -1023,17 +1008,14 @@
       "properties": {
         "requestId": {
           "type": "string",
-          "format": "int64",
           "title": "requestId - идентификатор заявки"
         },
         "fromUserId": {
           "type": "string",
-          "format": "int64",
           "title": "fromUserId - идентификатор пользователя, отправившего заявку"
         },
         "toUserId": {
           "type": "string",
-          "format": "int64",
           "title": "toUserId - идентификатор пользователя, получающего заявку"
         },
         "status": {
@@ -1089,8 +1071,7 @@
         "userIds": {
           "type": "array",
           "items": {
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           "title": "userIds - список идентификаторов пользователей"
         }
@@ -1103,8 +1084,7 @@
         "friendUserIds": {
           "type": "array",
           "items": {
-            "type": "string",
-            "format": "int64"
+            "type": "string"
           },
           "title": "friendUserIds - список идентификаторов друзей"
         },
@@ -1188,7 +1168,6 @@
         },
         "userId": {
           "type": "string",
-          "format": "int64",
           "title": "userId - уникальный идентификатор пользователя"
         }
       },
@@ -1199,17 +1178,14 @@
       "properties": {
         "messageId": {
           "type": "string",
-          "format": "int64",
           "title": "messageId - идентификатор сообщения"
         },
         "chatId": {
           "type": "string",
-          "format": "int64",
           "title": "chatId - идентификатор чата"
         },
         "userId": {
           "type": "string",
-          "format": "int64",
           "title": "userId - идентификатор отправителя"
         },
         "text": {
@@ -1299,7 +1275,6 @@
       "properties": {
         "toUserId": {
           "type": "string",
-          "format": "int64",
           "title": "toUserId - идентификатор пользователя, получающего заявку"
         }
       },

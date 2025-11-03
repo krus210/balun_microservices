@@ -185,7 +185,7 @@ type LoginResponse struct {
 	// refreshToken - токен после протухания accessToken
 	RefreshToken string `protobuf:"bytes,2,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
 	// userId - уникальный идентификатор пользователя
-	UserId        int64 `protobuf:"varint,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId        string `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -234,11 +234,11 @@ func (x *LoginResponse) GetRefreshToken() string {
 	return ""
 }
 
-func (x *LoginResponse) GetUserId() int64 {
+func (x *LoginResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 // RefreshRequest - запрос Refresh
@@ -367,7 +367,7 @@ const file_api_auth_auth_proto_rawDesc = "" +
 	"\rLoginResponse\x12 \n" +
 	"\vaccessToken\x18\x01 \x01(\tR\vaccessToken\x12\"\n" +
 	"\frefreshToken\x18\x02 \x01(\tR\frefreshToken\x12\x16\n" +
-	"\x06userId\x18\x03 \x01(\x03R\x06userId\"4\n" +
+	"\x06userId\x18\x03 \x01(\tR\x06userId\"4\n" +
 	"\x0eRefreshRequest\x12\"\n" +
 	"\frefreshToken\x18\x01 \x01(\tR\frefreshToken\"o\n" +
 	"\x0fRefreshResponse\x12 \n" +
