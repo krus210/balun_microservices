@@ -3,6 +3,10 @@ ifneq (,$(wildcard .env))
     export $(shell sed 's/=.*//' .env)
 endif
 
+# Vault must come up first so we can seed credentials before dependent services start.
+.up-vault:
+	@docker-compose up vault -d
+
 .up-kafka:
 	@docker-compose up kafka -d --wait
 	@docker-compose up kafka-ui -d

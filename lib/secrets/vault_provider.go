@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/api/auth/approle"
@@ -154,7 +155,11 @@ func (p *vaultProvider) GetBytes(ctx context.Context, key string) ([]byte, error
 // buildSecretPath формирует полный путь к секрету
 func (p *vaultProvider) buildSecretPath(key string) string {
 	if p.secretPath != "" {
-		return fmt.Sprintf("%s/%s", p.secretPath, key)
+		path := strings.Trim(p.secretPath, "/")
+		if path == "" {
+			return ""
+		}
+		return strings.TrimPrefix(path, p.mountPath+"/")
 	}
-	return key
+	return strings.TrimPrefix(strings.Trim(key, "/"), p.mountPath+"/")
 }
