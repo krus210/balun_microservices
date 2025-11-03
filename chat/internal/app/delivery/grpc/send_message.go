@@ -22,7 +22,7 @@ func (h *ChatController) SendMessage(ctx context.Context, req *pb.SendMessageReq
 	}
 
 	message, err := h.usecase.SendMessage(ctx, dto.SendMessageDto{
-		UserID: models.UserID(1), // TODO: брать из хедера
+		UserID: "1", // TODO: брать из хедера
 		ChatID: models.ChatID(req.ChatId),
 		Text:   req.Text,
 	})

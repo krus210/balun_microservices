@@ -3,12 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/message"
-
-	"lib/postgres"
 
 	"github.com/Masterminds/squirrel"
 )
@@ -23,16 +21,12 @@ func (r *Repository) ListMessages(ctx context.Context, chatID models.ChatID, lim
 	// Собираем базовый запрос
 	listMessagesQuery := r.sb.Select(message.MessagesTableColumns...).
 		From(message.MessagesTable).
-		Where(squirrel.Eq{message.MessagesTableColumnChatID: int64(chatID)}).
+		Where(squirrel.Eq{message.MessagesTableColumnChatID: chatID}).
 		OrderBy(message.MessagesTableColumnID + " DESC")
 
 	// Если есть cursor, добавляем фильтр по ID
 	if cursor != nil && *cursor != "" {
-		cursorID, err := strconv.ParseInt(*cursor, 10, 64)
-		if err != nil {
-			return nil, nil, fmt.Errorf("%s: invalid cursor: %w", api, err)
-		}
-		listMessagesQuery = listMessagesQuery.Where(squirrel.Lt{message.MessagesTableColumnID: cursorID})
+		listMessagesQuery = listMessagesQuery.Where(squirrel.Lt{message.MessagesTableColumnID: *cursor})
 	}
 
 	// Запрашиваем limit + 1 сообщений, чтобы понять, есть ли еще данные
@@ -68,7 +62,7 @@ func (r *Repository) ListMessages(ctx context.Context, chatID models.ChatID, lim
 
 	// Если есть еще сообщения, устанавливаем nextCursor
 	if hasMore && len(result) > 0 {
-		lastID := strconv.FormatInt(int64(result[len(result)-1].ID), 10)
+		lastID := string(result[len(result)-1].ID)
 		nextCursor = &lastID
 	}
 

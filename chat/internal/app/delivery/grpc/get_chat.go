@@ -22,7 +22,7 @@ func (h *ChatController) GetChat(ctx context.Context, req *pb.GetChatRequest) (*
 	}
 
 	chat, err := h.usecase.GetChat(ctx, dto.GetChatDto{
-		UserID: models.UserID(1), // TODO: брать из хедера
+		UserID: "1", // TODO: брать из хедера
 		ChatID: models.ChatID(req.ChatId),
 	})
 	if err != nil {

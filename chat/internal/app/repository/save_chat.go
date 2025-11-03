@@ -3,13 +3,12 @@ package repository
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 	"time"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat"
 	"chat/internal/app/repository/chat_member"
-
-	"lib/postgres"
 )
 
 // SaveChat создает новый чат с участниками в рамках транзакции
@@ -35,7 +34,7 @@ func (r *Repository) SaveChat(ctx context.Context, chatModel *models.Chat) (*mod
 		conn := r.tm.GetQueryEngine(txCtx)
 
 		// Выполняем вставку чата и получаем сгенерированный ID
-		var chatID int64
+		var chatID string
 		if err := conn.Getx(txCtx, &chatID, insertChatQuery); err != nil {
 			return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 		}

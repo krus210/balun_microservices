@@ -3,11 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat_member"
-
-	"lib/postgres"
 
 	"github.com/Masterminds/squirrel"
 )
@@ -22,7 +21,7 @@ func (r *Repository) GetChatMembers(ctx context.Context, chatID models.ChatID) (
 	// Запрос для получения всех участников чата
 	getMembersQuery := r.sb.Select(chat_member.ChatMembersTableColumns...).
 		From(chat_member.ChatMembersTable).
-		Where(squirrel.Eq{chat_member.ChatMembersTableColumnChatID: int64(chatID)})
+		Where(squirrel.Eq{chat_member.ChatMembersTableColumnChatID: chatID})
 
 	// Выполняем запрос
 	var memberRows []chat_member.Row

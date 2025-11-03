@@ -28,7 +28,7 @@ func (h *ChatController) CreateDirectChat(ctx context.Context, req *pb.CreateDir
 	}
 
 	chat, err := h.usecase.CreateDirectChat(ctx, dto.CreateDirectChatDto{
-		UserID:        models.UserID(1), // TODO: брать из хедера
+		UserID:        "1", // TODO: брать из хедера
 		ParticipantID: models.UserID(req.ParticipantId),
 	})
 	if err != nil {
@@ -36,7 +36,7 @@ func (h *ChatController) CreateDirectChat(ctx context.Context, req *pb.CreateDir
 	}
 
 	return &pb.CreateDirectChatResponse{
-		ChatId: int64(chat.ID),
+		ChatId: string(chat.ID),
 	}, nil
 }
 

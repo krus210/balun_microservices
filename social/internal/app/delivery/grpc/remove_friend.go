@@ -22,7 +22,7 @@ func (h *SocialController) RemoveFriend(ctx context.Context, req *pb.RemoveFrien
 	}
 
 	err := h.usecase.RemoveFriend(ctx, dto.FriendRequestDto{
-		FromUserID: models.UserID(1), // TODO: брать из хедера
+		FromUserID: "1", // TODO: брать из хедера
 		ToUserID:   models.UserID(req.UserId),
 	})
 	if err != nil {

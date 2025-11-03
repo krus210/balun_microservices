@@ -22,7 +22,7 @@ func (h *ChatController) ListMessages(ctx context.Context, req *pb.ListMessagesR
 	}
 
 	response, err := h.usecase.ListMessages(ctx, dto.ListMessagesDto{
-		UserID: models.UserID(1), // TODO: брать из хедера
+		UserID: "1", // TODO: брать из хедера
 		ChatID: models.ChatID(req.ChatId),
 		Limit:  req.Limit,
 		Cursor: req.Cursor,

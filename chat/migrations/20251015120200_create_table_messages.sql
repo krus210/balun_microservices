@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS public.messages (
-    id         BIGSERIAL PRIMARY KEY,
-    chat_id    BIGINT NOT NULL REFERENCES public.chats(id) ON DELETE CASCADE,
-    owner_id   BIGINT NOT NULL,
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    chat_id    TEXT NOT NULL,
+    owner_id   TEXT NOT NULL,
     text       TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ
