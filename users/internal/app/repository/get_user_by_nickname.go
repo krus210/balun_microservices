@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"lib/postgres"
 
 	"users/internal/app/models"
 	"users/internal/app/repository/user"
@@ -30,7 +31,7 @@ func (r *Repository) GetUserByNickname(ctx context.Context, nickname string) (*m
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("%s: %w", getUserByNicknameApi, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", getUserByNicknameApi, postgres.ConvertPGError(err))
 	}
 
 	// Конвертируем строку в модель

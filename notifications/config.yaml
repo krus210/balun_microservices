@@ -1,0 +1,41 @@
+service:
+  name: notifications
+  version: 1.0.0
+  environment: dev
+
+database:
+  host: notifications-db
+  port: 5432
+  name: notifications
+  sslmode: disable
+  max_conn_idle_time: 1m
+
+kafka:
+  brokers: kafka:29092
+  consumer_group_id: notifications-service
+  consumer_name: notifications-consumer
+  topics:
+    friend_request_events: friend-request-events
+
+workers:
+  save_events:
+    interval: 5s
+    batch_size: 100
+  delete:
+    interval: 1h
+    retention_days: 7
+
+secrets:
+  dev:
+    env_prefix: "APP_"
+    file_path: "./secrets.yaml"
+    vault:
+      enabled: false
+  prod:
+    env_prefix: "APP_"
+    file_path: "/etc/secrets/secrets.yaml"
+    vault:
+      enabled: true
+      address: "http://vault:8200"
+      mount_path: "secret"
+      secret_path: "notifications/production"

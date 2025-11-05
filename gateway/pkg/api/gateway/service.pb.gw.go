@@ -163,7 +163,7 @@ func request_GatewayService_UpdateProfile_0(ctx context.Context, marshaler runti
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -184,7 +184,7 @@ func local_request_GatewayService_UpdateProfile_0(ctx context.Context, marshaler
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -205,7 +205,7 @@ func request_GatewayService_GetProfileByID_0(ctx context.Context, marshaler runt
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -223,7 +223,7 @@ func local_request_GatewayService_GetProfileByID_0(ctx context.Context, marshale
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -380,7 +380,7 @@ func request_GatewayService_AcceptFriendRequest_0(ctx context.Context, marshaler
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "requestId")
 	}
-	protoReq.RequestId, err = runtime.Int64(val)
+	protoReq.RequestId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "requestId", err)
 	}
@@ -398,7 +398,7 @@ func local_request_GatewayService_AcceptFriendRequest_0(ctx context.Context, mar
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "requestId")
 	}
-	protoReq.RequestId, err = runtime.Int64(val)
+	protoReq.RequestId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "requestId", err)
 	}
@@ -419,7 +419,7 @@ func request_GatewayService_DeclineFriendRequest_0(ctx context.Context, marshale
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "requestId")
 	}
-	protoReq.RequestId, err = runtime.Int64(val)
+	protoReq.RequestId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "requestId", err)
 	}
@@ -437,7 +437,7 @@ func local_request_GatewayService_DeclineFriendRequest_0(ctx context.Context, ma
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "requestId")
 	}
-	protoReq.RequestId, err = runtime.Int64(val)
+	protoReq.RequestId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "requestId", err)
 	}
@@ -458,7 +458,7 @@ func request_GatewayService_RemoveFriend_0(ctx context.Context, marshaler runtim
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -476,7 +476,7 @@ func local_request_GatewayService_RemoveFriend_0(ctx context.Context, marshaler 
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
-	protoReq.UserId, err = runtime.Int64(val)
+	protoReq.UserId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
 	}
@@ -559,7 +559,7 @@ func request_GatewayService_GetChat_0(ctx context.Context, marshaler runtime.Mar
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}
@@ -577,7 +577,7 @@ func local_request_GatewayService_GetChat_0(ctx context.Context, marshaler runti
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}
@@ -633,7 +633,7 @@ func request_GatewayService_ListChatMembers_0(ctx context.Context, marshaler run
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}
@@ -651,7 +651,7 @@ func local_request_GatewayService_ListChatMembers_0(ctx context.Context, marshal
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}
@@ -675,7 +675,7 @@ func request_GatewayService_SendMessage_0(ctx context.Context, marshaler runtime
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}
@@ -696,7 +696,7 @@ func local_request_GatewayService_SendMessage_0(ctx context.Context, marshaler r
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}
@@ -719,7 +719,7 @@ func request_GatewayService_ListMessages_0(ctx context.Context, marshaler runtim
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}
@@ -743,7 +743,7 @@ func local_request_GatewayService_ListMessages_0(ctx context.Context, marshaler 
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chatId")
 	}
-	protoReq.ChatId, err = runtime.Int64(val)
+	protoReq.ChatId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chatId", err)
 	}

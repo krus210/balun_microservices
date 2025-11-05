@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat"
@@ -18,23 +19,33 @@ func (r *Repository) ListChatsByUserID(ctx context.Context, userID models.UserID
 	// Получаем QueryEngine из контекста (может быть транзакция или обычное соединение)
 	conn := r.tm.GetQueryEngine(ctx)
 
-	// Запрос для получения всех чатов пользователя
-	// Добавляем префикс таблицы к именам колонок для корректного JOIN
+	// Сначала получаем список chat_id для пользователя из chat_members
+	getChatIDsQuery := r.sb.
+		Select(chat_member.ChatMembersTableColumnChatID).
+		From(chat_member.ChatMembersTable).
+		Where(squirrel.Eq{chat_member.ChatMembersTableColumnUserID: userID})
+
+	var chatIDs []string
+	if err := conn.Selectx(ctx, &chatIDs, getChatIDsQuery); err != nil {
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
+	}
+
+	// Если у пользователя нет чатов, возвращаем пустой список
+	if len(chatIDs) == 0 {
+		return []*models.Chat{}, nil
+	}
+
+	// Получаем информацию о чатах по списку ID
 	listChatsQuery := r.sb.
-		Select(
-			chat.ChatsTable+"."+chat.ChatsTableColumnID,
-			chat.ChatsTable+"."+chat.ChatsTableColumnCreatedAt,
-			chat.ChatsTable+"."+chat.ChatsTableColumnUpdatedAt,
-		).
+		Select(chat.ChatsTableColumns...).
 		From(chat.ChatsTable).
-		InnerJoin(chat_member.ChatMembersTable + " ON " + chat.ChatsTable + "." + chat.ChatsTableColumnID + " = " + chat_member.ChatMembersTable + "." + chat_member.ChatMembersTableColumnChatID).
-		Where(squirrel.Eq{chat_member.ChatMembersTable + "." + chat_member.ChatMembersTableColumnUserID: int64(userID)}).
-		OrderBy(chat.ChatsTable + "." + chat.ChatsTableColumnUpdatedAt + " DESC")
+		Where(squirrel.Eq{chat.ChatsTableColumnID: chatIDs}).
+		OrderBy(chat.ChatsTableColumnUpdatedAt + " DESC")
 
 	// Выполняем запрос
 	var chatRows []chat.Row
 	if err := conn.Selectx(ctx, &chatRows, listChatsQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Если чатов нет, возвращаем пустой список
@@ -42,17 +53,16 @@ func (r *Repository) ListChatsByUserID(ctx context.Context, userID models.UserID
 		return []*models.Chat{}, nil
 	}
 
-	// Собираем ID всех чатов для получения участников
-	chatIDs := make([]int64, 0, len(chatRows))
+	// Создаем мапу чатов для быстрого доступа
 	chatMap := make(map[models.ChatID]*models.Chat, len(chatRows))
 	for _, chatRow := range chatRows {
 		chatModel := chat.ToModel(&chatRow)
 		// ToModel уже инициализирует пустые слайсы для участников и сообщений
-		chatIDs = append(chatIDs, int64(chatModel.ID))
 		chatMap[chatModel.ID] = chatModel
 	}
 
 	// Запрос для получения всех участников всех чатов одним запросом
+	// Используем chatIDs, полученные из первого запроса
 	getMembersQuery := r.sb.Select(chat_member.ChatMembersTableColumns...).
 		From(chat_member.ChatMembersTable).
 		Where(squirrel.Eq{chat_member.ChatMembersTableColumnChatID: chatIDs})
@@ -60,7 +70,7 @@ func (r *Repository) ListChatsByUserID(ctx context.Context, userID models.UserID
 	// Выполняем запрос для получения всех участников
 	var memberRows []chat_member.Row
 	if err := conn.Selectx(ctx, &memberRows, getMembersQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Группируем участников по чатам

@@ -1,18 +1,18 @@
 package repository
 
 import (
-	tm "notifications/pkg/postgres/transaction_manager"
+	"lib/postgres"
 
 	"github.com/Masterminds/squirrel"
 )
 
 type Repository struct {
-	db tm.TransactionManagerAPI
+	db postgres.TransactionManagerAPI
 	qb squirrel.StatementBuilderType
 }
 
 // NewRepository конструктор Repository
-func NewRepository(db tm.TransactionManagerAPI) *Repository {
+func NewRepository(db postgres.TransactionManagerAPI) *Repository {
 	return &Repository{
 		db: db,
 		qb: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),

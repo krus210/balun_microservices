@@ -8,7 +8,7 @@ import (
 
 // Row — «плоская» проекция строки таблицы chats
 type Row struct {
-	ID        int64     `db:"id"`
+	ID        string    `db:"id"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
@@ -40,7 +40,7 @@ func FromModel(m *models.Chat) Row {
 		return Row{}
 	}
 	return Row{
-		ID:        int64(m.ID),
+		ID:        string(m.ID),
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 	}

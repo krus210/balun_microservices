@@ -10,16 +10,14 @@ import (
 
 type UsersRepositoryStub struct {
 	mu          sync.RWMutex
-	users       map[int64]*models.UserProfile
+	users       map[string]*models.UserProfile
 	usersByNick map[string]*models.UserProfile
-	nextID      int64
 }
 
 func NewUsersRepositoryStub() *UsersRepositoryStub {
 	return &UsersRepositoryStub{
-		users:       make(map[int64]*models.UserProfile),
+		users:       make(map[string]*models.UserProfile),
 		usersByNick: make(map[string]*models.UserProfile),
-		nextID:      1,
 	}
 }
 
@@ -32,9 +30,6 @@ func (r *UsersRepositoryStub) SaveUser(ctx context.Context, user *models.UserPro
 	}
 
 	savedUser := *user
-	savedUser.UserID = r.nextID
-	r.nextID++
-
 	r.users[savedUser.UserID] = &savedUser
 	r.usersByNick[savedUser.Nickname] = &savedUser
 
@@ -64,7 +59,7 @@ func (r *UsersRepositoryStub) UpdateUser(ctx context.Context, user *models.UserP
 	return &updatedUser, nil
 }
 
-func (r *UsersRepositoryStub) GetUserByID(ctx context.Context, id int64) (*models.UserProfile, error) {
+func (r *UsersRepositoryStub) GetUserByID(ctx context.Context, id string) (*models.UserProfile, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

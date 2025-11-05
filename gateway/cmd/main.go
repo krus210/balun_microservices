@@ -7,9 +7,11 @@ import (
 	"net"
 	"net/http"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
+	"gateway/internal/config"
 	"gateway/pkg/api/auth"
 	"gateway/pkg/api/chat"
 	pb "gateway/pkg/api/gateway"
@@ -34,25 +36,51 @@ type Server struct {
 	chatClient   chat.ChatServiceClient
 }
 
-func NewServer() (*Server, error) {
-	authConn, err := grpc.NewClient("auth:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to auth service: %w", err)
+func NewServer(cfg *config.Config) (*Server, func(), error) {
+	var conns []*grpc.ClientConn
+
+	closeConns := func() {
+		for _, conn := range conns {
+			if err := conn.Close(); err != nil {
+				log.Printf("failed to close connection: %v", err)
+			}
+		}
 	}
 
-	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authAddr := fmt.Sprintf("%s:%d", cfg.Services.Auth.Host, cfg.Services.Auth.Port)
+	authConn, err := grpc.NewClient(authAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to users service: %w", err)
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to auth service (%s): %w", authAddr, err)
 	}
+	conns = append(conns, authConn)
 
-	socialConn, err := grpc.NewClient("social:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersAddr := fmt.Sprintf("%s:%d", cfg.Services.Users.Host, cfg.Services.Users.Port)
+	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to social service: %w", err)
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to users service (%s): %w", usersAddr, err)
 	}
+	conns = append(conns, usersConn)
 
-	chatConn, err := grpc.NewClient("chat:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	socialAddr := fmt.Sprintf("%s:%d", cfg.Services.Social.Host, cfg.Services.Social.Port)
+	socialConn, err := grpc.NewClient(socialAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to chat service: %w", err)
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to social service (%s): %w", socialAddr, err)
+	}
+	conns = append(conns, socialConn)
+
+	chatAddr := fmt.Sprintf("%s:%d", cfg.Services.Chat.Host, cfg.Services.Chat.Port)
+	chatConn, err := grpc.NewClient(chatAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		closeConns()
+		return nil, nil, fmt.Errorf("failed to connect to chat service (%s): %w", chatAddr, err)
+	}
+	conns = append(conns, chatConn)
+
+	cleanup := func() {
+		closeConns()
 	}
 
 	srv := &Server{
@@ -62,7 +90,7 @@ func NewServer() (*Server, error) {
 		chatClient:   chat.NewChatServiceClient(chatConn),
 	}
 
-	return srv, nil
+	return srv, cleanup, nil
 }
 
 // customHTTPError обрабатывает gRPC ошибки и возвращает соответствующие HTTP коды
@@ -154,7 +182,7 @@ func (s *Server) CreateProfile(ctx context.Context, req *users.CreateProfileRequ
 }
 
 func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequest) (*users.UpdateProfileResponse, error) {
-	log.Printf("Gateway: UpdateProfile request for userId: %d", req.GetUserId())
+	log.Printf("Gateway: UpdateProfile request for userId: %s", req.GetUserId())
 
 	resp, err := s.usersClient.UpdateProfile(ctx, req)
 	if err != nil {
@@ -166,7 +194,7 @@ func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequ
 }
 
 func (s *Server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRequest) (*users.GetProfileByIDResponse, error) {
-	log.Printf("Gateway: GetProfileByID request for userId: %d", req.GetUserId())
+	log.Printf("Gateway: GetProfileByID request for userId: %s", req.GetUserId())
 
 	resp, err := s.usersClient.GetProfileByID(ctx, req)
 	if err != nil {
@@ -202,7 +230,7 @@ func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNickna
 }
 
 func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRequestRequest) (*social.SendFriendRequestResponse, error) {
-	log.Printf("Gateway: SendFriendRequest from userId: %d", req.GetToUserId())
+	log.Printf("Gateway: SendFriendRequest from userId: %s", req.GetToUserId())
 
 	resp, err := s.socialClient.SendFriendRequest(ctx, req)
 	if err != nil {
@@ -214,7 +242,7 @@ func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRe
 }
 
 func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsRequest) (*social.ListRequestsResponse, error) {
-	log.Printf("Gateway: ListRequests for userId: %d", req.GetToUserId())
+	log.Printf("Gateway: ListRequests for userId: %s", req.GetToUserId())
 
 	resp, err := s.socialClient.ListRequests(ctx, req)
 	if err != nil {
@@ -226,7 +254,7 @@ func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsReque
 }
 
 func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFriendRequestRequest) (*social.AcceptFriendRequestResponse, error) {
-	log.Printf("Gateway: AcceptFriendRequest requestId: %d", req.GetRequestId())
+	log.Printf("Gateway: AcceptFriendRequest requestId: %s", req.GetRequestId())
 
 	resp, err := s.socialClient.AcceptFriendRequest(ctx, req)
 	if err != nil {
@@ -238,7 +266,7 @@ func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFrie
 }
 
 func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFriendRequestRequest) (*social.DeclineFriendRequestResponse, error) {
-	log.Printf("Gateway: DeclineFriendRequest requestId: %d", req.GetRequestId())
+	log.Printf("Gateway: DeclineFriendRequest requestId: %s", req.GetRequestId())
 
 	resp, err := s.socialClient.DeclineFriendRequest(ctx, req)
 	if err != nil {
@@ -250,7 +278,7 @@ func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFr
 }
 
 func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendRequest) (*social.RemoveFriendResponse, error) {
-	log.Printf("Gateway: RemoveFriend userId: %d", req.GetUserId())
+	log.Printf("Gateway: RemoveFriend userId: %s", req.GetUserId())
 
 	resp, err := s.socialClient.RemoveFriend(ctx, req)
 	if err != nil {
@@ -262,7 +290,7 @@ func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendReque
 }
 
 func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest) (*social.ListFriendsResponse, error) {
-	log.Printf("Gateway: ListFriends for userId: %d", req.GetUserId())
+	log.Printf("Gateway: ListFriends for userId: %s", req.GetUserId())
 
 	resp, err := s.socialClient.ListFriends(ctx, req)
 	if err != nil {
@@ -274,7 +302,7 @@ func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest
 }
 
 func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectChatRequest) (*chat.CreateDirectChatResponse, error) {
-	log.Printf("Gateway: CreateDirectChat for participantId: %d", req.GetParticipantId())
+	log.Printf("Gateway: CreateDirectChat for participantId: %s", req.GetParticipantId())
 
 	// Извлекаем Idempotency-Key из входящих метаданных
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -296,7 +324,7 @@ func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectCha
 }
 
 func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.GetChatResponse, error) {
-	log.Printf("Gateway: GetChat chatId: %d", req.GetChatId())
+	log.Printf("Gateway: GetChat chatId: %s", req.GetChatId())
 
 	resp, err := s.chatClient.GetChat(ctx, req)
 	if err != nil {
@@ -308,7 +336,7 @@ func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.G
 }
 
 func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsRequest) (*chat.ListUserChatsResponse, error) {
-	log.Printf("Gateway: ListUserChats for userId: %d", req.GetUserId())
+	log.Printf("Gateway: ListUserChats for userId: %s", req.GetUserId())
 
 	resp, err := s.chatClient.ListUserChats(ctx, req)
 	if err != nil {
@@ -320,7 +348,7 @@ func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsReque
 }
 
 func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersRequest) (*chat.ListChatMembersResponse, error) {
-	log.Printf("Gateway: ListChatMembers for chatId: %d", req.GetChatId())
+	log.Printf("Gateway: ListChatMembers for chatId: %s", req.GetChatId())
 
 	resp, err := s.chatClient.ListChatMembers(ctx, req)
 	if err != nil {
@@ -332,7 +360,7 @@ func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersR
 }
 
 func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
-	log.Printf("Gateway: SendMessage in chatId: %d, text: %s", req.GetChatId(), req.GetText())
+	log.Printf("Gateway: SendMessage in chatId: %s, text: %s", req.GetChatId(), req.GetText())
 
 	resp, err := s.chatClient.SendMessage(ctx, req)
 	if err != nil {
@@ -344,7 +372,7 @@ func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) 
 }
 
 func (s *Server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest) (*chat.ListMessagesResponse, error) {
-	log.Printf("Gateway: ListMessages for chatId: %d", req.GetChatId())
+	log.Printf("Gateway: ListMessages for chatId: %s", req.GetChatId())
 
 	resp, err := s.chatClient.ListMessages(ctx, req)
 	if err != nil {
@@ -359,10 +387,19 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	server, err := NewServer()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	log.Printf("Starting %s service (version: %s, environment: %s)",
+		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
+
+	server, cleanup, err := NewServer(cfg)
 	if err != nil {
 		log.Fatalf("failed to create Server: %v", err)
 	}
+	defer cleanup()
 
 	var wg sync.WaitGroup
 
@@ -375,7 +412,7 @@ func main() {
 
 		reflection.Register(grpcServer)
 
-		lis, err := net.Listen("tcp", ":8085")
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.GRPC.Port))
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
@@ -401,7 +438,7 @@ func main() {
 					return "idempotency-key", true
 				}
 				// Стандартные заголовки (Authorization и т.д.)
-				return runtime.DefaultHeaderMatcher(key)
+				return runtime.DefaultHeaderMatcher(strings.ToLower(key))
 			}),
 		)
 		if err = pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
@@ -410,7 +447,7 @@ func main() {
 
 		httpServer := &http.Server{Handler: mux}
 
-		lis, err := net.Listen("tcp", ":8080")
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.HTTP.Port))
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}

@@ -10,9 +10,9 @@ const (
 	FriendRequestDeclined FriendRequestStatus = 2
 )
 
-type UserID int64
+type UserID string
 
-type FriendRequestID int64
+type FriendRequestID string
 
 type FriendRequest struct {
 	ID         FriendRequestID

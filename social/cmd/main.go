@@ -2,21 +2,20 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"lib/postgres"
 	"log"
 	"net"
 	"os/signal"
-	"strings"
 	"syscall"
-	"time"
 
 	"social/internal/app/delivery/friend_request_handler"
+	"social/internal/config"
 	"social/pkg/kafka"
 
 	"social/internal/app/adapters"
 	"social/internal/app/repository"
 	"social/internal/app/usecase"
-	"social/pkg/postgres"
-	"social/pkg/postgres/transaction_manager"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -34,41 +33,60 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	usersConn, err := grpc.NewClient("users:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Загружаем конфигурацию с интеграцией secrets
+	cfg, err := config.LoadWithSecrets(ctx)
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	log.Printf("Starting %s service (version: %s, environment: %s)",
+		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
+
+	// Подключаемся к Users сервису
+	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
+	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 
-	conn, err := postgres.NewConnectionPool(ctx, DSN(),
-		postgres.WithMaxConnIdleTime(time.Minute),
+	// Подключаемся к PostgreSQL
+	conn, txMngr, err := postgres.New(ctx,
+		postgres.WithHost(cfg.Database.Host),
+		postgres.WithPort(cfg.Database.Port),
+		postgres.WithDatabase(cfg.Database.Name),
+		postgres.WithUser(cfg.Database.User),
+		postgres.WithPassword(cfg.Database.Password),
+		postgres.WithSSLMode(cfg.Database.SSLMode),
+		postgres.WithMaxConnIdleTime(cfg.Database.MaxConnIdleTime),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
 
-	producer, err := kafka.NewSyncProducer(strings.Split(kafkaBrokers, ","), nil)
+	// Создаем Kafka producer
+	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, cfg.Kafka.ClientID, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Создаем обработчик событий заявок в друзья
 	friendRequestEventsHandler := friend_request_handler.NewKafkaFriendRequestBatchHandler(producer,
-		friend_request_handler.WithMaxBatchSize(100),
-		friend_request_handler.WithTopic(kafkaFriendRequestEventTopicName),
+		friend_request_handler.WithMaxBatchSize(cfg.FriendRequestHandler.BatchSize),
+		friend_request_handler.WithTopic(cfg.Kafka.Topics.FriendRequestEvents),
 	)
-
-	txMngr := transaction_manager.New(conn)
 
 	friendRequestRepo := repository.NewRepository(txMngr)
 	outboxRepo := outboxRepository.NewRepository(txMngr)
 
+	// Создаем и запускаем outbox worker
 	worker := outboxProcessor.NewOutboxFriendRequestWorker(outboxRepo, txMngr, friendRequestEventsHandler,
-		outboxProcessor.WithBatchSize(10),
-		outboxProcessor.WithMaxRetry(10),
-		outboxProcessor.WithRetryInterval(30*time.Second),
-		outboxProcessor.WithWindow(time.Hour),
+		outboxProcessor.WithBatchSize(cfg.Outbox.Processor.BatchSize),
+		outboxProcessor.WithMaxRetry(cfg.Outbox.Processor.MaxRetry),
+		outboxProcessor.WithRetryInterval(cfg.Outbox.Processor.RetryInterval),
+		outboxProcessor.WithWindow(cfg.Outbox.Processor.Window),
 	)
 
 	go worker.Run(ctx)
@@ -79,7 +97,9 @@ func main() {
 
 	controller := deliveryGrpc.NewSocialController(socialUsecase)
 
-	lis, err := net.Listen("tcp", ":8082")
+	// Запускаем gRPC сервер
+	listenAddr := fmt.Sprintf(":%d", cfg.Server.GRPC.Port)
+	lis, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -89,11 +109,11 @@ func main() {
 			errorsMiddleware.ErrorsUnaryInterceptor(),
 		),
 	)
-	socialPb.RegisterSocialServiceServer(server, controller) // регистрация обработчиков
+	socialPb.RegisterSocialServiceServer(server, controller)
 
-	reflection.Register(server) // регистрируем дополнительные обработчики
+	reflection.Register(server)
 
-	log.Printf("server listening at %v", lis.Addr())
+	log.Printf("gRPC server listening at %v", lis.Addr())
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

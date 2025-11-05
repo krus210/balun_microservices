@@ -3,12 +3,12 @@ package worker
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 	"log"
 	"time"
 
 	"notifications/internal/app/models"
 	"notifications/internal/app/repository"
-	tm "notifications/pkg/postgres/transaction_manager"
 )
 
 const (
@@ -29,14 +29,14 @@ type inboxRepository interface {
 // SaveEventsWorker воркер для обработки событий из inbox
 type SaveEventsWorker struct {
 	repo         inboxRepository
-	tm           tm.TransactionManagerAPI
+	tm           postgres.TransactionManagerAPI
 	tickInterval time.Duration
 	batchSize    int
 	maxAttempts  int
 }
 
 // NewSaveEventsWorker создает новый воркер с настройками по умолчанию
-func NewSaveEventsWorker(repo inboxRepository, tm tm.TransactionManagerAPI) *SaveEventsWorker {
+func NewSaveEventsWorker(repo inboxRepository, tm postgres.TransactionManagerAPI) *SaveEventsWorker {
 	return &SaveEventsWorker{
 		repo:         repo,
 		tm:           tm,

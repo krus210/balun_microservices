@@ -22,7 +22,7 @@ func (h *SocialController) SendFriendRequest(ctx context.Context, req *pb.SendFr
 	}
 
 	friendRequest, err := h.usecase.SendFriendRequest(ctx, dto.FriendRequestDto{
-		FromUserID: models.UserID(1), // TODO: брать из хедера
+		FromUserID: "1", // TODO: брать из хедера
 		ToUserID:   models.UserID(req.ToUserId),
 	})
 	if err != nil {

@@ -3,7 +3,7 @@ package models
 import "time"
 
 type UserProfile struct {
-	UserID    int64
+	UserID    string
 	Nickname  string
 	Bio       *string
 	AvatarURL *string

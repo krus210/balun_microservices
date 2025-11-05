@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat"
@@ -20,31 +21,50 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 	// Получаем QueryEngine из контекста (может быть транзакция или обычное соединение)
 	conn := r.tm.GetQueryEngine(ctx)
 
-	// Сначала найдем ID чатов, где участвуют оба пользователя
-	// Используем подзапрос с INNER JOIN
-	findChatsQuery := r.sb.Select("cm1." + chat_member.ChatMembersTableColumnChatID).
-		From(chat_member.ChatMembersTable + " cm1").
-		InnerJoin(chat_member.ChatMembersTable + " cm2 ON cm1." + chat_member.ChatMembersTableColumnChatID + " = cm2." + chat_member.ChatMembersTableColumnChatID).
-		Where(squirrel.Eq{
-			"cm1." + chat_member.ChatMembersTableColumnUserID: int64(userID1),
-			"cm2." + chat_member.ChatMembersTableColumnUserID: int64(userID2),
-		})
+	// Получаем chat_ids для первого пользователя
+	getChatIDsUser1Query := r.sb.Select(chat_member.ChatMembersTableColumnChatID).
+		From(chat_member.ChatMembersTable).
+		Where(squirrel.Eq{chat_member.ChatMembersTableColumnUserID: userID1})
 
-	// Выполняем запрос для получения ID чатов-кандидатов
-	var candidateRows []chat_member.Row
-	if err := conn.Selectx(ctx, &candidateRows, findChatsQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+	var chatIDsUser1 []string
+	if err := conn.Selectx(ctx, &chatIDsUser1, getChatIDsUser1Query); err != nil {
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
-	// Если нет чатов с обоими участниками, возвращаем nil
-	if len(candidateRows) == 0 {
+	if len(chatIDsUser1) == 0 {
 		return nil, nil
 	}
 
-	// Извлекаем ID чатов из структуры
-	candidateChatIDs := make([]int64, 0, len(candidateRows))
-	for _, row := range candidateRows {
-		candidateChatIDs = append(candidateChatIDs, row.ChatID)
+	// Получаем chat_ids для второго пользователя
+	getChatIDsUser2Query := r.sb.Select(chat_member.ChatMembersTableColumnChatID).
+		From(chat_member.ChatMembersTable).
+		Where(squirrel.Eq{chat_member.ChatMembersTableColumnUserID: userID2})
+
+	var chatIDsUser2 []string
+	if err := conn.Selectx(ctx, &chatIDsUser2, getChatIDsUser2Query); err != nil {
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
+	}
+
+	if len(chatIDsUser2) == 0 {
+		return nil, nil
+	}
+
+	// Находим пересечение chat_ids (чаты, где участвуют оба пользователя)
+	chatIDsSet := make(map[string]bool)
+	for _, chatID := range chatIDsUser1 {
+		chatIDsSet[chatID] = true
+	}
+
+	var candidateChatIDs []string
+	for _, chatID := range chatIDsUser2 {
+		if chatIDsSet[chatID] {
+			candidateChatIDs = append(candidateChatIDs, chatID)
+		}
+	}
+
+	// Если нет общих чатов, возвращаем nil
+	if len(candidateChatIDs) == 0 {
+		return nil, nil
 	}
 
 	// Для каждого чата проверяем, что в нем ровно 2 участника
@@ -56,7 +76,7 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 
 		var count int
 		if err := conn.Getx(ctx, &count, countQuery); err != nil {
-			return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+			return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 		}
 
 		// Если в чате ровно 2 участника, это наш чат
@@ -71,7 +91,7 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 				if errors.Is(err, sql.ErrNoRows) {
 					continue
 				}
-				return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+				return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 			}
 
 			// Конвертируем в модель (ToModel уже инициализирует пустые слайсы)
@@ -84,7 +104,7 @@ func (r *Repository) GetDirectChatByParticipants(ctx context.Context, userID1, u
 
 			var memberRows []chat_member.Row
 			if err := conn.Selectx(ctx, &memberRows, getMembersQuery); err != nil {
-				return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+				return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 			}
 
 			// Заполняем список участников

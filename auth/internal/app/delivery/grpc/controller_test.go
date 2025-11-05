@@ -37,13 +37,13 @@ func TestAuthController_Register(t *testing.T) {
 					Email:    "test@example.com",
 					Password: "password123",
 				}).Return(&models.User{
-					ID:       1,
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 				}, nil)
 			},
 			expectedResponse: &pb.RegisterResponse{
-				UserId: 1,
+				UserId: "550e8400-e29b-41d4-a716-446655440000",
 			},
 			expectedError: nil,
 		},
@@ -159,7 +159,7 @@ func TestAuthController_Login(t *testing.T) {
 					Email:    "test@example.com",
 					Password: "password123",
 				}).Return(&models.User{
-					ID:    1,
+					ID:    "550e8400-e29b-41d4-a716-446655440000",
 					Email: "test@example.com",
 					Token: &models.UserToken{
 						AccessToken:    "access-token",
@@ -169,7 +169,7 @@ func TestAuthController_Login(t *testing.T) {
 				}, nil)
 			},
 			expectedResponse: &pb.LoginResponse{
-				UserId:       1,
+				UserId:       "550e8400-e29b-41d4-a716-446655440000",
 				AccessToken:  "access-token",
 				RefreshToken: "refresh-token",
 			},
@@ -299,10 +299,10 @@ func TestAuthController_Refresh(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, usecase *mocks.UsecaseMock) {
 				usecase.RefreshMock.Expect(ctx, dto.RefreshRequest{
-					UserID:       1, // hardcoded в методе Refresh
+					UserID:       "1", // hardcoded в методе Refresh (пока string "1", потом исправим на реальный UUID)
 					RefreshToken: "valid-refresh-token",
 				}).Return(&models.User{
-					ID:    1,
+					ID:    "550e8400-e29b-41d4-a716-446655440000",
 					Email: "test@example.com",
 					Token: &models.UserToken{
 						AccessToken:    "new-access-token",
@@ -312,7 +312,7 @@ func TestAuthController_Refresh(t *testing.T) {
 				}, nil)
 			},
 			expectedResponse: &pb.RefreshResponse{
-				UserId:       1,
+				UserId:       "550e8400-e29b-41d4-a716-446655440000",
 				AccessToken:  "new-access-token",
 				RefreshToken: "new-refresh-token",
 			},
@@ -325,7 +325,7 @@ func TestAuthController_Refresh(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, usecase *mocks.UsecaseMock) {
 				usecase.RefreshMock.Expect(ctx, dto.RefreshRequest{
-					UserID:       1,
+					UserID:       "1",
 					RefreshToken: "valid-refresh-token",
 				}).Return(nil, models.ErrNotFound)
 			},
@@ -339,7 +339,7 @@ func TestAuthController_Refresh(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, usecase *mocks.UsecaseMock) {
 				usecase.RefreshMock.Expect(ctx, dto.RefreshRequest{
-					UserID:       1,
+					UserID:       "1",
 					RefreshToken: "invalid-token",
 				}).Return(nil, errors.New("wrong token"))
 			},
@@ -353,7 +353,7 @@ func TestAuthController_Refresh(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, usecase *mocks.UsecaseMock) {
 				usecase.RefreshMock.Expect(ctx, dto.RefreshRequest{
-					UserID:       1,
+					UserID:       "1",
 					RefreshToken: "valid-refresh-token",
 				}).Return(nil, errors.New("database error"))
 			},

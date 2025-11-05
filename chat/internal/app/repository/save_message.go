@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 	"time"
 
 	"chat/internal/app/models"
@@ -38,9 +39,9 @@ func (r *Repository) SaveMessage(ctx context.Context, msg *models.Message) (*mod
 		conn := r.tm.GetQueryEngine(txCtx)
 
 		// Выполняем вставку сообщения и получаем сгенерированный ID
-		var messageID int64
+		var messageID string
 		if err := conn.Getx(txCtx, &messageID, insertMessageQuery); err != nil {
-			return fmt.Errorf("%s: %w", api, ConvertPGError(err))
+			return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 		}
 
 		msg.ID = models.MessageID(messageID)

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 	"time"
 
 	"chat/internal/app/models"
@@ -33,9 +34,9 @@ func (r *Repository) SaveChat(ctx context.Context, chatModel *models.Chat) (*mod
 		conn := r.tm.GetQueryEngine(txCtx)
 
 		// Выполняем вставку чата и получаем сгенерированный ID
-		var chatID int64
+		var chatID string
 		if err := conn.Getx(txCtx, &chatID, insertChatQuery); err != nil {
-			return fmt.Errorf("%s: %w", api, ConvertPGError(err))
+			return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 		}
 
 		chatModel.ID = models.ChatID(chatID)
@@ -51,7 +52,7 @@ func (r *Repository) SaveChat(ctx context.Context, chatModel *models.Chat) (*mod
 			}
 
 			if _, err := conn.Execx(txCtx, insertMembersQuery); err != nil {
-				return fmt.Errorf("%s: %w", api, ConvertPGError(err))
+				return fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 			}
 		}
 

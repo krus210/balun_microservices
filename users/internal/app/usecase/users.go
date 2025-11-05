@@ -12,7 +12,7 @@ type (
 	UsersRepository interface {
 		SaveUser(ctx context.Context, user *models.UserProfile) (*models.UserProfile, error)
 		UpdateUser(ctx context.Context, user *models.UserProfile) (*models.UserProfile, error)
-		GetUserByID(ctx context.Context, id int64) (*models.UserProfile, error)
+		GetUserByID(ctx context.Context, id string) (*models.UserProfile, error)
 		GetUserByNickname(ctx context.Context, nickname string) (*models.UserProfile, error)
 		SearchByNickname(ctx context.Context, query string, limit int64) ([]*models.UserProfile, error)
 	}
@@ -26,7 +26,7 @@ type Usecase interface {
 	UpdateProfile(ctx context.Context, req dto.UpdateProfileRequest) (*models.UserProfile, error)
 
 	// GetProfileByID получение пользователя по ID
-	GetProfileByID(ctx context.Context, id int64) (*models.UserProfile, error)
+	GetProfileByID(ctx context.Context, id string) (*models.UserProfile, error)
 
 	// GetProfileByNickname получение пользователя по никнейму
 	GetProfileByNickname(ctx context.Context, nickname string) (*models.UserProfile, error)

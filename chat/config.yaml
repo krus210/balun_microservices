@@ -1,0 +1,34 @@
+service:
+  name: chat
+  version: 1.0.0
+  environment: dev
+
+server:
+  grpc:
+    port: 8082
+
+database:
+  host: chat-db
+  port: 5432
+  name: chat
+  sslmode: disable
+  max_conn_idle_time: 1m
+
+users_service:
+  host: users
+  port: 8082
+
+secrets:
+  dev:
+    env_prefix: "APP_"
+    file_path: "./secrets.yaml"
+    vault:
+      enabled: false
+  prod:
+    env_prefix: "APP_"
+    file_path: "/etc/secrets/secrets.yaml"
+    vault:
+      enabled: true
+      address: "http://vault:8200"
+      mount_path: "secret"
+      secret_path: "chat/production"

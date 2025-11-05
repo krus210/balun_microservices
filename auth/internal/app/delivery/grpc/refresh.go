@@ -21,7 +21,7 @@ func (h *AuthController) Refresh(ctx context.Context, req *pb.RefreshRequest) (*
 	}
 
 	user, err := h.usecase.Refresh(ctx, dto.RefreshRequest{
-		UserID:       1, // TODO: получать из хедера
+		UserID:       "1", // TODO: получать из хедера (пока hardcoded string "1")
 		RefreshToken: req.RefreshToken,
 	})
 	if err != nil {

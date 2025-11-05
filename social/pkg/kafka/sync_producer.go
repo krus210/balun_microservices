@@ -8,14 +8,14 @@ import (
 )
 
 // NewSyncProducer создаёт идемпотентный sync-producer.
-func NewSyncProducer(brokers []string, cfg *sarama.Config) (sarama.SyncProducer, error) {
+func NewSyncProducer(brokers []string, clientID string, cfg *sarama.Config) (sarama.SyncProducer, error) {
 	if len(brokers) == 0 {
 		return nil, errors.New("kafka: empty brokers")
 	}
 
 	if cfg == nil {
 		cfg = sarama.NewConfig()
-		cfg.ClientID = "service-client"
+		cfg.ClientID = clientID
 		cfg.Version = sarama.DefaultVersion
 		cfg.Metadata.AllowAutoTopicCreation = true    // DEV = true, PROD = false
 		cfg.Producer.RequiredAcks = sarama.WaitForAll // ack = -1 (all)

@@ -4,21 +4,21 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
+
 	"auth/internal/app/models"
 )
 
 type UsersRepositoryStub struct {
 	mu     sync.RWMutex
-	users  map[int64]*models.User
+	users  map[string]*models.User
 	emails map[string]*models.User
-	nextID int64
 }
 
 func NewUsersRepositoryStub() *UsersRepositoryStub {
 	return &UsersRepositoryStub{
-		users:  make(map[int64]*models.User),
+		users:  make(map[string]*models.User),
 		emails: make(map[string]*models.User),
-		nextID: 1,
 	}
 }
 
@@ -31,11 +31,10 @@ func (r *UsersRepositoryStub) SaveUser(ctx context.Context, email, password stri
 	}
 
 	user := &models.User{
-		ID:       r.nextID,
+		ID:       uuid.NewString(),
 		Email:    email,
 		Password: password,
 	}
-	r.nextID++
 
 	r.users[user.ID] = user
 	r.emails[email] = user
@@ -69,7 +68,7 @@ func (r *UsersRepositoryStub) GetUserByEmail(ctx context.Context, email string) 
 	return user, nil
 }
 
-func (r *UsersRepositoryStub) GetUserByID(ctx context.Context, userID int64) (*models.User, error) {
+func (r *UsersRepositoryStub) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"lib/postgres"
 	"log"
 	"time"
 
 	appoutbox "social/internal/app/outbox/processor"
-	"social/pkg/postgres"
 )
 
 func (r *Repository) SaveEvent(ctx context.Context, e *appoutbox.Event) error {

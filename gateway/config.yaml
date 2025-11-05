@@ -1,0 +1,24 @@
+service:
+  name: gateway
+  version: 1.0.0
+  environment: dev
+
+server:
+  http:
+    port: 8080
+  grpc:
+    port: 8085
+
+services:
+  auth:
+    host: auth
+    port: 8082
+  users:
+    host: users
+    port: 8082
+  social:
+    host: social
+    port: 8082
+  chat:
+    host: chat
+    port: 8082

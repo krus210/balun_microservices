@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Apache Kafka broker
   kafka:
@@ -50,10 +48,39 @@ services:
     networks:
       - microservices
 
+  # HashiCorp Vault для управления секретами
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "dev-root-token"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    command: server -dev
+    volumes:
+      - ./docker/vault/data:/vault/data
+      - ./docker/vault/init.sh:/vault/init.sh
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices
+
   auth:
     build:
-      context: ./auth
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./auth/Dockerfile
+    environment:
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_GRPC_PORT: 8082
+      APP_USERS_SERVICE_HOST: users
+      APP_USERS_SERVICE_PORT: 8082
     ports:
       - "8081:8082"
     networks:
@@ -90,15 +117,18 @@ services:
 
   users:
     build:
-      context: ./users
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./users/Dockerfile
     environment:
-      DB_HOST: ${USERS_POSTGRES_HOST}
-      DB_PORT: 5432
-      DB_NAME: ${USERS_POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SSLMODE: disable
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_GRPC_PORT: 8082
+      APP_DATABASE_HOST: ${USERS_POSTGRES_HOST:-users-db}
+      APP_DATABASE_PORT: 5432
+      APP_DATABASE_NAME: ${USERS_POSTGRES_DB:-users}
+      APP_DATABASE_USER: ${POSTGRES_USER}
+      APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DATABASE_SSLMODE: disable
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       users-db:
         condition: service_healthy
@@ -138,17 +168,22 @@ services:
 
   social:
     build:
-      context: ./social
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./social/Dockerfile
     environment:
-      DB_HOST: ${SOCIAL_POSTGRES_HOST}
-      DB_PORT: 5432
-      DB_NAME: ${SOCIAL_POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SSLMODE: disable
-      KAFKA_BROKERS: kafka:29092
-      KAFKA_FRIEND_REQUEST_EVENTS_TOPIC_NAME: friend-request-events
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_GRPC_PORT: 8082
+      APP_DATABASE_HOST: ${SOCIAL_POSTGRES_HOST}
+      APP_DATABASE_PORT: 5432
+      APP_DATABASE_NAME: ${SOCIAL_POSTGRES_DB}
+      APP_DATABASE_USER: ${POSTGRES_USER}
+      APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DATABASE_SSLMODE: disable
+      APP_KAFKA_BROKERS: kafka:29092
+      APP_KAFKA_TOPICS_FRIEND_REQUEST_EVENTS: friend-request-events
+      APP_USERS_SERVICE_HOST: users
+      APP_USERS_SERVICE_PORT: 8082
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       kafka:
         condition: service_healthy
@@ -191,17 +226,22 @@ services:
 
   chat:
     build:
-      context: ./chat
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./chat/Dockerfile
     ports:
       - "8084:8082"
     environment:
-      DB_HOST: ${CHAT_POSTGRES_HOST}
-      DB_PORT: 5432
-      DB_NAME: ${CHAT_POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SSLMODE: disable
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_GRPC_PORT: 8082
+      APP_DATABASE_HOST: ${CHAT_POSTGRES_HOST}
+      APP_DATABASE_PORT: 5432
+      APP_DATABASE_NAME: ${CHAT_POSTGRES_DB}
+      APP_DATABASE_USER: ${POSTGRES_USER}
+      APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DATABASE_SSLMODE: disable
+      APP_USERS_SERVICE_HOST: users
+      APP_USERS_SERVICE_PORT: 8082
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       chat-db:
         condition: service_healthy
@@ -240,19 +280,21 @@ services:
 
   notifications:
     build:
-      context: ./notifications
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./notifications/Dockerfile
     ports:
       - "8079:8082"
     environment:
-      DB_HOST: ${NOTIFICATIONS_POSTGRES_HOST}
-      DB_PORT: 5432
-      DB_NAME: ${NOTIFICATIONS_POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SSLMODE: disable
-      KAFKA_BROKERS: kafka:29092
-      KAFKA_FRIEND_REQUEST_EVENTS_TOPIC_NAME: friend-request-events
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_DATABASE_HOST: ${NOTIFICATIONS_POSTGRES_HOST}
+      APP_DATABASE_PORT: 5432
+      APP_DATABASE_NAME: ${NOTIFICATIONS_POSTGRES_DB}
+      APP_DATABASE_USER: ${POSTGRES_USER}
+      APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DATABASE_SSLMODE: disable
+      APP_KAFKA_BROKERS: kafka:29092
+      APP_KAFKA_TOPICS_FRIEND_REQUEST_EVENTS: friend-request-events
+      APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
     depends_on:
       kafka:
         condition: service_healthy
@@ -263,8 +305,20 @@ services:
 
   gateway:
     build:
-      context: ./gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./gateway/Dockerfile
+    environment:
+      APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
+      APP_SERVER_HTTP_PORT: 8080
+      APP_SERVER_GRPC_PORT: 8085
+      APP_SERVICES_AUTH_HOST: auth
+      APP_SERVICES_AUTH_PORT: 8082
+      APP_SERVICES_USERS_HOST: users
+      APP_SERVICES_USERS_PORT: 8082
+      APP_SERVICES_SOCIAL_HOST: social
+      APP_SERVICES_SOCIAL_PORT: 8082
+      APP_SERVICES_CHAT_HOST: chat
+      APP_SERVICES_CHAT_PORT: 8082
     ports:
       - "8080:8080"
       - "8085:8085"

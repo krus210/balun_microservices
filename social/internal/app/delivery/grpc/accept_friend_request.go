@@ -22,7 +22,7 @@ func (h *SocialController) AcceptFriendRequest(ctx context.Context, req *pb.Acce
 	}
 
 	friendRequest, err := h.usecase.AcceptFriendRequest(ctx, dto.ChangeFriendRequestDto{
-		UserID:    models.UserID(1), // TODO: брать из хедера
+		UserID:    "1", // TODO: брать из хедера
 		RequestID: models.FriendRequestID(req.RequestId),
 	})
 	if err != nil {

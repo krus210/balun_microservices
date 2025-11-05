@@ -1,0 +1,12 @@
+service:
+  name: auth
+  version: 1.0.0
+  environment: dev
+
+server:
+  grpc:
+    port: 8082
+
+users_service:
+  host: users
+  port: 8082

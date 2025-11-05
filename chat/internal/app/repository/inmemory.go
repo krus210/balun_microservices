@@ -3,19 +3,18 @@ package repository
 import (
 	"context"
 	"sort"
-	"strconv"
 	"sync"
 	"time"
 
 	"chat/internal/app/models"
+
+	"github.com/google/uuid"
 )
 
 type InMemoryChatRepository struct {
-	mu           sync.RWMutex
-	chats        map[models.ChatID]*models.Chat
-	messages     map[models.ChatID][]*models.Message
-	chatIDSeq    models.ChatID
-	messageIDSeq models.MessageID
+	mu       sync.RWMutex
+	chats    map[models.ChatID]*models.Chat
+	messages map[models.ChatID][]*models.Message
 }
 
 func NewInMemoryChatRepository() *InMemoryChatRepository {
@@ -29,9 +28,8 @@ func (r *InMemoryChatRepository) SaveChat(ctx context.Context, chat *models.Chat
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if chat.ID == 0 {
-		r.chatIDSeq++
-		chat.ID = r.chatIDSeq
+	if chat.ID == "" {
+		chat.ID = models.ChatID(uuid.New().String())
 		chat.CreatedAt = time.Now()
 	}
 	chat.UpdatedAt = time.Now()
@@ -177,9 +175,8 @@ func (r *InMemoryChatRepository) SaveMessage(ctx context.Context, msg *models.Me
 		return nil, nil
 	}
 
-	if msg.ID == 0 {
-		r.messageIDSeq++
-		msg.ID = r.messageIDSeq
+	if msg.ID == "" {
+		msg.ID = models.MessageID(uuid.New().String())
 		msg.CreatedAt = time.Now()
 	}
 	msg.UpdatedAt = time.Now()
@@ -222,14 +219,9 @@ func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID models
 	// Find start position based on cursor
 	startIdx := 0
 	if cursor != nil && *cursor != "" {
-		cursorID, err := strconv.ParseInt(*cursor, 10, 64)
-		if err != nil {
-			return nil, nil, nil
-		}
-
 		// Find the position after the cursor
 		for i, msg := range sortedMessages {
-			if msg.ID == models.MessageID(cursorID) {
+			if msg.ID == models.MessageID(*cursor) {
 				startIdx = i + 1
 				break
 			}
@@ -258,7 +250,7 @@ func (r *InMemoryChatRepository) ListMessages(ctx context.Context, chatID models
 
 	// Set next cursor if there are more messages
 	if endIdx < len(sortedMessages) {
-		lastID := strconv.FormatInt(int64(result[len(result)-1].ID), 10)
+		lastID := string(result[len(result)-1].ID)
 		nextCursor = &lastID
 	}
 

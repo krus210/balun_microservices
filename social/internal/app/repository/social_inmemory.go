@@ -2,11 +2,11 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"sort"
-	"strconv"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 
 	"social/internal/app/models"
 )
@@ -14,13 +14,11 @@ import (
 type InMemorySocialRepository struct {
 	mu             sync.RWMutex
 	friendRequests map[models.FriendRequestID]*models.FriendRequest
-	nextID         models.FriendRequestID
 }
 
 func NewInMemorySocialRepository() *InMemorySocialRepository {
 	return &InMemorySocialRepository{
 		friendRequests: make(map[models.FriendRequestID]*models.FriendRequest),
-		nextID:         1,
 	}
 }
 
@@ -28,9 +26,10 @@ func (r *InMemorySocialRepository) SaveFriendRequest(ctx context.Context, req *m
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	// Генерируем UUID для новой заявки
+	req.ID = models.FriendRequestID(uuid.New().String())
+
 	now := time.Now()
-	req.ID = r.nextID
-	r.nextID++
 	req.CreatedAt = &now
 	req.UpdatedAt = &now
 
@@ -135,14 +134,11 @@ func (r *InMemorySocialRepository) applyPagination(requests []*models.FriendRequ
 
 	// Если есть курсор, находим позицию для начала
 	if cursor != nil && *cursor != "" {
-		cursorID, err := strconv.ParseInt(*cursor, 10, 64)
-		if err != nil {
-			return nil, nil, fmt.Errorf("invalid cursor: %w", err)
-		}
+		cursorID := models.FriendRequestID(*cursor)
 
 		startIdx = len(requests) // По умолчанию за пределами списка
 		for i, req := range requests {
-			if req.ID > models.FriendRequestID(cursorID) {
+			if req.ID > cursorID {
 				startIdx = i
 				break
 			}
@@ -165,7 +161,7 @@ func (r *InMemorySocialRepository) applyPagination(requests []*models.FriendRequ
 	// Формируем следующий курсор
 	var nextCursor *string
 	if len(result) > 0 && endIdx < len(requests) {
-		cursorStr := strconv.FormatInt(int64(result[len(result)-1].ID), 10)
+		cursorStr := string(result[len(result)-1].ID)
 		nextCursor = &cursorStr
 	}
 

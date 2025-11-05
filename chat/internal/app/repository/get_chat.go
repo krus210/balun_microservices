@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat"
@@ -23,7 +24,7 @@ func (r *Repository) GetChat(ctx context.Context, chatID models.ChatID) (*models
 	// Запрос для получения информации о чате
 	getChatQuery := r.sb.Select(chat.ChatsTableColumns...).
 		From(chat.ChatsTable).
-		Where(squirrel.Eq{chat.ChatsTableColumnID: int64(chatID)})
+		Where(squirrel.Eq{chat.ChatsTableColumnID: chatID})
 
 	// Выполняем запрос
 	var chatRow chat.Row
@@ -31,7 +32,7 @@ func (r *Repository) GetChat(ctx context.Context, chatID models.ChatID) (*models
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Конвертируем строку в модель
@@ -40,12 +41,12 @@ func (r *Repository) GetChat(ctx context.Context, chatID models.ChatID) (*models
 	// Запрос для получения участников чата
 	getMembersQuery := r.sb.Select(chat_member.ChatMembersTableColumns...).
 		From(chat_member.ChatMembersTable).
-		Where(squirrel.Eq{chat_member.ChatMembersTableColumnChatID: int64(chatID)})
+		Where(squirrel.Eq{chat_member.ChatMembersTableColumnChatID: chatID})
 
 	// Выполняем запрос для получения участников
 	var memberRows []chat_member.Row
 	if err := conn.Selectx(ctx, &memberRows, getMembersQuery); err != nil {
-		return nil, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	// Заполняем список участников

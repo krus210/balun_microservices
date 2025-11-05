@@ -3,8 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
-	"social/pkg/postgres"
-	"strconv"
+	"lib/postgres"
 
 	"social/internal/app/models"
 	"social/internal/app/repository/friend_request"
@@ -28,16 +27,12 @@ func (r *Repository) GetFriendRequestsByFromUserID(ctx context.Context, fromUser
 	// Собираем базовый запрос
 	listQuery := r.sb.Select(friend_request.FriendRequestsTableColumns...).
 		From(friend_request.FriendRequestsTable).
-		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnFromUserID: int64(fromUserID)}).
+		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnFromUserID: string(fromUserID)}).
 		OrderBy(friend_request.FriendRequestsTableColumnID + " DESC")
 
 	// Если есть cursor, добавляем фильтр по ID
 	if cursor != nil && *cursor != "" {
-		cursorID, err := strconv.ParseInt(*cursor, 10, 64)
-		if err != nil {
-			return nil, nil, fmt.Errorf("%s: invalid cursor: %w", GetFriendRequestsByFromUserIDApi, err)
-		}
-		listQuery = listQuery.Where(squirrel.Lt{friend_request.FriendRequestsTableColumnID: cursorID})
+		listQuery = listQuery.Where(squirrel.Lt{friend_request.FriendRequestsTableColumnID: *cursor})
 	}
 
 	// Запрашиваем limit + 1 записей, чтобы понять, есть ли еще данные
@@ -73,7 +68,7 @@ func (r *Repository) GetFriendRequestsByFromUserID(ctx context.Context, fromUser
 
 	// Если есть еще записи, устанавливаем nextCursor
 	if hasMore && len(result) > 0 {
-		lastID := strconv.FormatInt(int64(result[len(result)-1].ID), 10)
+		lastID := string(result[len(result)-1].ID)
 		nextCursor = &lastID
 	}
 

@@ -45,8 +45,7 @@ generate: .bin-deps .protoc-generate .tidy
 
 # Билд приложения
 build:
-	go build -o $(LOCAL_BIN) ./cmd/client
-	go build -o $(LOCAL_BIN) ./cmd/server
+	go build -o $(LOCAL_BIN) ./cmd
 
 # Объявляем, что текущие команды не являются файлами и
 # интсрументируем Makefile не искать изменения в файловой системе

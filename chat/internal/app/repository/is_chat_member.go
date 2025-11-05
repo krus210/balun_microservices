@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat_member"
@@ -21,14 +22,14 @@ func (r *Repository) IsChatMember(ctx context.Context, chatID models.ChatID, use
 	countQuery := r.sb.Select("COUNT(*)").
 		From(chat_member.ChatMembersTable).
 		Where(squirrel.Eq{
-			chat_member.ChatMembersTableColumnChatID: int64(chatID),
-			chat_member.ChatMembersTableColumnUserID: int64(userID),
+			chat_member.ChatMembersTableColumnChatID: chatID,
+			chat_member.ChatMembersTableColumnUserID: userID,
 		})
 
 	// Выполняем запрос
 	var count int
 	if err := conn.Getx(ctx, &count, countQuery); err != nil {
-		return false, fmt.Errorf("%s: %w", api, ConvertPGError(err))
+		return false, fmt.Errorf("%s: %w", api, postgres.ConvertPGError(err))
 	}
 
 	return count > 0, nil

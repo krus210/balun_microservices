@@ -1,8 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS public.chat_members (
-    chat_id BIGINT NOT NULL REFERENCES public.chats(id) ON DELETE CASCADE,
-    user_id BIGINT NOT NULL,
+    chat_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
     UNIQUE(chat_id, user_id)
 );
 

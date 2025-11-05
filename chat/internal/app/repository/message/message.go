@@ -8,10 +8,10 @@ import (
 
 // Row — «плоская» проекция строки таблицы messages
 type Row struct {
-	ID        int64     `db:"id"`
+	ID        string    `db:"id"`
 	Text      string    `db:"text"`
-	ChatID    int64     `db:"chat_id"`
-	OwnerID   int64     `db:"owner_id"`
+	ChatID    string    `db:"chat_id"`
+	OwnerID   string    `db:"owner_id"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
@@ -43,10 +43,10 @@ func FromModel(m *models.Message) Row {
 		return Row{}
 	}
 	return Row{
-		ID:        int64(m.ID),
+		ID:        string(m.ID),
 		Text:      m.Text,
-		ChatID:    int64(m.ChatID),
-		OwnerID:   int64(m.OwnerID),
+		ChatID:    string(m.ChatID),
+		OwnerID:   string(m.OwnerID),
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 	}

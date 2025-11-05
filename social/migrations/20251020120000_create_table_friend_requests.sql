@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS public.friend_requests (
-    id BIGSERIAL PRIMARY KEY,
-    from_user_id BIGINT NOT NULL,
-    to_user_id BIGINT NOT NULL,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    from_user_id TEXT NOT NULL,
+    to_user_id TEXT NOT NULL,
     status SMALLINT NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ

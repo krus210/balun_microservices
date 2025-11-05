@@ -32,11 +32,11 @@ enum FriendRequestStatus {
 // FriendRequest - заявка в друзья
 message FriendRequest {
   // requestId - идентификатор заявки
-  int64 requestId = 1;
+  string requestId = 1;
   // fromUserId - идентификатор пользователя, отправившего заявку
-  int64 fromUserId = 2;
+  string fromUserId = 2;
   // toUserId - идентификатор пользователя, получающего заявку
-  int64 toUserId = 3;
+  string toUserId = 3;
   // status - статус заявки
   FriendRequestStatus status = 4;
 }
@@ -44,7 +44,7 @@ message FriendRequest {
 // SendFriendRequestRequest - запрос SendFriendRequest
 message SendFriendRequestRequest {
   // toUserId - идентификатор пользователя, получающего заявку
-  int64 toUserId = 1;
+  string toUserId = 1;
 }
 
 // SendFriendRequestResponse - ответ SendFriendRequest
@@ -56,7 +56,7 @@ message SendFriendRequestResponse {
 // ListRequestsRequest - запрос ListRequests
 message ListRequestsRequest {
   // toUserId - идентификатор пользователя получающего заявку
-  int64 toUserId = 1;
+  string toUserId = 1;
 }
 
 // ListRequestsResponse - ответ ListRequests
@@ -68,7 +68,7 @@ message ListRequestsResponse {
 // AcceptFriendRequestRequest - запрос AcceptFriendRequest
 message AcceptFriendRequestRequest {
   // requestId - идентификатор заявки
-  int64 requestId = 1;
+  string requestId = 1;
 }
 
 // AcceptFriendRequestResponse - ответ AcceptFriendRequest
@@ -80,7 +80,7 @@ message AcceptFriendRequestResponse {
 // DeclineFriendRequestRequest - запрос DeclineFriendRequest
 message DeclineFriendRequestRequest {
   // requestId - идентификатор заявки
-  int64 requestId = 1;
+  string requestId = 1;
 }
 
 // DeclineFriendRequestResponse - ответ DeclineFriendRequest
@@ -92,7 +92,7 @@ message DeclineFriendRequestResponse {
 // RemoveFriendRequest - запрос RemoveFriend
 message RemoveFriendRequest {
   // userId - идентификатор пользователя для удаления из друзей
-  int64 userId = 1;
+  string userId = 1;
 }
 
 // RemoveFriendResponse - ответ RemoveFriend
@@ -103,7 +103,7 @@ message RemoveFriendResponse {
 // ListFriendsRequest - запрос ListFriends
 message ListFriendsRequest {
   // userId - идентификатор пользователя
-  int64 userId = 1;
+  string userId = 1;
   // limit - лимит результатов
   int64 limit = 2;
   // cursor - курсор для пагинации
@@ -113,7 +113,7 @@ message ListFriendsRequest {
 // ListFriendsResponse - ответ ListFriends
 message ListFriendsResponse {
   // friendUserIds - список идентификаторов друзей
-  repeated int64 friendUserIds = 1;
+  repeated string friendUserIds = 1;
   // nextCursor - следующий курсор для пагинации
   optional string nextCursor = 2;
 }

@@ -2,11 +2,11 @@ package models
 
 import "time"
 
-type UserID int64
+type UserID string
 
-type ChatID int64
+type ChatID string
 
-type MessageID int64
+type MessageID string
 
 type Message struct {
 	ID        MessageID

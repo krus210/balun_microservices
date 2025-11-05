@@ -31,14 +31,14 @@ func TestAuthService_Register(t *testing.T) {
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock, service *mocks.UsersServiceMock) {
 				repo.GetUserByEmailMock.Expect(ctx, "test@example.com").Return(nil, nil)
 				repo.SaveUserMock.Expect(ctx, "test@example.com", "password123").Return(&models.User{
-					ID:       1,
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 				}, nil)
-				service.CreateUserMock.Expect(ctx, int64(1), "test@example.com").Return(nil)
+				service.CreateUserMock.Expect(ctx, "550e8400-e29b-41d4-a716-446655440000", "test@example.com").Return(nil)
 			},
 			expectedUser: &models.User{
-				ID:       1,
+				ID:       "550e8400-e29b-41d4-a716-446655440000",
 				Email:    "test@example.com",
 				Password: "password123",
 			},
@@ -52,7 +52,7 @@ func TestAuthService_Register(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock, service *mocks.UsersServiceMock) {
 				repo.GetUserByEmailMock.Expect(ctx, "existing@example.com").Return(&models.User{
-					ID:    1,
+					ID:    "550e8400-e29b-41d4-a716-446655440000",
 					Email: "existing@example.com",
 				}, nil)
 			},
@@ -93,11 +93,11 @@ func TestAuthService_Register(t *testing.T) {
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock, service *mocks.UsersServiceMock) {
 				repo.GetUserByEmailMock.Expect(ctx, "test@example.com").Return(nil, nil)
 				repo.SaveUserMock.Expect(ctx, "test@example.com", "password123").Return(&models.User{
-					ID:       1,
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 				}, nil)
-				service.CreateUserMock.Expect(ctx, int64(1), "test@example.com").Return(errors.New("service error"))
+				service.CreateUserMock.Expect(ctx, "550e8400-e29b-41d4-a716-446655440000", "test@example.com").Return(errors.New("service error"))
 			},
 			expectedUser:  nil,
 			expectedError: errors.New("service error"),
@@ -147,7 +147,7 @@ func TestAuthService_Login(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
 				repo.GetUserByEmailMock.Expect(ctx, "test@example.com").Return(&models.User{
-					ID:       1,
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 				}, nil)
@@ -160,7 +160,7 @@ func TestAuthService_Login(t *testing.T) {
 				})
 			},
 			validateUser: func(t *testing.T, user *models.User) {
-				assert.Equal(t, int64(1), user.ID)
+				assert.Equal(t, "550e8400-e29b-41d4-a716-446655440000", user.ID)
 				assert.Equal(t, "test@example.com", user.Email)
 				require.NotNil(t, user.Token)
 				assert.NotEmpty(t, user.Token.AccessToken)
@@ -189,7 +189,7 @@ func TestAuthService_Login(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
 				repo.GetUserByEmailMock.Expect(ctx, "test@example.com").Return(&models.User{
-					ID:       1,
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 				}, nil)
@@ -217,7 +217,7 @@ func TestAuthService_Login(t *testing.T) {
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
 				repo.GetUserByEmailMock.Expect(ctx, "test@example.com").Return(&models.User{
-					ID:       1,
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 				}, nil)
@@ -268,12 +268,12 @@ func TestAuthService_Refresh(t *testing.T) {
 		{
 			name: "успешное обновление токена",
 			req: dto.RefreshRequest{
-				UserID:       1,
+				UserID:       "550e8400-e29b-41d4-a716-446655440000",
 				RefreshToken: validRefreshToken,
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
-				repo.GetUserByIDMock.Expect(ctx, int64(1)).Return(&models.User{
-					ID:       1,
+				repo.GetUserByIDMock.Expect(ctx, "550e8400-e29b-41d4-a716-446655440000").Return(&models.User{
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 					Token: &models.UserToken{
@@ -291,7 +291,7 @@ func TestAuthService_Refresh(t *testing.T) {
 				})
 			},
 			validateUser: func(t *testing.T, user *models.User) {
-				assert.Equal(t, int64(1), user.ID)
+				assert.Equal(t, "550e8400-e29b-41d4-a716-446655440000", user.ID)
 				assert.Equal(t, "test@example.com", user.Email)
 				require.NotNil(t, user.Token)
 				assert.NotEmpty(t, user.Token.AccessToken)
@@ -304,11 +304,11 @@ func TestAuthService_Refresh(t *testing.T) {
 		{
 			name: "пользователь не найден",
 			req: dto.RefreshRequest{
-				UserID:       999,
+				UserID:       "999e8400-e29b-41d4-a716-446655440099",
 				RefreshToken: validRefreshToken,
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
-				repo.GetUserByIDMock.Expect(ctx, int64(999)).Return(nil, nil)
+				repo.GetUserByIDMock.Expect(ctx, "999e8400-e29b-41d4-a716-446655440099").Return(nil, nil)
 			},
 			validateUser:  nil,
 			expectedError: models.ErrNotFound,
@@ -316,12 +316,12 @@ func TestAuthService_Refresh(t *testing.T) {
 		{
 			name: "неверный refresh token",
 			req: dto.RefreshRequest{
-				UserID:       1,
+				UserID:       "550e8400-e29b-41d4-a716-446655440000",
 				RefreshToken: "invalid-token",
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
-				repo.GetUserByIDMock.Expect(ctx, int64(1)).Return(&models.User{
-					ID:       1,
+				repo.GetUserByIDMock.Expect(ctx, "550e8400-e29b-41d4-a716-446655440000").Return(&models.User{
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 					Token: &models.UserToken{
@@ -337,11 +337,11 @@ func TestAuthService_Refresh(t *testing.T) {
 		{
 			name: "ошибка получения пользователя",
 			req: dto.RefreshRequest{
-				UserID:       1,
+				UserID:       "550e8400-e29b-41d4-a716-446655440000",
 				RefreshToken: validRefreshToken,
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
-				repo.GetUserByIDMock.Expect(ctx, int64(1)).Return(nil, errors.New("database error"))
+				repo.GetUserByIDMock.Expect(ctx, "550e8400-e29b-41d4-a716-446655440000").Return(nil, errors.New("database error"))
 			},
 			validateUser:  nil,
 			expectedError: errors.New("database error"),
@@ -349,12 +349,12 @@ func TestAuthService_Refresh(t *testing.T) {
 		{
 			name: "ошибка обновления токена",
 			req: dto.RefreshRequest{
-				UserID:       1,
+				UserID:       "550e8400-e29b-41d4-a716-446655440000",
 				RefreshToken: validRefreshToken,
 			},
 			setupMocks: func(ctx context.Context, repo *mocks.UsersRepositoryMock) {
-				repo.GetUserByIDMock.Expect(ctx, int64(1)).Return(&models.User{
-					ID:       1,
+				repo.GetUserByIDMock.Expect(ctx, "550e8400-e29b-41d4-a716-446655440000").Return(&models.User{
+					ID:       "550e8400-e29b-41d4-a716-446655440000",
 					Email:    "test@example.com",
 					Password: "password123",
 					Token: &models.UserToken{

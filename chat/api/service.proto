@@ -26,9 +26,9 @@ service ChatService {
 
 message Chat {
   // chatId - идентификатор чата
-  int64 chatId = 1;
+  string chatId = 1;
   // participantIds - список участников чата
-  repeated int64 participantIds = 2;
+  repeated string participantIds = 2;
   // createdAtUnixMs - время создания чата в миллисекундах
   int64 createdAtUnixMs = 3;
   // lastMessageUnixMs - время последнего сообщения в миллисекундах
@@ -37,11 +37,11 @@ message Chat {
 
 message Message {
   // messageId - идентификатор сообщения
-  int64 messageId = 1;
+  string messageId = 1;
   // chatId - идентификатор чата
-  int64 chatId = 2;
+  string chatId = 2;
   // userId - идентификатор отправителя
-  int64 userId = 3;
+  string userId = 3;
   // text - текст сообщения
   string text = 4;
   // sentAtUnixMs - время отправки в миллисекундах
@@ -51,19 +51,19 @@ message Message {
 // CreateDirectChatRequest - запрос CreateDirectChat
 message CreateDirectChatRequest {
   // participantId - идентификатор участника чата
-  int64 participantId = 1;
+  string participantId = 1;
 }
 
 // CreateDirectChatResponse - ответ CreateDirectChat
 message CreateDirectChatResponse {
   // chatId - идентификатор созданного чата
-    int64 chatId = 1;
+    string chatId = 1;
 }
 
 // GetChatRequest - запрос GetChat
 message GetChatRequest {
   // chatId - идентификатор чата
-  int64 chatId = 1;
+  string chatId = 1;
 }
 
 // GetChatResponse - ответ GetChat
@@ -75,7 +75,7 @@ message GetChatResponse {
 // ListUserChatsRequest - запрос ListUserChats
 message ListUserChatsRequest {
   // userId - идентификатор пользователя
-  int64 userId = 1;
+  string userId = 1;
 }
 
 // ListUserChatsResponse - ответ ListUserChats
@@ -87,19 +87,19 @@ message ListUserChatsResponse {
 // ListChatMembersRequest - запрос ListChatMembers
 message ListChatMembersRequest {
   // chatId - идентификатор чата
-  int64 chatId = 1;
+  string chatId = 1;
 }
 
 // ListChatMembersResponse - ответ ListChatMembers
 message ListChatMembersResponse {
   // userIds - список идентификаторов пользователей
-  repeated int64 userIds = 1;
+  repeated string userIds = 1;
 }
 
 // SendMessageRequest - запрос SendMessage
 message SendMessageRequest {
   // chatId - идентификатор чата
-  int64 chatId = 1;
+  string chatId = 1;
   // text - текст сообщения
   string text = 2 [
     (buf.validate.field).string = {
@@ -118,7 +118,7 @@ message SendMessageResponse {
 // ListMessagesRequest - запрос ListMessages
 message ListMessagesRequest {
   // chatId - идентификатор чата
-  int64 chatId = 1;
+  string chatId = 1;
   // limit - лимит результатов
   int64 limit = 2;
   // cursor - курсор для пагинации
@@ -136,7 +136,7 @@ message ListMessagesResponse {
 // StreamMessagesRequest - запрос StreamMessages
 message StreamMessagesRequest {
   // chatId - идентификатор чата
-  int64 chatId = 1;
+  string chatId = 1;
   // sinceUnixMs - время с которого получать сообщения в миллисекундах
   optional int64 sinceUnixMs = 2;
 }

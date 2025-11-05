@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"lib/postgres"
 
 	"users/internal/app/models"
 	"users/internal/app/repository/user"
@@ -15,7 +16,7 @@ import (
 const getUserByIDApi = "[Repository][GetUserByID]"
 
 // GetUserByID получает профиль пользователя по ID
-func (r *Repository) GetUserByID(ctx context.Context, id int64) (*models.UserProfile, error) {
+func (r *Repository) GetUserByID(ctx context.Context, id string) (*models.UserProfile, error) {
 	// Получаем QueryEngine из контекста (может быть транзакция или обычное соединение)
 	conn := r.tm.GetQueryEngine(ctx)
 
@@ -30,7 +31,7 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (*models.UserPro
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("%s: %w", getUserByIDApi, ConvertPGError(err))
+		return nil, fmt.Errorf("%s: %w", getUserByIDApi, postgres.ConvertPGError(err))
 	}
 
 	// Конвертируем строку в модель

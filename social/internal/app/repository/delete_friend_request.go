@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
-	"social/pkg/postgres"
+	"lib/postgres"
 
 	"social/internal/app/models"
 	"social/internal/app/repository/friend_request"
@@ -17,7 +17,7 @@ const deleteFriendRequestApi = "[Repository][DeleteFriendRequest]"
 func (r *Repository) DeleteFriendRequest(ctx context.Context, requestID models.FriendRequestID) error {
 	// Собираем запрос для удаления заявки
 	deleteQuery := r.sb.Delete(friend_request.FriendRequestsTable).
-		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnID: int64(requestID)})
+		Where(squirrel.Eq{friend_request.FriendRequestsTableColumnID: string(requestID)})
 
 	// Получаем QueryEngine из контекста
 	conn := r.tm.GetQueryEngine(ctx)
