@@ -5,36 +5,25 @@ package main
 
 import (
 	"context"
-	"lib/postgres"
 
+	lib "github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 	"users/internal/app/delivery/grpc"
 	"users/internal/app/repository"
 	"users/internal/app/usecase"
-	"users/internal/config"
 	errorsMiddleware "users/internal/middleware/errors"
 	pb "users/pkg/api"
 
 	"github.com/google/wire"
 	grpcLib "google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 // providePostgresConnection создает connection pool для postgres и cleanup функцию
-func providePostgresConnection(ctx context.Context, cfg *config.Config) (*postgres.Connection, func(), error) {
-	conn, _, err := postgres.New(ctx,
-		postgres.WithHost(cfg.Database.Host),
-		postgres.WithPort(cfg.Database.Port),
-		postgres.WithDatabase(cfg.Database.Name),
-		postgres.WithUser(cfg.Database.User),
-		postgres.WithPassword(cfg.Database.Password),
-		postgres.WithSSLMode(cfg.Database.SSLMode),
-		postgres.WithMaxConnIdleTime(cfg.Database.MaxConnIdleTime),
-	)
+func providePostgresConnection(ctx context.Context, cfg *config.StandardServiceConfig) (*postgres.Connection, func(), error) {
+	conn, cleanup, err := lib.InitPostgres(ctx, cfg.Database)
 	if err != nil {
 		return nil, nil, err
-	}
-	cleanup := func() {
-		conn.Close()
 	}
 	return conn, cleanup, nil
 }
@@ -56,21 +45,18 @@ func provideUsecase(repo usecase.UsersRepository) usecase.Usecase {
 
 // provideGRPCServer создает gRPC сервер с middleware и регистрирует контроллер
 func provideGRPCServer(controller *grpc.UsersController) *grpcLib.Server {
-	server := grpcLib.NewServer(
-		grpcLib.ChainUnaryInterceptor(
-			errorsMiddleware.ErrorsUnaryInterceptor(),
-		),
+	server := lib.InitGRPCServer(
+		errorsMiddleware.ErrorsUnaryInterceptor(),
 	)
 
 	pb.RegisterUsersServiceServer(server, controller)
-	reflection.Register(server)
 
 	return server
 }
 
 // InitializeApp - injector функция, которую сгенерирует Wire
 // Возвращает gRPC сервер и cleanup функцию для закрытия ресурсов
-func InitializeApp(ctx context.Context, cfg *config.Config) (*grpcLib.Server, func(), error) {
+func InitializeApp(ctx context.Context, cfg *config.StandardServiceConfig) (*grpcLib.Server, func(), error) {
 	wire.Build(
 		providePostgresConnection,
 		provideTransactionManager,

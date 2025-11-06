@@ -8,15 +8,15 @@ import (
 	"os/signal"
 	"syscall"
 
-	"users/internal/config"
+	"github.com/sskorolev/balun_microservices/lib/config"
 )
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	// Загружаем конфигурацию с интеграцией secrets
-	cfg, err := config.LoadWithSecrets(ctx)
+	// Загружаем конфигурацию напрямую через lib/config
+	cfg, err := config.LoadServiceConfig(ctx, "users")
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}

@@ -8,13 +8,13 @@ package main
 
 import (
 	"context"
+	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"lib/postgres"
 	grpc2 "users/internal/app/delivery/grpc"
 	"users/internal/app/repository"
 	"users/internal/app/usecase"
-	"users/internal/config"
 	"users/internal/middleware/errors"
 	"users/pkg/api"
 )
@@ -23,7 +23,7 @@ import (
 
 // InitializeApp - injector функция, которую сгенерирует Wire
 // Возвращает gRPC сервер и cleanup функцию для закрытия ресурсов
-func InitializeApp(ctx context.Context, cfg *config.Config) (*grpc.Server, func(), error) {
+func InitializeApp(ctx context.Context, cfg *config.StandardServiceConfig) (*grpc.Server, func(), error) {
 	connection, cleanup, err := providePostgresConnection(ctx, cfg)
 	if err != nil {
 		return nil, nil, err
@@ -41,13 +41,10 @@ func InitializeApp(ctx context.Context, cfg *config.Config) (*grpc.Server, func(
 // wire.go:
 
 // providePostgresConnection создает connection pool для postgres и cleanup функцию
-func providePostgresConnection(ctx context.Context, cfg *config.Config) (*postgres.Connection, func(), error) {
-	conn, _, err := postgres.New(ctx, postgres.WithHost(cfg.Database.Host), postgres.WithPort(cfg.Database.Port), postgres.WithDatabase(cfg.Database.Name), postgres.WithUser(cfg.Database.User), postgres.WithPassword(cfg.Database.Password), postgres.WithSSLMode(cfg.Database.SSLMode), postgres.WithMaxConnIdleTime(cfg.Database.MaxConnIdleTime))
+func providePostgresConnection(ctx context.Context, cfg *config.StandardServiceConfig) (*postgres.Connection, func(), error) {
+	conn, cleanup, err := app.InitPostgres(ctx, cfg.Database)
 	if err != nil {
 		return nil, nil, err
-	}
-	cleanup := func() {
-		conn.Close()
 	}
 	return conn, cleanup, nil
 }
@@ -69,9 +66,8 @@ func provideUsecase(repo usecase.UsersRepository) usecase.Usecase {
 
 // provideGRPCServer создает gRPC сервер с middleware и регистрирует контроллер
 func provideGRPCServer(controller *grpc2.UsersController) *grpc.Server {
-	server := grpc.NewServer(grpc.ChainUnaryInterceptor(errors.ErrorsUnaryInterceptor()))
+	server := app.InitGRPCServer(errors.ErrorsUnaryInterceptor())
 	proto_v1.RegisterUsersServiceServer(server, controller)
-	reflection.Register(server)
 
 	return server
 }

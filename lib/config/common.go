@@ -1,0 +1,82 @@
+package config
+
+import (
+	"fmt"
+	"time"
+)
+
+// ServiceConfig содержит общую информацию о сервисе
+type ServiceConfig struct {
+	Name        string `mapstructure:"name"`
+	Version     string `mapstructure:"version"`
+	Environment string `mapstructure:"environment"`
+}
+
+// ServerConfig содержит настройки серверов
+type ServerConfig struct {
+	HTTP *HTTPConfig `mapstructure:"http,omitempty"`
+	GRPC *GRPCConfig `mapstructure:"grpc,omitempty"`
+}
+
+// HTTPConfig содержит настройки HTTP сервера
+type HTTPConfig struct {
+	Port int `mapstructure:"port"`
+}
+
+// GRPCConfig содержит настройки gRPC сервера
+type GRPCConfig struct {
+	Port int `mapstructure:"port"`
+}
+
+// DatabaseConfig содержит настройки подключения к базе данных
+type DatabaseConfig struct {
+	Host            string        `mapstructure:"host"`
+	Port            int           `mapstructure:"port"`
+	Name            string        `mapstructure:"name"`
+	User            string        `mapstructure:"user"`
+	Password        string        `mapstructure:"password"`
+	SSLMode         string        `mapstructure:"sslmode"`
+	MaxConnIdleTime time.Duration `mapstructure:"max_conn_idle_time"`
+}
+
+// DSN возвращает строку подключения к PostgreSQL
+func (c DatabaseConfig) DSN() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		c.User, c.Password, c.Host, c.Port, c.Name, c.SSLMode,
+	)
+}
+
+// SecretsConfig содержит настройки провайдера секретов для разных окружений
+type SecretsConfig struct {
+	Dev  SecretsProviderConfig `mapstructure:"dev"`
+	Prod SecretsProviderConfig `mapstructure:"prod"`
+}
+
+// SecretsProviderConfig содержит настройки провайдера секретов
+type SecretsProviderConfig struct {
+	EnvPrefix string             `mapstructure:"env_prefix"`
+	FilePath  string             `mapstructure:"file_path"`
+	Vault     VaultSecretsConfig `mapstructure:"vault"`
+}
+
+// VaultSecretsConfig содержит настройки HashiCorp Vault
+type VaultSecretsConfig struct {
+	Enabled    bool   `mapstructure:"enabled"`
+	Address    string `mapstructure:"address"`
+	Token      string `mapstructure:"token"`
+	RoleID     string `mapstructure:"role_id"`
+	SecretID   string `mapstructure:"secret_id"`
+	MountPath  string `mapstructure:"mount_path"`
+	SecretPath string `mapstructure:"secret_path"`
+}
+
+// TargetServiceConfig содержит настройки подключения к зависимому сервису
+type TargetServiceConfig struct {
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
+}
+
+// Address возвращает полный адрес сервиса
+func (t TargetServiceConfig) Address() string {
+	return fmt.Sprintf("%s:%d", t.Host, t.Port)
+}
