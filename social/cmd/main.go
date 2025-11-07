@@ -3,28 +3,28 @@ package main
 import (
 	"context"
 	"fmt"
-	"lib/postgres"
 	"log"
 	"net"
 	"os/signal"
 	"syscall"
 
-	"social/internal/app/delivery/friend_request_handler"
-	"social/internal/config"
-	"social/pkg/kafka"
+	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"social/internal/app/adapters"
-	"social/internal/app/repository"
-	"social/internal/app/usecase"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
-
+	"social/internal/app/delivery/friend_request_handler"
 	deliveryGrpc "social/internal/app/delivery/grpc"
 	outboxProcessor "social/internal/app/outbox/processor"
 	outboxRepository "social/internal/app/outbox/repository"
+	"social/internal/app/repository"
+	"social/internal/app/usecase"
 	errorsMiddleware "social/internal/middleware/errors"
+	"social/pkg/kafka"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	socialPb "social/pkg/api"
 	usersPb "social/pkg/users/api"
 )
@@ -33,8 +33,8 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	// Загружаем конфигурацию с интеграцией secrets
-	cfg, err := config.LoadWithSecrets(ctx)
+	// Загружаем конфигурацию через lib/config с явным указанием всех компонентов
+	cfg, err := config.LoadServiceConfig(ctx, "social")
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
@@ -43,34 +43,31 @@ func main() {
 		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
 
 	// Подключаемся к Users сервису
-	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
+	usersAddr := cfg.UsersService.Address()
 	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
+	defer usersConn.Close()
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 
-	// Подключаемся к PostgreSQL
-	conn, txMngr, err := postgres.New(ctx,
-		postgres.WithHost(cfg.Database.Host),
-		postgres.WithPort(cfg.Database.Port),
-		postgres.WithDatabase(cfg.Database.Name),
-		postgres.WithUser(cfg.Database.User),
-		postgres.WithPassword(cfg.Database.Password),
-		postgres.WithSSLMode(cfg.Database.SSLMode),
-		postgres.WithMaxConnIdleTime(cfg.Database.MaxConnIdleTime),
-	)
+	// Инициализируем PostgreSQL через lib/app
+	conn, cleanup, err := app.InitPostgres(ctx, cfg.Database)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to init postgres: %v", err)
 	}
-	defer conn.Close()
+	defer cleanup()
+
+	// Создаем Transaction Manager
+	txMngr := postgres.NewTransactionManager(conn)
 
 	// Создаем Kafka producer
 	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, cfg.Kafka.ClientID, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to create kafka producer: %v", err)
 	}
+	defer producer.Close()
 
 	// Создаем обработчик событий заявок в друзья
 	friendRequestEventsHandler := friend_request_handler.NewKafkaFriendRequestBatchHandler(producer,
@@ -78,6 +75,7 @@ func main() {
 		friend_request_handler.WithTopic(cfg.Kafka.Topics.FriendRequestEvents),
 	)
 
+	// Инициализируем репозитории
 	friendRequestRepo := repository.NewRepository(txMngr)
 	outboxRepo := outboxRepository.NewRepository(txMngr)
 
@@ -91,11 +89,14 @@ func main() {
 
 	go worker.Run(ctx)
 
+	// Создаем use cases и controller
 	outboxProc := outboxProcessor.NewProcessor(outboxProcessor.Deps{Repository: outboxRepo})
-
 	socialUsecase := usecase.NewUsecase(usersClient, friendRequestRepo, outboxProc, txMngr)
-
 	controller := deliveryGrpc.NewSocialController(socialUsecase)
+
+	// Инициализируем gRPC сервер через lib/app
+	server := app.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
+	socialPb.RegisterSocialServiceServer(server, controller)
 
 	// Запускаем gRPC сервер
 	listenAddr := fmt.Sprintf(":%d", cfg.Server.GRPC.Port)
@@ -103,15 +104,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-
-	server := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			errorsMiddleware.ErrorsUnaryInterceptor(),
-		),
-	)
-	socialPb.RegisterSocialServiceServer(server, controller)
-
-	reflection.Register(server)
 
 	log.Printf("gRPC server listening at %v", lis.Addr())
 	if err := server.Serve(lis); err != nil {

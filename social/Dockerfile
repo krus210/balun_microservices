@@ -8,6 +8,8 @@ WORKDIR /app
 # Copy shared libraries
 COPY lib/postgres/ lib/postgres/
 COPY lib/secrets/ lib/secrets/
+COPY lib/config/ lib/config/
+COPY lib/app/ lib/app/
 
 # Copy social service
 COPY social/ social/

@@ -19,6 +19,12 @@ type serviceOptions struct {
 	grpcPort          int
 	secretsPathSuffix string
 	customDefaults    func(*viper.Viper)
+
+	// Опциональные компоненты
+	kafka                *KafkaConfig
+	outbox               *OutboxConfig
+	friendRequestHandler *FriendRequestHandlerConfig
+	usersService         *TargetServiceConfig
 }
 
 // WithDatabaseName устанавливает имя базы данных
@@ -46,6 +52,52 @@ func WithSecretsPathSuffix(suffix string) ServiceOption {
 func WithCustomDefaults(fn func(*viper.Viper)) ServiceOption {
 	return func(opts *serviceOptions) {
 		opts.customDefaults = fn
+	}
+}
+
+// WithKafka включает Kafka конфигурацию
+func WithKafka(brokers, clientID, friendRequestTopic string) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.kafka = &KafkaConfig{
+			Brokers:  brokers,
+			ClientID: clientID,
+			Topics: KafkaTopics{
+				FriendRequestEvents: friendRequestTopic,
+			},
+		}
+	}
+}
+
+// WithOutbox включает Outbox процессор конфигурацию
+func WithOutbox(batchSize, maxRetry int, retryInterval, window time.Duration) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.outbox = &OutboxConfig{
+			Processor: OutboxProcessorConfig{
+				BatchSize:     batchSize,
+				MaxRetry:      maxRetry,
+				RetryInterval: retryInterval,
+				Window:        window,
+			},
+		}
+	}
+}
+
+// WithFriendRequestHandler включает конфигурацию обработчика заявок в друзья
+func WithFriendRequestHandler(batchSize int) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.friendRequestHandler = &FriendRequestHandlerConfig{
+			BatchSize: batchSize,
+		}
+	}
+}
+
+// WithUsersService включает конфигурацию подключения к Users сервису
+func WithUsersService(host string, port int) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.usersService = &TargetServiceConfig{
+			Host: host,
+			Port: port,
+		}
 	}
 }
 
@@ -95,6 +147,29 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 			v.SetDefault("secrets.prod.vault.secret_path", options.secretsPathSuffix)
 		} else {
 			v.SetDefault("secrets.prod.vault.secret_path", fmt.Sprintf("%s/production", options.serviceName))
+		}
+
+		// Опциональные компоненты - defaults только если указаны через опции
+		if options.kafka != nil {
+			v.SetDefault("kafka.brokers", options.kafka.Brokers)
+			v.SetDefault("kafka.client_id", options.kafka.ClientID)
+			v.SetDefault("kafka.topics.friend_request_events", options.kafka.Topics.FriendRequestEvents)
+		}
+
+		if options.outbox != nil {
+			v.SetDefault("outbox.processor.batch_size", options.outbox.Processor.BatchSize)
+			v.SetDefault("outbox.processor.max_retry", options.outbox.Processor.MaxRetry)
+			v.SetDefault("outbox.processor.retry_interval", options.outbox.Processor.RetryInterval)
+			v.SetDefault("outbox.processor.window", options.outbox.Processor.Window)
+		}
+
+		if options.friendRequestHandler != nil {
+			v.SetDefault("friend_request_handler.batch_size", options.friendRequestHandler.BatchSize)
+		}
+
+		if options.usersService != nil {
+			v.SetDefault("users_service.host", options.usersService.Host)
+			v.SetDefault("users_service.port", options.usersService.Port)
 		}
 
 		// Вызываем кастомную функцию если она есть

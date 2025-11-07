@@ -85,3 +85,33 @@ func ValidateTargetServiceConfig(cfg TargetServiceConfig, prefix string) error {
 	}
 	return nil
 }
+
+// ValidateKafkaConfig валидирует KafkaConfig
+func ValidateKafkaConfig(cfg KafkaConfig) error {
+	if err := ValidateRequired(cfg.GetBrokers(), "kafka.brokers"); err != nil {
+		return err
+	}
+	if err := ValidateRequired(cfg.Topics.FriendRequestEvents, "kafka.topics.friend_request_events"); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ValidateOutboxConfig валидирует OutboxConfig
+func ValidateOutboxConfig(cfg OutboxConfig) error {
+	if err := ValidatePositive(cfg.Processor.BatchSize, "outbox.processor.batch_size"); err != nil {
+		return err
+	}
+	if err := ValidateNonNegative(cfg.Processor.MaxRetry, "outbox.processor.max_retry"); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ValidateFriendRequestHandlerConfig валидирует FriendRequestHandlerConfig
+func ValidateFriendRequestHandlerConfig(cfg FriendRequestHandlerConfig) error {
+	if err := ValidatePositive(cfg.BatchSize, "friend_request_handler.batch_size"); err != nil {
+		return err
+	}
+	return nil
+}

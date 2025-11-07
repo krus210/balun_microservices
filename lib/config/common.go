@@ -80,3 +80,38 @@ type TargetServiceConfig struct {
 func (t TargetServiceConfig) Address() string {
 	return fmt.Sprintf("%s:%d", t.Host, t.Port)
 }
+
+// KafkaConfig содержит настройки подключения к Apache Kafka
+type KafkaConfig struct {
+	Brokers  string      `mapstructure:"brokers"`
+	ClientID string      `mapstructure:"client_id"`
+	Topics   KafkaTopics `mapstructure:"topics"`
+}
+
+// KafkaTopics содержит названия топиков Kafka
+type KafkaTopics struct {
+	FriendRequestEvents string `mapstructure:"friend_request_events"`
+}
+
+// GetBrokers возвращает строку с адресами брокеров Kafka
+func (c KafkaConfig) GetBrokers() string {
+	return c.Brokers
+}
+
+// OutboxConfig содержит настройки Transactional Outbox процессора
+type OutboxConfig struct {
+	Processor OutboxProcessorConfig `mapstructure:"processor"`
+}
+
+// OutboxProcessorConfig содержит параметры работы outbox процессора
+type OutboxProcessorConfig struct {
+	BatchSize     int           `mapstructure:"batch_size"`
+	MaxRetry      int           `mapstructure:"max_retry"`
+	RetryInterval time.Duration `mapstructure:"retry_interval"`
+	Window        time.Duration `mapstructure:"window"`
+}
+
+// FriendRequestHandlerConfig содержит настройки обработчика заявок в друзья
+type FriendRequestHandlerConfig struct {
+	BatchSize int `mapstructure:"batch_size"`
+}
