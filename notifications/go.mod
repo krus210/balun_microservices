@@ -7,9 +7,11 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.21.0
+	github.com/sskorolev/balun_microservices/lib/app v0.0.0
+	github.com/sskorolev/balun_microservices/lib/config v0.0.0
+	github.com/sskorolev/balun_microservices/lib/postgres v0.0.0
 	github.com/sskorolev/balun_microservices/lib/secrets v0.0.0
 	golang.org/x/sync v0.17.0
-	lib/postgres v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -67,9 +69,16 @@ require (
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250102185135-69823020774d // indirect
+	google.golang.org/grpc v1.70.0 // indirect
+	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/sskorolev/balun_microservices/lib/secrets => ../lib/secrets
+replace github.com/sskorolev/balun_microservices/lib/app => ../lib/app
 
-replace lib/postgres => ../lib/postgres
+replace github.com/sskorolev/balun_microservices/lib/config => ../lib/config
+
+replace github.com/sskorolev/balun_microservices/lib/postgres => ../lib/postgres
+
+replace github.com/sskorolev/balun_microservices/lib/secrets => ../lib/secrets

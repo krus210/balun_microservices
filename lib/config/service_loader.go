@@ -22,9 +22,15 @@ type serviceOptions struct {
 
 	// Опциональные компоненты
 	kafka                *KafkaConfig
+	kafkaConsumer        *KafkaConsumerConfig
 	outbox               *OutboxConfig
 	friendRequestHandler *FriendRequestHandlerConfig
-	usersService         *TargetServiceConfig
+
+	// Подключения к другим сервисам
+	authService   *TargetServiceConfig
+	usersService  *TargetServiceConfig
+	socialService *TargetServiceConfig
+	chatService   *TargetServiceConfig
 }
 
 // WithDatabaseName устанавливает имя базы данных
@@ -68,6 +74,20 @@ func WithKafka(brokers, clientID, friendRequestTopic string) ServiceOption {
 	}
 }
 
+// WithKafkaConsumer включает Kafka consumer конфигурацию
+func WithKafkaConsumer(brokers, consumerGroupID, consumerName, friendRequestTopic string) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.kafkaConsumer = &KafkaConsumerConfig{
+			Brokers:         brokers,
+			ConsumerGroupID: consumerGroupID,
+			ConsumerName:    consumerName,
+			Topics: KafkaTopics{
+				FriendRequestEvents: friendRequestTopic,
+			},
+		}
+	}
+}
+
 // WithOutbox включает Outbox процессор конфигурацию
 func WithOutbox(batchSize, maxRetry int, retryInterval, window time.Duration) ServiceOption {
 	return func(opts *serviceOptions) {
@@ -91,10 +111,40 @@ func WithFriendRequestHandler(batchSize int) ServiceOption {
 	}
 }
 
+// WithAuthService включает конфигурацию подключения к Auth сервису
+func WithAuthService(host string, port int) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.authService = &TargetServiceConfig{
+			Host: host,
+			Port: port,
+		}
+	}
+}
+
 // WithUsersService включает конфигурацию подключения к Users сервису
 func WithUsersService(host string, port int) ServiceOption {
 	return func(opts *serviceOptions) {
 		opts.usersService = &TargetServiceConfig{
+			Host: host,
+			Port: port,
+		}
+	}
+}
+
+// WithSocialService включает конфигурацию подключения к Social сервису
+func WithSocialService(host string, port int) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.socialService = &TargetServiceConfig{
+			Host: host,
+			Port: port,
+		}
+	}
+}
+
+// WithChatService включает конфигурацию подключения к Chat сервису
+func WithChatService(host string, port int) ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.chatService = &TargetServiceConfig{
 			Host: host,
 			Port: port,
 		}
@@ -156,6 +206,13 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 			v.SetDefault("kafka.topics.friend_request_events", options.kafka.Topics.FriendRequestEvents)
 		}
 
+		if options.kafkaConsumer != nil {
+			v.SetDefault("kafka_consumer.brokers", options.kafkaConsumer.Brokers)
+			v.SetDefault("kafka_consumer.consumer_group_id", options.kafkaConsumer.ConsumerGroupID)
+			v.SetDefault("kafka_consumer.consumer_name", options.kafkaConsumer.ConsumerName)
+			v.SetDefault("kafka_consumer.topics.friend_request_events", options.kafkaConsumer.Topics.FriendRequestEvents)
+		}
+
 		if options.outbox != nil {
 			v.SetDefault("outbox.processor.batch_size", options.outbox.Processor.BatchSize)
 			v.SetDefault("outbox.processor.max_retry", options.outbox.Processor.MaxRetry)
@@ -167,9 +224,24 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 			v.SetDefault("friend_request_handler.batch_size", options.friendRequestHandler.BatchSize)
 		}
 
+		if options.authService != nil {
+			v.SetDefault("auth_service.host", options.authService.Host)
+			v.SetDefault("auth_service.port", options.authService.Port)
+		}
+
 		if options.usersService != nil {
 			v.SetDefault("users_service.host", options.usersService.Host)
 			v.SetDefault("users_service.port", options.usersService.Port)
+		}
+
+		if options.socialService != nil {
+			v.SetDefault("social_service.host", options.socialService.Host)
+			v.SetDefault("social_service.port", options.socialService.Port)
+		}
+
+		if options.chatService != nil {
+			v.SetDefault("chat_service.host", options.chatService.Host)
+			v.SetDefault("chat_service.port", options.chatService.Port)
 		}
 
 		// Вызываем кастомную функцию если она есть
@@ -197,9 +269,11 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
-	// Загружаем секреты
-	if err := LoadConfigWithSecrets(ctx, cfg, &databaseSecretsLoader{db: &cfg.Database}); err != nil {
-		return nil, err
+	// Загружаем секреты БД только если сервис использует базу данных
+	if cfg.Database != nil {
+		if err := LoadConfigWithSecrets(ctx, cfg, &databaseSecretsLoader{db: cfg.Database}); err != nil {
+			return nil, err
+		}
 	}
 
 	return cfg, nil

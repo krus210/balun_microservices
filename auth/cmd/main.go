@@ -1,15 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"net"
+	"os/signal"
+	"syscall"
+
+	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
 
 	"auth/internal/app/adapters"
 	deliveryGrpc "auth/internal/app/delivery/grpc"
 	"auth/internal/app/repository"
 	"auth/internal/app/usecase"
-	"auth/internal/config"
 	errorsMiddleware "auth/internal/middleware/errors"
 
 	authPb "auth/pkg/api"
@@ -17,11 +21,16 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
 )
 
 func main() {
-	cfg, err := config.Load()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	// Загружаем конфигурацию через lib/config
+	cfg, err := config.LoadServiceConfig(ctx, "auth",
+		config.WithUsersService("users", 8082),
+	)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
@@ -29,6 +38,7 @@ func main() {
 	log.Printf("Starting %s service (version: %s, environment: %s)",
 		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
 
+	// Подключаемся к Users сервису
 	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
 	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -44,23 +54,20 @@ func main() {
 
 	controller := deliveryGrpc.NewAuthController(authUsecase)
 
-	listenAddr := fmt.Sprintf(":%d", cfg.Server.GRPC.Port)
-	lis, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	server := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			errorsMiddleware.ErrorsUnaryInterceptor(),
-		),
+	// Создаем gRPC сервер через lib/app
+	server := app.InitGRPCServer(
+		errorsMiddleware.ErrorsUnaryInterceptor(),
 	)
 	authPb.RegisterAuthServiceServer(server, controller)
 
-	reflection.Register(server)
+	log.Printf("gRPC server listening on port %d", cfg.Server.GRPC.Port)
 
-	log.Printf("gRPC server listening at %v", lis.Addr())
-	if err := server.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	// Запускаем gRPC сервер через lib/app
+	if err := app.ServeGRPC(ctx, server, *cfg.Server.GRPC); err != nil {
+		if err == context.Canceled {
+			log.Println("shutdown")
+		} else {
+			log.Fatalf("failed to serve: %v", err)
+		}
 	}
 }

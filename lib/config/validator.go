@@ -115,3 +115,20 @@ func ValidateFriendRequestHandlerConfig(cfg FriendRequestHandlerConfig) error {
 	}
 	return nil
 }
+
+// ValidateKafkaConsumerConfig валидирует KafkaConsumerConfig
+func ValidateKafkaConsumerConfig(cfg KafkaConsumerConfig) error {
+	if err := ValidateRequired(cfg.GetBrokers(), "kafka_consumer.brokers"); err != nil {
+		return err
+	}
+	if err := ValidateRequired(cfg.ConsumerGroupID, "kafka_consumer.consumer_group_id"); err != nil {
+		return err
+	}
+	if err := ValidateRequired(cfg.ConsumerName, "kafka_consumer.consumer_name"); err != nil {
+		return err
+	}
+	if err := ValidateRequired(cfg.Topics.FriendRequestEvents, "kafka_consumer.topics.friend_request_events"); err != nil {
+		return err
+	}
+	return nil
+}

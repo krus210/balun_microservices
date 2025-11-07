@@ -9,7 +9,7 @@ import (
 )
 
 // InitPostgres создает и инициализирует PostgreSQL connection pool
-func InitPostgres(ctx context.Context, dbCfg config.DatabaseConfig) (*postgres.Connection, func(), error) {
+func InitPostgres(ctx context.Context, dbCfg *config.DatabaseConfig) (*postgres.Connection, func(), error) {
 	conn, _, err := postgres.New(ctx,
 		postgres.WithHost(dbCfg.Host),
 		postgres.WithPort(dbCfg.Port),

@@ -39,7 +39,7 @@ func NewApp(ctx context.Context, cfg config.Config, opts ...Option) (*App, error
 }
 
 // InitPostgres инициализирует PostgreSQL connection pool
-func (a *App) InitPostgres(ctx context.Context, dbCfg config.DatabaseConfig) error {
+func (a *App) InitPostgres(ctx context.Context, dbCfg *config.DatabaseConfig) error {
 	conn, cleanup, err := InitPostgres(ctx, dbCfg)
 	if err != nil {
 		return err

@@ -9,16 +9,18 @@ server:
   grpc:
     port: 8085
 
-services:
-  auth:
-    host: auth
-    port: 8082
-  users:
-    host: users
-    port: 8082
-  social:
-    host: social
-    port: 8082
-  chat:
-    host: chat
-    port: 8082
+auth_service:
+  host: auth
+  port: 8082
+
+users_service:
+  host: users
+  port: 8082
+
+social_service:
+  host: social
+  port: 8082
+
+chat_service:
+  host: chat
+  port: 8082

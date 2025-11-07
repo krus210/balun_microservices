@@ -115,3 +115,16 @@ type OutboxProcessorConfig struct {
 type FriendRequestHandlerConfig struct {
 	BatchSize int `mapstructure:"batch_size"`
 }
+
+// KafkaConsumerConfig содержит настройки Kafka consumer
+type KafkaConsumerConfig struct {
+	Brokers         string      `mapstructure:"brokers"`
+	ConsumerGroupID string      `mapstructure:"consumer_group_id"`
+	ConsumerName    string      `mapstructure:"consumer_name"`
+	Topics          KafkaTopics `mapstructure:"topics"`
+}
+
+// GetBrokers возвращает строку с адресами брокеров Kafka
+func (c KafkaConsumerConfig) GetBrokers() string {
+	return c.Brokers
+}

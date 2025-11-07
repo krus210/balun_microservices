@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os/signal"
 	"strings"
 	"sync"
 	"syscall"
 
-	"gateway/internal/config"
+	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
+
 	"gateway/pkg/api/auth"
 	"gateway/pkg/api/chat"
 	pb "gateway/pkg/api/gateway"
@@ -23,7 +24,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -36,7 +36,7 @@ type Server struct {
 	chatClient   chat.ChatServiceClient
 }
 
-func NewServer(cfg *config.Config) (*Server, func(), error) {
+func NewServer(cfg *config.StandardServiceConfig) (*Server, func(), error) {
 	var conns []*grpc.ClientConn
 
 	closeConns := func() {
@@ -47,7 +47,7 @@ func NewServer(cfg *config.Config) (*Server, func(), error) {
 		}
 	}
 
-	authAddr := fmt.Sprintf("%s:%d", cfg.Services.Auth.Host, cfg.Services.Auth.Port)
+	authAddr := fmt.Sprintf("%s:%d", cfg.AuthService.Host, cfg.AuthService.Port)
 	authConn, err := grpc.NewClient(authAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		closeConns()
@@ -55,7 +55,7 @@ func NewServer(cfg *config.Config) (*Server, func(), error) {
 	}
 	conns = append(conns, authConn)
 
-	usersAddr := fmt.Sprintf("%s:%d", cfg.Services.Users.Host, cfg.Services.Users.Port)
+	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
 	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		closeConns()
@@ -63,7 +63,7 @@ func NewServer(cfg *config.Config) (*Server, func(), error) {
 	}
 	conns = append(conns, usersConn)
 
-	socialAddr := fmt.Sprintf("%s:%d", cfg.Services.Social.Host, cfg.Services.Social.Port)
+	socialAddr := fmt.Sprintf("%s:%d", cfg.SocialService.Host, cfg.SocialService.Port)
 	socialConn, err := grpc.NewClient(socialAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		closeConns()
@@ -71,7 +71,7 @@ func NewServer(cfg *config.Config) (*Server, func(), error) {
 	}
 	conns = append(conns, socialConn)
 
-	chatAddr := fmt.Sprintf("%s:%d", cfg.Services.Chat.Host, cfg.Services.Chat.Port)
+	chatAddr := fmt.Sprintf("%s:%d", cfg.ChatService.Host, cfg.ChatService.Port)
 	chatConn, err := grpc.NewClient(chatAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		closeConns()
@@ -387,7 +387,13 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	cfg, err := config.Load()
+	// Загружаем конфигурацию через lib/config
+	cfg, err := config.LoadServiceConfig(ctx, "gateway",
+		config.WithAuthService("auth", 8082),
+		config.WithUsersService("users", 8082),
+		config.WithSocialService("social", 8082),
+		config.WithChatService("chat", 8082),
+	)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
@@ -402,27 +408,28 @@ func main() {
 	defer cleanup()
 
 	var wg sync.WaitGroup
+	errChan := make(chan error, 2)
 
+	// Запускаем gRPC сервер
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
-		grpcServer := grpc.NewServer()
+		// Создаем gRPC сервер через lib/app
+		grpcServer := app.InitGRPCServer()
 		pb.RegisterGatewayServiceServer(grpcServer, server)
 
-		reflection.Register(grpcServer)
+		log.Printf("Gateway gRPC Server listening on port %d", cfg.Server.GRPC.Port)
 
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.GRPC.Port))
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-		}
-
-		log.Printf("Gateway gRPC Server listening at %v", lis.Addr())
-		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+		// Запускаем gRPC сервер через lib/app
+		if err := app.ServeGRPC(ctx, grpcServer, *cfg.Server.GRPC); err != nil {
+			if err != context.Canceled {
+				errChan <- fmt.Errorf("grpc server error: %w", err)
+			}
 		}
 	}()
 
+	// Запускаем HTTP сервер
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -441,22 +448,33 @@ func main() {
 				return runtime.DefaultHeaderMatcher(strings.ToLower(key))
 			}),
 		)
-		if err = pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
-			log.Fatalf("failed to register gateway handler: %v", err)
+		if err := pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
+			errChan <- fmt.Errorf("failed to register gateway handler: %w", err)
+			return
 		}
 
-		httpServer := &http.Server{Handler: mux}
+		log.Printf("Gateway HTTP Server listening on port %d", cfg.Server.HTTP.Port)
 
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.HTTP.Port))
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-		}
-
-		log.Printf("Gateway HTTP Server listening at %v", lis.Addr())
-		if err := httpServer.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+		// Запускаем HTTP сервер через lib/app
+		if err := app.ServeHTTP(ctx, mux, *cfg.Server.HTTP); err != nil {
+			if err != context.Canceled {
+				errChan <- fmt.Errorf("http server error: %w", err)
+			}
 		}
 	}()
 
-	wg.Wait()
+	// Ждем завершения серверов или ошибки
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	// Если произошла ошибка, логируем её
+	for err := range errChan {
+		if err != nil {
+			log.Printf("Server error: %v", err)
+		}
+	}
+
+	log.Println("shutdown")
 }
