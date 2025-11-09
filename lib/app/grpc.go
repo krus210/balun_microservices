@@ -9,17 +9,34 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/grpc/server/interceptors"
 )
 
 // GRPCRegistrar определяет функцию для регистрации gRPC сервисов
 type GRPCRegistrar func(*grpc.Server)
 
-// InitGRPCServer создает новый gRPC сервер с настройками по умолчанию
-func InitGRPCServer(interceptors ...grpc.UnaryServerInterceptor) *grpc.Server {
-	opts := []grpc.ServerOption{}
+// InitGRPCServer создает новый gRPC сервер с настройками по умолчанию и встроенными интерсепторами
+func InitGRPCServer(cfg config.ServerConfig, customInterceptors ...grpc.UnaryServerInterceptor) *grpc.Server {
+	var interceptorChain []grpc.UnaryServerInterceptor
 
-	if len(interceptors) > 0 {
-		opts = append(opts, grpc.ChainUnaryInterceptor(interceptors...))
+	// 1. Panic recovery (всегда первый для перехвата любых паник)
+	interceptorChain = append(interceptorChain, interceptors.PanicRecoveryUnaryInterceptor())
+
+	// 2. Rate limit (если enabled)
+	if cfg.RateLimit != nil && cfg.RateLimit.Enabled {
+		interceptorChain = append(interceptorChain, interceptors.RateLimitUnaryInterceptor(*cfg.RateLimit))
+	}
+
+	// 3. Timeout (если enabled)
+	if cfg.Timeout != nil && cfg.Timeout.Enabled {
+		interceptorChain = append(interceptorChain, interceptors.TimeoutUnaryInterceptor(*cfg.Timeout))
+	}
+
+	// 4. Custom interceptors (например, ErrorsUnaryInterceptor)
+	interceptorChain = append(interceptorChain, customInterceptors...)
+
+	opts := []grpc.ServerOption{
+		grpc.ChainUnaryInterceptor(interceptorChain...),
 	}
 
 	server := grpc.NewServer(opts...)

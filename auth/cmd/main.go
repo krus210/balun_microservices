@@ -53,7 +53,7 @@ func main() {
 	controller := deliveryGrpc.NewAuthController(authUsecase)
 
 	// Инициализируем gRPC сервер
-	application.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
+	application.InitGRPCServer(cfg.Server, errorsMiddleware.ErrorsUnaryInterceptor())
 
 	// Регистрируем gRPC сервисы
 	application.RegisterGRPC(func(s *grpc.Server) {

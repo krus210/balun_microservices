@@ -6,6 +6,16 @@ service:
 server:
   grpc:
     port: 8082
+  timeout:
+    enabled: true
+    ignore: []
+    timeoutMs: 5000
+    paths: []
+  rateLimit:
+    enabled: true
+    ignore: []
+    reqPerSec: 1000
+    paths: []
 
 database:
   host: chat-db

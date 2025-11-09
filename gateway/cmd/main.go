@@ -375,7 +375,7 @@ func main() {
 	server := NewServer(application)
 
 	// Инициализируем gRPC сервер
-	application.InitGRPCServer()
+	application.InitGRPCServer(cfg.Server)
 
 	// Регистрируем gRPC сервисы
 	application.RegisterGRPC(func(s *grpc.Server) {

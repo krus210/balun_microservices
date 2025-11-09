@@ -8,6 +8,16 @@ server:
     port: 8080
   grpc:
     port: 8085
+  timeout:
+    enabled: true
+    ignore: []
+    timeoutMs: 5000
+    paths: []
+  rateLimit:
+    enabled: true
+    ignore: []
+    reqPerSec: 1000
+    paths: []
 
 auth_service:
   host: auth

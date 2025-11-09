@@ -37,7 +37,7 @@ func main() {
 	controller := deliveryGrpc.NewUsersController(container.Usecase)
 
 	// Инициализируем gRPC сервер
-	container.App.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
+	container.App.InitGRPCServer(cfg.Server, errorsMiddleware.ErrorsUnaryInterceptor())
 
 	// Регистрируем gRPC сервисы
 	container.App.RegisterGRPC(func(s *grpc.Server) {

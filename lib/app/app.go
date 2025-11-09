@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -70,8 +71,8 @@ func (a *App) TransactionManager() postgres.TransactionManagerAPI {
 }
 
 // InitGRPCServer инициализирует gRPC сервер
-func (a *App) InitGRPCServer(interceptors ...grpc.UnaryServerInterceptor) {
-	a.grpcServer = InitGRPCServer(interceptors...)
+func (a *App) InitGRPCServer(cfg config.ServerConfig, customInterceptors ...grpc.UnaryServerInterceptor) {
+	a.grpcServer = InitGRPCServer(cfg, customInterceptors...)
 	log.Println("gRPC server initialized")
 }
 
@@ -159,7 +160,7 @@ func (a *App) RunBoth(ctx context.Context, grpcCfg config.GRPCConfig, httpCfg co
 		defer wg.Done()
 		log.Printf("gRPC server starting on port %d", grpcCfg.Port)
 		if err := ServeGRPC(ctx, a.grpcServer, grpcCfg); err != nil {
-			if err != context.Canceled {
+			if !errors.Is(err, context.Canceled) {
 				errChan <- fmt.Errorf("gRPC server error: %w", err)
 			}
 		}
@@ -171,7 +172,7 @@ func (a *App) RunBoth(ctx context.Context, grpcCfg config.GRPCConfig, httpCfg co
 		defer wg.Done()
 		log.Printf("HTTP server starting on port %d", httpCfg.Port)
 		if err := ServeHTTP(ctx, a.httpHandler, httpCfg); err != nil {
-			if err != context.Canceled {
+			if !errors.Is(err, context.Canceled) {
 				errChan <- fmt.Errorf("HTTP server error: %w", err)
 			}
 		}

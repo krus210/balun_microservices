@@ -59,7 +59,7 @@ func main() {
 	controller := deliveryGrpc.NewChatController(chatUsecase)
 
 	// Инициализируем gRPC сервер
-	application.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
+	application.InitGRPCServer(cfg.Server, errorsMiddleware.ErrorsUnaryInterceptor())
 
 	// Регистрируем gRPC сервисы
 	application.RegisterGRPC(func(s *grpc.Server) {

@@ -14,8 +14,10 @@ type ServiceConfig struct {
 
 // ServerConfig содержит настройки серверов
 type ServerConfig struct {
-	HTTP *HTTPConfig `mapstructure:"http,omitempty"`
-	GRPC *GRPCConfig `mapstructure:"grpc,omitempty"`
+	HTTP      *HTTPConfig      `mapstructure:"http,omitempty"`
+	GRPC      *GRPCConfig      `mapstructure:"grpc,omitempty"`
+	Timeout   *TimeoutConfig   `mapstructure:"timeout,omitempty"`
+	RateLimit *RateLimitConfig `mapstructure:"rateLimit,omitempty"`
 }
 
 // HTTPConfig содержит настройки HTTP сервера
@@ -157,4 +159,32 @@ type KafkaConsumerConfig struct {
 // GetBrokers возвращает строку с адресами брокеров Kafka
 func (c KafkaConsumerConfig) GetBrokers() string {
 	return c.Brokers
+}
+
+// TimeoutConfig содержит настройки timeout интерсептора
+type TimeoutConfig struct {
+	Enabled   bool                `mapstructure:"enabled"`
+	Ignore    []string            `mapstructure:"ignore"`
+	TimeoutMs int                 `mapstructure:"timeoutMs"`
+	Paths     []TimeoutPathConfig `mapstructure:"paths"`
+}
+
+// TimeoutPathConfig содержит переопределенный таймаут для конкретного метода
+type TimeoutPathConfig struct {
+	Path      string `mapstructure:"path"`
+	TimeoutMs int    `mapstructure:"timeoutMs"`
+}
+
+// RateLimitConfig содержит настройки rate limit интерсептора
+type RateLimitConfig struct {
+	Enabled   bool                  `mapstructure:"enabled"`
+	Ignore    []string              `mapstructure:"ignore"`
+	ReqPerSec int                   `mapstructure:"reqPerSec"`
+	Paths     []RateLimitPathConfig `mapstructure:"paths"`
+}
+
+// RateLimitPathConfig содержит переопределенный rate limit для конкретного метода
+type RateLimitPathConfig struct {
+	Path      string `mapstructure:"path"`
+	ReqPerSec int    `mapstructure:"reqPerSec"`
 }
