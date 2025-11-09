@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
-	"net"
 	"os/signal"
 	"syscall"
 
+	"google.golang.org/grpc"
+
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
-	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"social/internal/app/adapters"
 	"social/internal/app/delivery/friend_request_handler"
@@ -36,27 +36,23 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
-
-	// Подключаемся к Users сервису
-	usersConn, usersCleanup, err := app.InitGRPCClient(ctx, cfg.UsersService)
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		log.Fatalf("failed to connect to users service: %v", err)
+		log.Fatalf("failed to create app: %v", err)
 	}
-	defer usersCleanup()
 
-	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
-
-	// Инициализируем PostgreSQL через lib/app
-	conn, cleanup, err := app.InitPostgres(ctx, cfg.Database)
-	if err != nil {
+	// Инициализируем PostgreSQL
+	if err := application.InitPostgres(ctx, cfg.Database); err != nil {
 		log.Fatalf("failed to init postgres: %v", err)
 	}
-	defer cleanup()
 
-	// Создаем Transaction Manager
-	txMngr := postgres.NewTransactionManager(conn)
+	// Подключаемся к Users сервису
+	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
+		log.Fatalf("failed to connect to users service: %v", err)
+	}
+
+	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(application.GetGRPCClient("users")))
 
 	// Создаем Kafka producer
 	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, cfg.Kafka.ClientID, nil)
@@ -72,11 +68,11 @@ func main() {
 	)
 
 	// Инициализируем репозитории
-	friendRequestRepo := repository.NewRepository(txMngr)
-	outboxRepo := outboxRepository.NewRepository(txMngr)
+	friendRequestRepo := repository.NewRepository(application.TransactionManager())
+	outboxRepo := outboxRepository.NewRepository(application.TransactionManager())
 
 	// Создаем и запускаем outbox worker
-	worker := outboxProcessor.NewOutboxFriendRequestWorker(outboxRepo, txMngr, friendRequestEventsHandler,
+	worker := outboxProcessor.NewOutboxFriendRequestWorker(outboxRepo, application.TransactionManager(), friendRequestEventsHandler,
 		outboxProcessor.WithBatchSize(cfg.Outbox.Processor.BatchSize),
 		outboxProcessor.WithMaxRetry(cfg.Outbox.Processor.MaxRetry),
 		outboxProcessor.WithRetryInterval(cfg.Outbox.Processor.RetryInterval),
@@ -87,22 +83,21 @@ func main() {
 
 	// Создаем use cases и controller
 	outboxProc := outboxProcessor.NewProcessor(outboxProcessor.Deps{Repository: outboxRepo})
-	socialUsecase := usecase.NewUsecase(usersClient, friendRequestRepo, outboxProc, txMngr)
+	socialUsecase := usecase.NewUsecase(usersClient, friendRequestRepo, outboxProc, application.TransactionManager())
 	controller := deliveryGrpc.NewSocialController(socialUsecase)
 
-	// Инициализируем gRPC сервер через lib/app
-	server := app.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
-	socialPb.RegisterSocialServiceServer(server, controller)
+	// Инициализируем gRPC сервер
+	application.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
 
-	// Запускаем gRPC сервер
-	listenAddr := fmt.Sprintf(":%d", cfg.Server.GRPC.Port)
-	lis, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+	// Регистрируем gRPC сервисы
+	application.RegisterGRPC(func(s *grpc.Server) {
+		socialPb.RegisterSocialServiceServer(s, controller)
+	})
 
-	log.Printf("gRPC server listening at %v", lis.Addr())
-	if err := server.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	// Запускаем приложение
+	if err := application.Run(ctx, *cfg.Server.GRPC); err != nil {
+		if !errors.Is(err, context.Canceled) {
+			log.Fatalf("failed to serve: %v", err)
+		}
 	}
 }

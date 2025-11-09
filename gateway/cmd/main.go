@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
+
+	"google.golang.org/grpc"
 
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
@@ -34,56 +34,13 @@ type Server struct {
 	chatClient   chat.ChatServiceClient
 }
 
-func NewServer(cfg *config.StandardServiceConfig) (*Server, func(), error) {
-	ctx := context.Background()
-	var cleanups []func()
-
-	allCleanup := func() {
-		for _, cleanup := range cleanups {
-			cleanup()
-		}
+func NewServer(application *app.App) *Server {
+	return &Server{
+		authClient:   auth.NewAuthServiceClient(application.GetGRPCClient("auth")),
+		usersClient:  users.NewUsersServiceClient(application.GetGRPCClient("users")),
+		socialClient: social.NewSocialServiceClient(application.GetGRPCClient("social")),
+		chatClient:   chat.NewChatServiceClient(application.GetGRPCClient("chat")),
 	}
-
-	// Создаем подключение к Auth Service
-	authConn, authCleanup, err := app.InitGRPCClient(ctx, cfg.AuthService)
-	if err != nil {
-		allCleanup()
-		return nil, nil, fmt.Errorf("failed to connect to auth service: %w", err)
-	}
-	cleanups = append(cleanups, authCleanup)
-
-	// Создаем подключение к Users Service
-	usersConn, usersCleanup, err := app.InitGRPCClient(ctx, cfg.UsersService)
-	if err != nil {
-		allCleanup()
-		return nil, nil, fmt.Errorf("failed to connect to users service: %w", err)
-	}
-	cleanups = append(cleanups, usersCleanup)
-
-	// Создаем подключение к Social Service
-	socialConn, socialCleanup, err := app.InitGRPCClient(ctx, cfg.SocialService)
-	if err != nil {
-		allCleanup()
-		return nil, nil, fmt.Errorf("failed to connect to social service: %w", err)
-	}
-	cleanups = append(cleanups, socialCleanup)
-
-	// Создаем подключение к Chat Service
-	chatConn, chatCleanup, err := app.InitGRPCClient(ctx, cfg.ChatService)
-	if err != nil {
-		allCleanup()
-		return nil, nil, fmt.Errorf("failed to connect to chat service: %w", err)
-	}
-	cleanups = append(cleanups, chatCleanup)
-
-	srv := &Server{
-		authClient:   auth.NewAuthServiceClient(authConn),
-		usersClient:  users.NewUsersServiceClient(usersConn),
-		socialClient: social.NewSocialServiceClient(socialConn),
-		chatClient:   chat.NewChatServiceClient(chatConn),
-	}
-
-	return srv, allCleanup, nil
 }
 
 // customHTTPError обрабатывает gRPC ошибки и возвращает соответствующие HTTP коды
@@ -391,83 +348,65 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
-
-	server, cleanup, err := NewServer(cfg)
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		log.Fatalf("failed to create Server: %v", err)
-	}
-	defer cleanup()
-
-	var wg sync.WaitGroup
-	errChan := make(chan error, 2)
-
-	// Запускаем gRPC сервер
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		// Создаем gRPC сервер через lib/app
-		grpcServer := app.InitGRPCServer()
-		pb.RegisterGatewayServiceServer(grpcServer, server)
-
-		log.Printf("Gateway gRPC Server listening on port %d", cfg.Server.GRPC.Port)
-
-		// Запускаем gRPC сервер через lib/app
-		if err := app.ServeGRPC(ctx, grpcServer, *cfg.Server.GRPC); err != nil {
-			if err != context.Canceled {
-				errChan <- fmt.Errorf("grpc server error: %w", err)
-			}
-		}
-	}()
-
-	// Запускаем HTTP сервер
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		// Создаем ServeMux с кастомным обработчиком ошибок
-		mux := runtime.NewServeMux(
-			runtime.WithErrorHandler(customHTTPError),
-			runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
-				// Пробрасываем idempotency-key в metadata
-				// HTTP заголовки приходят в разных регистрах
-				switch key {
-				case "Idempotency-Key", "idempotency-key", "X-Idempotency-Key", "x-idempotency-key":
-					return "idempotency-key", true
-				}
-				// Стандартные заголовки (Authorization и т.д.)
-				return runtime.DefaultHeaderMatcher(strings.ToLower(key))
-			}),
-		)
-		if err := pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
-			errChan <- fmt.Errorf("failed to register gateway handler: %w", err)
-			return
-		}
-
-		log.Printf("Gateway HTTP Server listening on port %d", cfg.Server.HTTP.Port)
-
-		// Запускаем HTTP сервер через lib/app
-		if err := app.ServeHTTP(ctx, mux, *cfg.Server.HTTP); err != nil {
-			if err != context.Canceled {
-				errChan <- fmt.Errorf("http server error: %w", err)
-			}
-		}
-	}()
-
-	// Ждем завершения серверов или ошибки
-	go func() {
-		wg.Wait()
-		close(errChan)
-	}()
-
-	// Если произошла ошибка, логируем её
-	for err := range errChan {
-		if err != nil {
-			log.Printf("Server error: %v", err)
-		}
+		log.Fatalf("failed to create app: %v", err)
 	}
 
-	log.Println("shutdown")
+	// Инициализируем gRPC клиенты для всех сервисов
+	if err := application.InitGRPCClient(ctx, "auth", cfg.AuthService); err != nil {
+		log.Fatalf("failed to connect to auth service: %v", err)
+	}
+
+	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
+		log.Fatalf("failed to connect to users service: %v", err)
+	}
+
+	if err := application.InitGRPCClient(ctx, "social", cfg.SocialService); err != nil {
+		log.Fatalf("failed to connect to social service: %v", err)
+	}
+
+	if err := application.InitGRPCClient(ctx, "chat", cfg.ChatService); err != nil {
+		log.Fatalf("failed to connect to chat service: %v", err)
+	}
+
+	// Создаем Server с клиентами
+	server := NewServer(application)
+
+	// Инициализируем gRPC сервер
+	application.InitGRPCServer()
+
+	// Регистрируем gRPC сервисы
+	application.RegisterGRPC(func(s *grpc.Server) {
+		pb.RegisterGatewayServiceServer(s, server)
+	})
+
+	// Создаем HTTP ServeMux с кастомным обработчиком ошибок
+	mux := runtime.NewServeMux(
+		runtime.WithErrorHandler(customHTTPError),
+		runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
+			// Пробрасываем idempotency-key в metadata
+			// HTTP заголовки приходят в разных регистрах
+			switch key {
+			case "Idempotency-Key", "idempotency-key", "X-Idempotency-Key", "x-idempotency-key":
+				return "idempotency-key", true
+			}
+			// Стандартные заголовки (Authorization и т.д.)
+			return runtime.DefaultHeaderMatcher(strings.ToLower(key))
+		}),
+	)
+	if err := pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
+		log.Fatalf("failed to register gateway handler: %v", err)
+	}
+
+	// Инициализируем HTTP handler
+	application.InitHTTPServer(mux)
+
+	// Запускаем оба сервера (HTTP и gRPC) параллельно
+	if err := application.RunBoth(ctx, *cfg.Server.GRPC, *cfg.Server.HTTP); err != nil {
+		if err != context.Canceled {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}
 }

@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os/signal"
 	"syscall"
 
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
+	"google.golang.org/grpc"
 
 	"auth/internal/app/adapters"
 	deliveryGrpc "auth/internal/app/delivery/grpc"
@@ -31,17 +33,18 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
+	if err != nil {
+		log.Fatalf("failed to create app: %v", err)
+	}
 
 	// Подключаемся к Users сервису
-	usersConn, usersCleanup, err := app.InitGRPCClient(ctx, cfg.UsersService)
-	if err != nil {
+	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
-	defer usersCleanup()
 
-	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
+	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(application.GetGRPCClient("users")))
 
 	repo := repository.NewUsersRepositoryStub()
 
@@ -49,19 +52,17 @@ func main() {
 
 	controller := deliveryGrpc.NewAuthController(authUsecase)
 
-	// Создаем gRPC сервер через lib/app
-	server := app.InitGRPCServer(
-		errorsMiddleware.ErrorsUnaryInterceptor(),
-	)
-	authPb.RegisterAuthServiceServer(server, controller)
+	// Инициализируем gRPC сервер
+	application.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
 
-	log.Printf("gRPC server listening on port %d", cfg.Server.GRPC.Port)
+	// Регистрируем gRPC сервисы
+	application.RegisterGRPC(func(s *grpc.Server) {
+		authPb.RegisterAuthServiceServer(s, controller)
+	})
 
-	// Запускаем gRPC сервер через lib/app
-	if err := app.ServeGRPC(ctx, server, *cfg.Server.GRPC); err != nil {
-		if err == context.Canceled {
-			log.Println("shutdown")
-		} else {
+	// Запускаем приложение
+	if err := application.Run(ctx, *cfg.Server.GRPC); err != nil {
+		if !errors.Is(err, context.Canceled) {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}

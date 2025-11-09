@@ -10,7 +10,6 @@ import (
 
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
-	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"notifications/internal/app/consumer"
 	"notifications/internal/app/delivery"
@@ -31,8 +30,16 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
+	if err != nil {
+		log.Fatalf("failed to create app: %v", err)
+	}
+
+	// Инициализируем PostgreSQL
+	if err := application.InitPostgres(ctx, cfg.Database); err != nil {
+		log.Fatalf("failed to init postgres: %v", err)
+	}
 
 	// Загружаем конфигурацию workers
 	workersCfg, err := workersConfig.Load()
@@ -40,17 +47,7 @@ func main() {
 		log.Fatalf("failed to load workers config: %v", err)
 	}
 
-	// Инициализируем PostgreSQL через lib/app
-	conn, cleanup, err := app.InitPostgres(ctx, cfg.Database)
-	if err != nil {
-		log.Fatalf("failed to init postgres: %v", err)
-	}
-	defer cleanup()
-
-	// Создаем Transaction Manager
-	txMngr := postgres.NewTransactionManager(conn)
-
-	inboxRepo := repository.NewRepository(txMngr)
+	inboxRepo := repository.NewRepository(application.TransactionManager())
 
 	handler := delivery.NewInboxHandler(inboxRepo)
 
@@ -71,7 +68,7 @@ func main() {
 	g, gCtx := errgroup.WithContext(ctx)
 
 	// Запускаем воркер сохранения событий с настройками из конфигурации
-	saveEventsWorker := worker.NewSaveEventsWorker(inboxRepo, txMngr).
+	saveEventsWorker := worker.NewSaveEventsWorker(inboxRepo, application.TransactionManager()).
 		WithTickInterval(workersCfg.SaveEvents.Interval).
 		WithBatchSize(workersCfg.SaveEvents.BatchSize)
 	g.Go(func() error {
@@ -80,7 +77,7 @@ func main() {
 	})
 
 	// Запускаем воркер удаления старых событий с настройками из конфигурации
-	deleteWorker := worker.NewDeleteWorker(inboxRepo, txMngr).
+	deleteWorker := worker.NewDeleteWorker(inboxRepo, application.TransactionManager()).
 		WithTickInterval(workersCfg.Delete.Interval).
 		WithRetentionPeriod(time.Duration(workersCfg.Delete.RetentionDays) * 24 * time.Hour)
 	g.Go(func() error {
@@ -96,6 +93,9 @@ func main() {
 	if err := g.Wait(); err != nil && ctx.Err() == nil {
 		log.Println("error:", err)
 	}
+
+	// Выполняем graceful shutdown
+	application.Shutdown()
 
 	log.Println("shutdown")
 }

@@ -7,6 +7,7 @@ require (
 	github.com/sskorolev/balun_microservices/lib/config v0.0.0
 	github.com/sskorolev/balun_microservices/lib/grpc v0.0.0
 	github.com/sskorolev/balun_microservices/lib/postgres v0.0.0
+	google.golang.org/grpc v1.76.0
 )
 
 require (

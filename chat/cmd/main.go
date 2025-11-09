@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os/signal"
 	"syscall"
 
+	"google.golang.org/grpc"
+
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
-	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"chat/internal/app/adapters"
 	"chat/internal/app/repository"
@@ -32,47 +34,41 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
-
-	// Подключаемся к Users сервису
-	usersConn, usersCleanup, err := app.InitGRPCClient(ctx, cfg.UsersService)
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		log.Fatalf("failed to connect to users service: %v", err)
+		log.Fatalf("failed to create app: %v", err)
 	}
-	defer usersCleanup()
 
-	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
-
-	// Инициализируем PostgreSQL через lib/app
-	conn, cleanup, err := app.InitPostgres(ctx, cfg.Database)
-	if err != nil {
+	// Инициализируем PostgreSQL
+	if err := application.InitPostgres(ctx, cfg.Database); err != nil {
 		log.Fatalf("failed to init postgres: %v", err)
 	}
-	defer cleanup()
 
-	// Создаем Transaction Manager
-	txMngr := postgres.NewTransactionManager(conn)
+	// Подключаемся к Users сервису
+	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
+		log.Fatalf("failed to connect to users service: %v", err)
+	}
 
-	repo := repository.NewRepository(txMngr)
+	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(application.GetGRPCClient("users")))
+
+	repo := repository.NewRepository(application.TransactionManager())
 
 	chatUsecase := usecase.NewUsecase(usersClient, repo)
 
 	controller := deliveryGrpc.NewChatController(chatUsecase)
 
-	// Создаем gRPC сервер через lib/app
-	server := app.InitGRPCServer(
-		errorsMiddleware.ErrorsUnaryInterceptor(),
-	)
-	chatPb.RegisterChatServiceServer(server, controller)
+	// Инициализируем gRPC сервер
+	application.InitGRPCServer(errorsMiddleware.ErrorsUnaryInterceptor())
 
-	log.Printf("gRPC server listening on port %d", cfg.Server.GRPC.Port)
+	// Регистрируем gRPC сервисы
+	application.RegisterGRPC(func(s *grpc.Server) {
+		chatPb.RegisterChatServiceServer(s, controller)
+	})
 
-	// Запускаем gRPC сервер через lib/app
-	if err := app.ServeGRPC(ctx, server, *cfg.Server.GRPC); err != nil {
-		if err == context.Canceled {
-			log.Println("shutdown")
-		} else {
+	// Запускаем приложение
+	if err := application.Run(ctx, *cfg.Server.GRPC); err != nil {
+		if !errors.Is(err, context.Canceled) {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}

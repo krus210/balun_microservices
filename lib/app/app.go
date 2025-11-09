@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"sync"
 
 	"google.golang.org/grpc"
 
@@ -17,6 +19,8 @@ type App struct {
 	pgConnection *postgres.Connection
 	pgTxManager  postgres.TransactionManagerAPI
 	grpcServer   *grpc.Server
+	httpHandler  http.Handler
+	grpcClients  map[string]*grpc.ClientConn
 	cleanupFuncs []func()
 
 	grpcRegistrar GRPCRegistrar
@@ -26,6 +30,7 @@ type App struct {
 func NewApp(ctx context.Context, cfg config.Config, opts ...Option) (*App, error) {
 	app := &App{
 		config:       cfg,
+		grpcClients:  make(map[string]*grpc.ClientConn),
 		cleanupFuncs: make([]func(), 0),
 	}
 
@@ -109,4 +114,86 @@ func (a *App) Shutdown() {
 	}
 
 	log.Println("Application stopped")
+}
+
+// InitGRPCClient инициализирует gRPC клиент для подключения к другому сервису
+func (a *App) InitGRPCClient(ctx context.Context, name string, targetCfg *config.TargetServiceConfig) error {
+	conn, cleanup, err := InitGRPCClient(ctx, targetCfg)
+	if err != nil {
+		return fmt.Errorf("failed to init gRPC client '%s': %w", name, err)
+	}
+
+	a.grpcClients[name] = conn
+	a.cleanupFuncs = append(a.cleanupFuncs, cleanup)
+
+	log.Printf("gRPC client '%s' connected to %s", name, targetCfg.Address())
+	return nil
+}
+
+// GetGRPCClient возвращает gRPC клиент по имени
+func (a *App) GetGRPCClient(name string) *grpc.ClientConn {
+	return a.grpcClients[name]
+}
+
+// InitHTTPServer инициализирует HTTP handler
+func (a *App) InitHTTPServer(handler http.Handler) {
+	a.httpHandler = handler
+	log.Println("HTTP handler initialized")
+}
+
+// RunBoth запускает HTTP и gRPC серверы параллельно (для Gateway)
+func (a *App) RunBoth(ctx context.Context, grpcCfg config.GRPCConfig, httpCfg config.HTTPConfig) error {
+	if a.grpcServer == nil {
+		return fmt.Errorf("gRPC server not initialized")
+	}
+	if a.httpHandler == nil {
+		return fmt.Errorf("HTTP handler not initialized")
+	}
+
+	var wg sync.WaitGroup
+	errChan := make(chan error, 2)
+
+	// Запускаем gRPC сервер
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		log.Printf("gRPC server starting on port %d", grpcCfg.Port)
+		if err := ServeGRPC(ctx, a.grpcServer, grpcCfg); err != nil {
+			if err != context.Canceled {
+				errChan <- fmt.Errorf("gRPC server error: %w", err)
+			}
+		}
+	}()
+
+	// Запускаем HTTP сервер
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		log.Printf("HTTP server starting on port %d", httpCfg.Port)
+		if err := ServeHTTP(ctx, a.httpHandler, httpCfg); err != nil {
+			if err != context.Canceled {
+				errChan <- fmt.Errorf("HTTP server error: %w", err)
+			}
+		}
+	}()
+
+	// Ждем завершения серверов
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	// Собираем ошибки
+	var firstErr error
+	for err := range errChan {
+		if err != nil && firstErr == nil {
+			firstErr = err
+			log.Printf("Server error: %v", err)
+		}
+	}
+
+	// После завершения серверов выполняем cleanup
+	a.Shutdown()
+
+	return firstErr
 }

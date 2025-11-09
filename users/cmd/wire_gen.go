@@ -11,47 +11,52 @@ import (
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/postgres"
-	"google.golang.org/grpc"
-	grpc2 "users/internal/app/delivery/grpc"
 	"users/internal/app/repository"
 	"users/internal/app/usecase"
-	"users/internal/middleware/errors"
-	"users/pkg/api"
 )
 
 // Injectors from wire.go:
 
 // InitializeApp - injector функция, которую сгенерирует Wire
-// Возвращает gRPC сервер и cleanup функцию для закрытия ресурсов
-func InitializeApp(ctx context.Context, cfg *config.StandardServiceConfig) (*grpc.Server, func(), error) {
-	connection, cleanup, err := providePostgresConnection(ctx, cfg)
+// Возвращает AppContainer и cleanup функцию
+func InitializeApp(ctx context.Context, cfg *config.StandardServiceConfig) (*AppContainer, func(), error) {
+	app, err := provideApp(ctx, cfg)
 	if err != nil {
 		return nil, nil, err
 	}
-	transactionManagerAPI := provideTransactionManager(connection)
+	transactionManagerAPI := provideTransactionManager(app)
 	usersRepository := provideRepository(transactionManagerAPI)
 	usecase := provideUsecase(usersRepository)
-	usersController := grpc2.NewUsersController(usecase)
-	server := provideGRPCServer(usersController)
-	return server, func() {
-		cleanup()
+	appContainer := provideAppContainer(app, usecase)
+	return appContainer, func() {
 	}, nil
 }
 
 // wire.go:
 
-// providePostgresConnection создает connection pool для postgres и cleanup функцию
-func providePostgresConnection(ctx context.Context, cfg *config.StandardServiceConfig) (*postgres.Connection, func(), error) {
-	conn, cleanup, err := app.InitPostgres(ctx, cfg.Database)
-	if err != nil {
-		return nil, nil, err
-	}
-	return conn, cleanup, nil
+// AppContainer содержит App и Usecase для передачи из Wire
+type AppContainer struct {
+	App     *app.App
+	Usecase usecase.Usecase
 }
 
-// provideTransactionManager создает transaction manager
-func provideTransactionManager(conn *postgres.Connection) postgres.TransactionManagerAPI {
-	return postgres.NewTransactionManager(conn)
+// provideApp создает App и инициализирует PostgreSQL
+func provideApp(ctx context.Context, cfg *config.StandardServiceConfig) (*app.App, error) {
+	app2, err := app.NewApp(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := app2.InitPostgres(ctx, cfg.Database); err != nil {
+		return nil, err
+	}
+
+	return app2, nil
+}
+
+// provideTransactionManager получает transaction manager из App
+func provideTransactionManager(app2 *app.App) postgres.TransactionManagerAPI {
+	return app2.TransactionManager()
 }
 
 // provideRepository создает репозиторий и возвращает его как интерфейс
@@ -64,10 +69,10 @@ func provideUsecase(repo usecase.UsersRepository) usecase.Usecase {
 	return usecase.NewUsecase(repo)
 }
 
-// provideGRPCServer создает gRPC сервер с middleware и регистрирует контроллер
-func provideGRPCServer(controller *grpc2.UsersController) *grpc.Server {
-	server := app.InitGRPCServer(errors.ErrorsUnaryInterceptor())
-	proto_v1.RegisterUsersServiceServer(server, controller)
-
-	return server
+// provideAppContainer создает контейнер с App и Usecase
+func provideAppContainer(app2 *app.App, uc usecase.Usecase) *AppContainer {
+	return &AppContainer{
+		App:     app2,
+		Usecase: uc,
+	}
 }
