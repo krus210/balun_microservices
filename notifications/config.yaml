@@ -10,7 +10,7 @@ database:
   sslmode: disable
   max_conn_idle_time: 1m
 
-kafka:
+kafka_consumer:
   brokers: kafka:29092
   consumer_group_id: notifications-service
   consumer_name: notifications-consumer

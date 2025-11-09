@@ -4,7 +4,7 @@
 -- Месячная партиция (range) OCT-2025 → сама partitioned BY LIST (aggregate_type)
 CREATE TABLE IF NOT EXISTS public.outbox_events_2025_10
     PARTITION OF public.outbox_events
-    FOR VALUES FROM ('2025-10-01 00:00:00+00') TO ('2025-11-01 00:00:00+00')
+    FOR VALUES FROM ('2025-10-01 00:00:00+00') TO ('2025-12-01 00:00:00+00')
     PARTITION BY LIST (aggregate_type);
 
 COMMENT ON TABLE public.outbox_events_2025_10 IS 'Партиция outbox за октябрь 2025';

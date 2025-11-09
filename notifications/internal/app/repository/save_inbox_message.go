@@ -3,7 +3,8 @@ package repository
 import (
 	"context"
 	"fmt"
-	"lib/postgres"
+
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"notifications/internal/app/models"
 )

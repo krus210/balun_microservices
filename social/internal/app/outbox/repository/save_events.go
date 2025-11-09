@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"lib/postgres"
 	"log"
 	"time"
+
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	appoutbox "social/internal/app/outbox/processor"
 )

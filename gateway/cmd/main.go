@@ -2,16 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net"
+	"log/slog"
 	"net/http"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
 
-	"gateway/internal/config"
+	"google.golang.org/grpc"
+
+	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
+
 	"gateway/pkg/api/auth"
 	"gateway/pkg/api/chat"
 	pb "gateway/pkg/api/gateway"
@@ -19,11 +21,8 @@ import (
 	"gateway/pkg/api/users"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -36,61 +35,13 @@ type Server struct {
 	chatClient   chat.ChatServiceClient
 }
 
-func NewServer(cfg *config.Config) (*Server, func(), error) {
-	var conns []*grpc.ClientConn
-
-	closeConns := func() {
-		for _, conn := range conns {
-			if err := conn.Close(); err != nil {
-				log.Printf("failed to close connection: %v", err)
-			}
-		}
+func NewServer(application *app.App) *Server {
+	return &Server{
+		authClient:   auth.NewAuthServiceClient(application.GetGRPCClient("auth")),
+		usersClient:  users.NewUsersServiceClient(application.GetGRPCClient("users")),
+		socialClient: social.NewSocialServiceClient(application.GetGRPCClient("social")),
+		chatClient:   chat.NewChatServiceClient(application.GetGRPCClient("chat")),
 	}
-
-	authAddr := fmt.Sprintf("%s:%d", cfg.Services.Auth.Host, cfg.Services.Auth.Port)
-	authConn, err := grpc.NewClient(authAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to auth service (%s): %w", authAddr, err)
-	}
-	conns = append(conns, authConn)
-
-	usersAddr := fmt.Sprintf("%s:%d", cfg.Services.Users.Host, cfg.Services.Users.Port)
-	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to users service (%s): %w", usersAddr, err)
-	}
-	conns = append(conns, usersConn)
-
-	socialAddr := fmt.Sprintf("%s:%d", cfg.Services.Social.Host, cfg.Services.Social.Port)
-	socialConn, err := grpc.NewClient(socialAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to social service (%s): %w", socialAddr, err)
-	}
-	conns = append(conns, socialConn)
-
-	chatAddr := fmt.Sprintf("%s:%d", cfg.Services.Chat.Host, cfg.Services.Chat.Port)
-	chatConn, err := grpc.NewClient(chatAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to chat service (%s): %w", chatAddr, err)
-	}
-	conns = append(conns, chatConn)
-
-	cleanup := func() {
-		closeConns()
-	}
-
-	srv := &Server{
-		authClient:   auth.NewAuthServiceClient(authConn),
-		usersClient:  users.NewUsersServiceClient(usersConn),
-		socialClient: social.NewSocialServiceClient(socialConn),
-		chatClient:   chat.NewChatServiceClient(chatConn),
-	}
-
-	return srv, cleanup, nil
 }
 
 // customHTTPError обрабатывает gRPC ошибки и возвращает соответствующие HTTP коды
@@ -387,76 +338,80 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	cfg, err := config.Load()
+	// Загружаем конфигурацию через lib/config
+	cfg, err := config.LoadServiceConfig(ctx, "gateway",
+		config.WithoutDatabase(),
+		config.WithAuthService("auth", 8082),
+		config.WithUsersService("users", 8082),
+		config.WithSocialService("social", 8082),
+		config.WithChatService("chat", 8082),
+	)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
-
-	server, cleanup, err := NewServer(cfg)
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		log.Fatalf("failed to create Server: %v", err)
+		log.Fatalf("failed to create app: %v", err)
 	}
-	defer cleanup()
 
-	var wg sync.WaitGroup
+	// Инициализируем gRPC клиенты для всех сервисов
+	if err := application.InitGRPCClient(ctx, "auth", cfg.AuthService); err != nil {
+		log.Fatalf("failed to connect to auth service: %v", err)
+	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
+		log.Fatalf("failed to connect to users service: %v", err)
+	}
 
-		grpcServer := grpc.NewServer()
-		pb.RegisterGatewayServiceServer(grpcServer, server)
+	if err := application.InitGRPCClient(ctx, "social", cfg.SocialService); err != nil {
+		log.Fatalf("failed to connect to social service: %v", err)
+	}
 
-		reflection.Register(grpcServer)
+	if err := application.InitGRPCClient(ctx, "chat", cfg.ChatService); err != nil {
+		log.Fatalf("failed to connect to chat service: %v", err)
+	}
 
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.GRPC.Port))
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-		}
+	// Создаем Server с клиентами
+	server := NewServer(application)
 
-		log.Printf("Gateway gRPC Server listening at %v", lis.Addr())
-		if err := grpcServer.Serve(lis); err != nil {
+	// Инициализируем gRPC сервер
+	application.InitGRPCServer(cfg.Server)
+
+	// Регистрируем gRPC сервисы
+	application.RegisterGRPC(func(s *grpc.Server) {
+		pb.RegisterGatewayServiceServer(s, server)
+	})
+
+	// Создаем HTTP ServeMux с кастомным обработчиком ошибок
+	mux := runtime.NewServeMux(
+		runtime.WithErrorHandler(customHTTPError),
+		runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
+			// Пробрасываем idempotency-key в metadata
+			// HTTP заголовки приходят в разных регистрах
+			switch key {
+			case "Idempotency-Key", "idempotency-key", "X-Idempotency-Key", "x-idempotency-key":
+				return "idempotency-key", true
+			}
+			// Стандартные заголовки (Authorization и т.д.)
+			return runtime.DefaultHeaderMatcher(strings.ToLower(key))
+		}),
+	)
+	if err := pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
+		log.Fatalf("failed to register gateway handler: %v", err)
+	}
+
+	// Инициализируем HTTP handler
+	application.InitHTTPServer(mux)
+
+	// Запускаем оба сервера (HTTP и gRPC) параллельно
+	slog.Info("starting gateway service", "http_port", cfg.Server.HTTP.Port, "grpc_port", cfg.Server.GRPC.Port)
+
+	if err := application.RunBoth(ctx, *cfg.Server.GRPC, *cfg.Server.HTTP); err != nil {
+		if err != context.Canceled {
 			log.Fatalf("failed to serve: %v", err)
 		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		// Создаем ServeMux с кастомным обработчиком ошибок
-		mux := runtime.NewServeMux(
-			runtime.WithErrorHandler(customHTTPError),
-			runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
-				// Пробрасываем idempotency-key в metadata
-				// HTTP заголовки приходят в разных регистрах
-				switch key {
-				case "Idempotency-Key", "idempotency-key", "X-Idempotency-Key", "x-idempotency-key":
-					return "idempotency-key", true
-				}
-				// Стандартные заголовки (Authorization и т.д.)
-				return runtime.DefaultHeaderMatcher(strings.ToLower(key))
-			}),
-		)
-		if err = pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
-			log.Fatalf("failed to register gateway handler: %v", err)
-		}
-
-		httpServer := &http.Server{Handler: mux}
-
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.HTTP.Port))
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-		}
-
-		log.Printf("Gateway HTTP Server listening at %v", lis.Addr())
-		if err := httpServer.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
-		}
-	}()
-
-	wg.Wait()
+	}
+	slog.Info("gateway service stopped gracefully")
 }

@@ -2,16 +2,22 @@ package main
 
 import (
 	"context"
-	"lib/postgres"
+	"errors"
 	"log"
+	"log/slog"
 	"os/signal"
+	"strings"
 	"syscall"
+	"time"
+
+	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
 
 	"notifications/internal/app/consumer"
 	"notifications/internal/app/delivery"
 	"notifications/internal/app/repository"
 	"notifications/internal/app/worker"
-	"notifications/internal/config"
+	workersConfig "notifications/internal/workers"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -20,70 +26,97 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	// Загружаем конфигурацию с интеграцией secrets
-	cfg, err := config.LoadWithSecrets(ctx)
+	// Загружаем конфигурацию через lib/config
+	cfg, err := config.LoadServiceConfig(ctx, "notifications")
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
-
-	// Подключаемся к PostgreSQL
-	conn, txMngr, err := postgres.New(ctx,
-		postgres.WithHost(cfg.Database.Host),
-		postgres.WithPort(cfg.Database.Port),
-		postgres.WithDatabase(cfg.Database.Name),
-		postgres.WithUser(cfg.Database.User),
-		postgres.WithPassword(cfg.Database.Password),
-		postgres.WithSSLMode(cfg.Database.SSLMode),
-		postgres.WithMaxConnIdleTime(cfg.Database.MaxConnIdleTime),
-	)
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to create app: %v", err)
 	}
-	defer conn.Close()
 
-	inboxRepo := repository.NewRepository(txMngr)
+	// Инициализируем PostgreSQL
+	if err := application.InitPostgres(ctx, cfg.Database); err != nil {
+		log.Fatalf("failed to init postgres: %v", err)
+	}
+
+	// Загружаем конфигурацию workers
+	workersCfg, err := workersConfig.Load()
+	if err != nil {
+		log.Fatalf("failed to load workers config: %v", err)
+	}
+
+	inboxRepo := repository.NewRepository(application.TransactionManager())
 
 	handler := delivery.NewInboxHandler(inboxRepo)
 
 	// Создаем Kafka consumer
+	// Конвертируем строку с брокерами в слайс
+	brokers := strings.Split(cfg.KafkaConsumer.GetBrokers(), ",")
 	inboxConsumer, err := consumer.NewInboxConsumer(
-		cfg.Kafka.GetBrokers(),
-		cfg.Kafka.ConsumerGroupID,
-		cfg.Kafka.ConsumerName,
+		brokers,
+		cfg.KafkaConsumer.ConsumerGroupID,
+		cfg.KafkaConsumer.ConsumerName,
 		handler,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer inboxConsumer.Close()
 
 	g, gCtx := errgroup.WithContext(ctx)
 
-	// Запускаем воркер сохранения событий
-	saveEventsWorker := worker.NewSaveEventsWorker(inboxRepo, txMngr)
+	// Запускаем воркер сохранения событий с настройками из конфигурации
+	saveEventsWorker := worker.NewSaveEventsWorker(inboxRepo, application.TransactionManager()).
+		WithTickInterval(workersCfg.SaveEvents.Interval).
+		WithBatchSize(workersCfg.SaveEvents.BatchSize)
 	g.Go(func() error {
+		slog.Info("starting save events worker")
 		saveEventsWorker.Start(gCtx)
+		slog.Info("save events worker stopped")
 		return nil
 	})
 
-	// Запускаем воркер удаления старых событий
-	deleteWorker := worker.NewDeleteWorker(inboxRepo, txMngr)
+	// Запускаем воркер удаления старых событий с настройками из конфигурации
+	deleteWorker := worker.NewDeleteWorker(inboxRepo, application.TransactionManager()).
+		WithTickInterval(workersCfg.Delete.Interval).
+		WithRetentionPeriod(time.Duration(workersCfg.Delete.RetentionDays) * 24 * time.Hour)
 	g.Go(func() error {
-		go deleteWorker.Start(gCtx)
+		slog.Info("starting delete events worker")
+		deleteWorker.Start(gCtx)
+		slog.Info("delete events worker stopped")
 		return nil
 	})
 
 	// Запускаем Kafka consumer
 	g.Go(func() error {
-		return inboxConsumer.Run(gCtx, cfg.Kafka.Topics.FriendRequestEvents)
+		slog.Info("starting kafka consumer")
+		return inboxConsumer.Run(gCtx, cfg.KafkaConsumer.Topics.FriendRequestEvents)
 	})
 
-	if err := g.Wait(); err != nil && ctx.Err() == nil {
-		log.Println("error:", err)
+	slog.Info("starting notifications service", "brokers", cfg.KafkaConsumer.GetBrokers())
+
+	waitErr := app.WaitForShutdown(ctx, g.Wait, app.GracefulShutdownTimeout)
+	switch {
+	case waitErr == nil || errors.Is(waitErr, context.Canceled):
+		slog.Info("notifications workers stopped")
+	case errors.Is(waitErr, context.DeadlineExceeded):
+		slog.Warn("graceful shutdown timeout exceeded, forcing cleanup")
+	default:
+		log.Printf("error while running workers: %v", waitErr)
 	}
 
-	log.Println("shutdown")
+	// Закрываем Kafka consumer (коммит оффсетов)
+	slog.Info("closing kafka consumer...")
+	if err := inboxConsumer.Close(); err != nil {
+		slog.Error("failed to close kafka consumer", "error", err)
+	}
+
+	// Закрываем PostgreSQL
+	slog.Info("closing database connections...")
+	application.Shutdown()
+
+	slog.Info("notifications service shutdown complete")
 }

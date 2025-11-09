@@ -45,4 +45,7 @@ GEMINI.md
 
 /docker
 
+# Service-local docker artifacts
+*/docker/
+
 .DS_Store

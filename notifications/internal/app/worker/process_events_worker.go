@@ -3,9 +3,10 @@ package worker
 import (
 	"context"
 	"fmt"
-	"lib/postgres"
 	"log"
 	"time"
+
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"notifications/internal/app/models"
 	"notifications/internal/app/repository"
