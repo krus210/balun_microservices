@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
+	"log/slog"
 	"os/signal"
 	"strings"
 	"syscall"
@@ -63,7 +65,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer inboxConsumer.Close()
 
 	g, gCtx := errgroup.WithContext(ctx)
 
@@ -72,7 +73,9 @@ func main() {
 		WithTickInterval(workersCfg.SaveEvents.Interval).
 		WithBatchSize(workersCfg.SaveEvents.BatchSize)
 	g.Go(func() error {
+		slog.Info("starting save events worker")
 		saveEventsWorker.Start(gCtx)
+		slog.Info("save events worker stopped")
 		return nil
 	})
 
@@ -81,21 +84,39 @@ func main() {
 		WithTickInterval(workersCfg.Delete.Interval).
 		WithRetentionPeriod(time.Duration(workersCfg.Delete.RetentionDays) * 24 * time.Hour)
 	g.Go(func() error {
+		slog.Info("starting delete events worker")
 		deleteWorker.Start(gCtx)
+		slog.Info("delete events worker stopped")
 		return nil
 	})
 
 	// Запускаем Kafka consumer
 	g.Go(func() error {
+		slog.Info("starting kafka consumer")
 		return inboxConsumer.Run(gCtx, cfg.KafkaConsumer.Topics.FriendRequestEvents)
 	})
 
-	if err := g.Wait(); err != nil && ctx.Err() == nil {
-		log.Println("error:", err)
+	slog.Info("starting notifications service", "brokers", cfg.KafkaConsumer.GetBrokers())
+
+	waitErr := app.WaitForShutdown(ctx, g.Wait, app.GracefulShutdownTimeout)
+	switch {
+	case waitErr == nil || errors.Is(waitErr, context.Canceled):
+		slog.Info("notifications workers stopped")
+	case errors.Is(waitErr, context.DeadlineExceeded):
+		slog.Warn("graceful shutdown timeout exceeded, forcing cleanup")
+	default:
+		log.Printf("error while running workers: %v", waitErr)
 	}
 
-	// Выполняем graceful shutdown
+	// Закрываем Kafka consumer (коммит оффсетов)
+	slog.Info("closing kafka consumer...")
+	if err := inboxConsumer.Close(); err != nil {
+		slog.Error("failed to close kafka consumer", "error", err)
+	}
+
+	// Закрываем PostgreSQL
+	slog.Info("closing database connections...")
 	application.Shutdown()
 
-	log.Println("shutdown")
+	slog.Info("notifications service shutdown complete")
 }

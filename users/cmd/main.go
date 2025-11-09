@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"log/slog"
 	"os/signal"
 	"syscall"
 
@@ -45,9 +46,12 @@ func main() {
 	})
 
 	// Запускаем приложение
+	slog.Info("starting users service", "grpc_port", cfg.Server.GRPC.Port)
+
 	if err := container.App.Run(ctx, *cfg.Server.GRPC); err != nil {
 		if !errors.Is(err, context.Canceled) {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}
+	slog.Info("users service stopped gracefully")
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"log/slog"
 	"os/signal"
 	"syscall"
 
@@ -67,9 +68,12 @@ func main() {
 	})
 
 	// Запускаем приложение
+	slog.Info("starting chat service", "grpc_port", cfg.Server.GRPC.Port)
+
 	if err := application.Run(ctx, *cfg.Server.GRPC); err != nil {
 		if !errors.Is(err, context.Canceled) {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}
+	slog.Info("chat service stopped gracefully")
 }

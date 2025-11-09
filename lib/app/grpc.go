@@ -3,7 +3,9 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -67,8 +69,21 @@ func ServeGRPC(ctx context.Context, server *grpc.Server, grpcCfg config.GRPCConf
 	// Ждем сигнала отмены или ошибки
 	select {
 	case <-ctx.Done():
-		server.GracefulStop()
-		return ctx.Err()
+		gracefulDone := make(chan struct{})
+
+		go func() {
+			server.GracefulStop()
+			close(gracefulDone)
+		}()
+
+		select {
+		case <-gracefulDone:
+			return ctx.Err()
+		case <-time.After(GracefulShutdownTimeout):
+			log.Printf("gRPC graceful shutdown exceeded %s, forcing stop", GracefulShutdownTimeout)
+			server.Stop()
+			return ctx.Err()
+		}
 	case err := <-errChan:
 		return err
 	}

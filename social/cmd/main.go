@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"log"
+	"log/slog"
 	"os/signal"
 	"syscall"
 
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
 	"github.com/sskorolev/balun_microservices/lib/app"
@@ -59,7 +61,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to create kafka producer: %v", err)
 	}
-	defer producer.Close()
 
 	// Создаем обработчик событий заявок в друзья
 	friendRequestEventsHandler := friend_request_handler.NewKafkaFriendRequestBatchHandler(producer,
@@ -71,15 +72,13 @@ func main() {
 	friendRequestRepo := repository.NewRepository(application.TransactionManager())
 	outboxRepo := outboxRepository.NewRepository(application.TransactionManager())
 
-	// Создаем и запускаем outbox worker
+	// Создаем outbox worker
 	worker := outboxProcessor.NewOutboxFriendRequestWorker(outboxRepo, application.TransactionManager(), friendRequestEventsHandler,
 		outboxProcessor.WithBatchSize(cfg.Outbox.Processor.BatchSize),
 		outboxProcessor.WithMaxRetry(cfg.Outbox.Processor.MaxRetry),
 		outboxProcessor.WithRetryInterval(cfg.Outbox.Processor.RetryInterval),
 		outboxProcessor.WithWindow(cfg.Outbox.Processor.Window),
 	)
-
-	go worker.Run(ctx)
 
 	// Создаем use cases и controller
 	outboxProc := outboxProcessor.NewProcessor(outboxProcessor.Deps{Repository: outboxRepo})
@@ -94,10 +93,40 @@ func main() {
 		socialPb.RegisterSocialServiceServer(s, controller)
 	})
 
-	// Запускаем приложение
-	if err := application.Run(ctx, *cfg.Server.GRPC); err != nil {
-		if !errors.Is(err, context.Canceled) {
-			log.Fatalf("failed to serve: %v", err)
+	// Запускаем gRPC сервер и outbox worker через errgroup
+	g, gCtx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		slog.Info("starting social service gRPC server", "grpc_port", cfg.Server.GRPC.Port)
+		if err := application.Run(gCtx, *cfg.Server.GRPC); err != nil && !errors.Is(err, context.Canceled) {
+			return err
 		}
+		return nil
+	})
+
+	g.Go(func() error {
+		slog.Info("starting outbox worker")
+		worker.Run(gCtx)
+		slog.Info("outbox worker stopped")
+		return nil
+	})
+
+	slog.Info("starting social service", "grpc_port", cfg.Server.GRPC.Port)
+
+	waitErr := app.WaitForShutdown(ctx, g.Wait, app.GracefulShutdownTimeout)
+	switch {
+	case waitErr == nil || errors.Is(waitErr, context.Canceled):
+		slog.Info("social service components stopped")
+	case errors.Is(waitErr, context.DeadlineExceeded):
+		slog.Warn("graceful shutdown timeout exceeded, forcing cleanup")
+	default:
+		log.Fatalf("failed to serve: %v", waitErr)
 	}
+
+	slog.Info("closing kafka producer...")
+	if err := producer.Close(); err != nil {
+		slog.Error("failed to close kafka producer", "error", err)
+	}
+
+	slog.Info("social service shutdown complete")
 }

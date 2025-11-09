@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"time"
 
 	"github.com/sskorolev/balun_microservices/lib/config"
 )
@@ -34,7 +33,7 @@ func ServeHTTP(ctx context.Context, handler http.Handler, httpCfg config.HTTPCon
 	select {
 	case <-ctx.Done():
 		// Graceful shutdown
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), GracefulShutdownTimeout)
 		defer cancel()
 
 		if err := server.Shutdown(shutdownCtx); err != nil {

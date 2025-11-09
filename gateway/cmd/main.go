@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os/signal"
 	"strings"
@@ -339,6 +340,7 @@ func main() {
 
 	// Загружаем конфигурацию через lib/config
 	cfg, err := config.LoadServiceConfig(ctx, "gateway",
+		config.WithoutDatabase(),
 		config.WithAuthService("auth", 8082),
 		config.WithUsersService("users", 8082),
 		config.WithSocialService("social", 8082),
@@ -404,9 +406,12 @@ func main() {
 	application.InitHTTPServer(mux)
 
 	// Запускаем оба сервера (HTTP и gRPC) параллельно
+	slog.Info("starting gateway service", "http_port", cfg.Server.HTTP.Port, "grpc_port", cfg.Server.GRPC.Port)
+
 	if err := application.RunBoth(ctx, *cfg.Server.GRPC, *cfg.Server.HTTP); err != nil {
 		if err != context.Canceled {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}
+	slog.Info("gateway service stopped gracefully")
 }

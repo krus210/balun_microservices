@@ -10,6 +10,7 @@ COPY lib/postgres/ lib/postgres/
 COPY lib/secrets/ lib/secrets/
 COPY lib/config/ lib/config/
 COPY lib/app/ lib/app/
+COPY lib/grpc/ lib/grpc/
 
 # Copy auth service
 COPY auth/ auth/

@@ -16,6 +16,7 @@ type ServiceOption func(*serviceOptions)
 type serviceOptions struct {
 	serviceName       string
 	databaseName      string
+	databaseEnabled   bool
 	grpcPort          int
 	secretsPathSuffix string
 	customDefaults    func(*viper.Viper)
@@ -37,6 +38,14 @@ type serviceOptions struct {
 func WithDatabaseName(name string) ServiceOption {
 	return func(opts *serviceOptions) {
 		opts.databaseName = name
+		opts.databaseEnabled = true
+	}
+}
+
+// WithoutDatabase отключает блок database и загрузку связанных секретов
+func WithoutDatabase() ServiceOption {
+	return func(opts *serviceOptions) {
+		opts.databaseEnabled = false
 	}
 }
 
@@ -179,9 +188,10 @@ func setGRPCClientDefaults(v *viper.Viper, servicePrefix string) {
 func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceOption) (*StandardServiceConfig, error) {
 	// Применяем опции
 	options := &serviceOptions{
-		serviceName:  serviceName,
-		databaseName: serviceName, // по умолчанию совпадает с именем сервиса
-		grpcPort:     8082,        // стандартный порт для всех сервисов
+		serviceName:     serviceName,
+		databaseName:    serviceName, // по умолчанию совпадает с именем сервиса
+		databaseEnabled: true,
+		grpcPort:        8082, // стандартный порт для всех сервисов
 	}
 	for _, opt := range opts {
 		opt(options)
@@ -198,11 +208,13 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 		v.SetDefault("server.grpc.port", options.grpcPort)
 
 		// Database defaults
-		v.SetDefault("database.host", "localhost")
-		v.SetDefault("database.port", 5432)
-		v.SetDefault("database.name", options.databaseName)
-		v.SetDefault("database.sslmode", "disable")
-		v.SetDefault("database.max_conn_idle_time", time.Minute)
+		if options.databaseEnabled {
+			v.SetDefault("database.host", "localhost")
+			v.SetDefault("database.port", 5432)
+			v.SetDefault("database.name", options.databaseName)
+			v.SetDefault("database.sslmode", "disable")
+			v.SetDefault("database.max_conn_idle_time", time.Minute)
+		}
 
 		// Secrets defaults для dev
 		v.SetDefault("secrets.dev.env_prefix", "APP_")
@@ -297,8 +309,13 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
+	// Если база данных отключена опциями, полностью игнорируем конфигурацию
+	if !options.databaseEnabled {
+		cfg.Database = nil
+	}
+
 	// Загружаем секреты БД только если сервис использует базу данных
-	if cfg.Database != nil {
+	if options.databaseEnabled && cfg.Database != nil {
 		if err := LoadConfigWithSecrets(ctx, cfg, &databaseSecretsLoader{db: cfg.Database}); err != nil {
 			return nil, err
 		}

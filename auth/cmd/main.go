@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"log/slog"
 	"os/signal"
 	"syscall"
 
@@ -27,6 +28,7 @@ func main() {
 
 	// Загружаем конфигурацию через lib/config
 	cfg, err := config.LoadServiceConfig(ctx, "auth",
+		config.WithoutDatabase(),
 		config.WithUsersService("users", 8082),
 	)
 	if err != nil {
@@ -61,9 +63,12 @@ func main() {
 	})
 
 	// Запускаем приложение
+	slog.Info("starting auth service", "grpc_port", cfg.Server.GRPC.Port)
+
 	if err := application.Run(ctx, *cfg.Server.GRPC); err != nil {
 		if !errors.Is(err, context.Canceled) {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}
+	slog.Info("auth service stopped gracefully")
 }
