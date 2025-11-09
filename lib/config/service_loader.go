@@ -151,6 +151,30 @@ func WithChatService(host string, port int) ServiceOption {
 	}
 }
 
+// setGRPCClientDefaults устанавливает defaults для gRPC клиента target сервиса
+func setGRPCClientDefaults(v *viper.Viper, servicePrefix string) {
+	// Timeout
+	v.SetDefault(servicePrefix+".grpc_client.timeout", 5*time.Second)
+
+	// Retry configuration
+	v.SetDefault(servicePrefix+".grpc_client.retry.max_attempts", 3)
+	v.SetDefault(servicePrefix+".grpc_client.retry.backoff.base", 100*time.Millisecond)
+	v.SetDefault(servicePrefix+".grpc_client.retry.backoff.max", 2*time.Second)
+	v.SetDefault(servicePrefix+".grpc_client.retry.backoff.jitter", true)
+	v.SetDefault(servicePrefix+".grpc_client.retry.retryable_codes", []string{
+		"UNAVAILABLE",
+		"DEADLINE_EXCEEDED",
+		"RESOURCE_EXHAUSTED",
+		"ABORTED",
+	})
+
+	// Circuit Breaker configuration
+	v.SetDefault(servicePrefix+".grpc_client.circuit_breaker.failures_for_open", 5)
+	v.SetDefault(servicePrefix+".grpc_client.circuit_breaker.window", 30*time.Second)
+	v.SetDefault(servicePrefix+".grpc_client.circuit_breaker.half_open_max_calls", 5)
+	v.SetDefault(servicePrefix+".grpc_client.circuit_breaker.open_state_for", 60*time.Second)
+}
+
 // LoadServiceConfig загружает стандартную конфигурацию сервиса с секретами
 func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceOption) (*StandardServiceConfig, error) {
 	// Применяем опции
@@ -227,21 +251,25 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 		if options.authService != nil {
 			v.SetDefault("auth_service.host", options.authService.Host)
 			v.SetDefault("auth_service.port", options.authService.Port)
+			setGRPCClientDefaults(v, "auth_service")
 		}
 
 		if options.usersService != nil {
 			v.SetDefault("users_service.host", options.usersService.Host)
 			v.SetDefault("users_service.port", options.usersService.Port)
+			setGRPCClientDefaults(v, "users_service")
 		}
 
 		if options.socialService != nil {
 			v.SetDefault("social_service.host", options.socialService.Host)
 			v.SetDefault("social_service.port", options.socialService.Port)
+			setGRPCClientDefaults(v, "social_service")
 		}
 
 		if options.chatService != nil {
 			v.SetDefault("chat_service.host", options.chatService.Host)
 			v.SetDefault("chat_service.port", options.chatService.Port)
+			setGRPCClientDefaults(v, "chat_service")
 		}
 
 		// Вызываем кастомную функцию если она есть

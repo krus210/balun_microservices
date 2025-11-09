@@ -8,15 +8,17 @@ require (
 	github.com/sskorolev/balun_microservices/lib/app v0.0.0
 	github.com/sskorolev/balun_microservices/lib/config v0.0.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250818200422-3122310a409c
-	google.golang.org/grpc v1.75.0
+	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.9
 )
 
 require (
+	github.com/benbjohnson/clock v1.3.0 // indirect
+	github.com/cenkalti/backoff/v3 v3.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/georgysavva/scany/v2 v2.1.4 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.1 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -35,6 +37,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.6 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/mercari/go-circuitbreaker v0.0.2 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
@@ -45,6 +48,7 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
+	github.com/sskorolev/balun_microservices/lib/grpc v0.0.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/postgres v0.0.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/secrets v0.0.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
@@ -67,3 +71,5 @@ replace github.com/sskorolev/balun_microservices/lib/config => ../lib/config
 replace github.com/sskorolev/balun_microservices/lib/postgres => ../lib/postgres
 
 replace github.com/sskorolev/balun_microservices/lib/secrets => ../lib/secrets
+
+replace github.com/sskorolev/balun_microservices/lib/grpc => ../lib/grpc

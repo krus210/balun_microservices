@@ -72,13 +72,43 @@ type VaultSecretsConfig struct {
 
 // TargetServiceConfig содержит настройки подключения к зависимому сервису
 type TargetServiceConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+	Host       string            `mapstructure:"host"`
+	Port       int               `mapstructure:"port"`
+	GRPCClient *GRPCClientConfig `mapstructure:"grpc_client,omitempty"`
 }
 
 // Address возвращает полный адрес сервиса
 func (t TargetServiceConfig) Address() string {
 	return fmt.Sprintf("%s:%d", t.Host, t.Port)
+}
+
+// GRPCClientConfig содержит настройки gRPC клиента
+type GRPCClientConfig struct {
+	Timeout        time.Duration         `mapstructure:"timeout"`
+	Retry          *RetryConfig          `mapstructure:"retry,omitempty"`
+	CircuitBreaker *CircuitBreakerConfig `mapstructure:"circuit_breaker,omitempty"`
+}
+
+// RetryConfig содержит настройки retry логики
+type RetryConfig struct {
+	MaxAttempts    int                `mapstructure:"max_attempts"`
+	Backoff        RetryBackoffConfig `mapstructure:"backoff"`
+	RetryableCodes []string           `mapstructure:"retryable_codes"`
+}
+
+// RetryBackoffConfig содержит настройки exponential backoff
+type RetryBackoffConfig struct {
+	Base   time.Duration `mapstructure:"base"`
+	Max    time.Duration `mapstructure:"max"`
+	Jitter bool          `mapstructure:"jitter"`
+}
+
+// CircuitBreakerConfig содержит настройки circuit breaker
+type CircuitBreakerConfig struct {
+	FailuresForOpen  int           `mapstructure:"failures_for_open"`
+	Window           time.Duration `mapstructure:"window"`
+	HalfOpenMaxCalls int           `mapstructure:"half_open_max_calls"`
+	OpenStateFor     time.Duration `mapstructure:"open_state_for"`
 }
 
 // KafkaConfig содержит настройки подключения к Apache Kafka

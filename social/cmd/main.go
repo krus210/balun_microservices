@@ -22,9 +22,6 @@ import (
 	errorsMiddleware "social/internal/middleware/errors"
 	"social/pkg/kafka"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	socialPb "social/pkg/api"
 	usersPb "social/pkg/users/api"
 )
@@ -43,12 +40,11 @@ func main() {
 		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
 
 	// Подключаемся к Users сервису
-	usersAddr := cfg.UsersService.Address()
-	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersConn, usersCleanup, err := app.InitGRPCClient(ctx, cfg.UsersService)
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
-	defer usersConn.Close()
+	defer usersCleanup()
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 

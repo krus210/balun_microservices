@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os/signal"
 	"syscall"
@@ -18,9 +17,6 @@ import (
 
 	authPb "auth/pkg/api"
 	usersPb "auth/pkg/users/api"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -39,12 +35,11 @@ func main() {
 		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
 
 	// Подключаемся к Users сервису
-	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
-	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersConn, usersCleanup, err := app.InitGRPCClient(ctx, cfg.UsersService)
 	if err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
-	defer usersConn.Close()
+	defer usersCleanup()
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
 

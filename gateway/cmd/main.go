@@ -20,9 +20,7 @@ import (
 	"gateway/pkg/api/users"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
@@ -37,51 +35,46 @@ type Server struct {
 }
 
 func NewServer(cfg *config.StandardServiceConfig) (*Server, func(), error) {
-	var conns []*grpc.ClientConn
+	ctx := context.Background()
+	var cleanups []func()
 
-	closeConns := func() {
-		for _, conn := range conns {
-			if err := conn.Close(); err != nil {
-				log.Printf("failed to close connection: %v", err)
-			}
+	allCleanup := func() {
+		for _, cleanup := range cleanups {
+			cleanup()
 		}
 	}
 
-	authAddr := fmt.Sprintf("%s:%d", cfg.AuthService.Host, cfg.AuthService.Port)
-	authConn, err := grpc.NewClient(authAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Создаем подключение к Auth Service
+	authConn, authCleanup, err := app.InitGRPCClient(ctx, cfg.AuthService)
 	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to auth service (%s): %w", authAddr, err)
+		allCleanup()
+		return nil, nil, fmt.Errorf("failed to connect to auth service: %w", err)
 	}
-	conns = append(conns, authConn)
+	cleanups = append(cleanups, authCleanup)
 
-	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
-	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Создаем подключение к Users Service
+	usersConn, usersCleanup, err := app.InitGRPCClient(ctx, cfg.UsersService)
 	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to users service (%s): %w", usersAddr, err)
+		allCleanup()
+		return nil, nil, fmt.Errorf("failed to connect to users service: %w", err)
 	}
-	conns = append(conns, usersConn)
+	cleanups = append(cleanups, usersCleanup)
 
-	socialAddr := fmt.Sprintf("%s:%d", cfg.SocialService.Host, cfg.SocialService.Port)
-	socialConn, err := grpc.NewClient(socialAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Создаем подключение к Social Service
+	socialConn, socialCleanup, err := app.InitGRPCClient(ctx, cfg.SocialService)
 	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to social service (%s): %w", socialAddr, err)
+		allCleanup()
+		return nil, nil, fmt.Errorf("failed to connect to social service: %w", err)
 	}
-	conns = append(conns, socialConn)
+	cleanups = append(cleanups, socialCleanup)
 
-	chatAddr := fmt.Sprintf("%s:%d", cfg.ChatService.Host, cfg.ChatService.Port)
-	chatConn, err := grpc.NewClient(chatAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Создаем подключение к Chat Service
+	chatConn, chatCleanup, err := app.InitGRPCClient(ctx, cfg.ChatService)
 	if err != nil {
-		closeConns()
-		return nil, nil, fmt.Errorf("failed to connect to chat service (%s): %w", chatAddr, err)
+		allCleanup()
+		return nil, nil, fmt.Errorf("failed to connect to chat service: %w", err)
 	}
-	conns = append(conns, chatConn)
-
-	cleanup := func() {
-		closeConns()
-	}
+	cleanups = append(cleanups, chatCleanup)
 
 	srv := &Server{
 		authClient:   auth.NewAuthServiceClient(authConn),
@@ -90,7 +83,7 @@ func NewServer(cfg *config.StandardServiceConfig) (*Server, func(), error) {
 		chatClient:   chat.NewChatServiceClient(chatConn),
 	}
 
-	return srv, cleanup, nil
+	return srv, allCleanup, nil
 }
 
 // customHTTPError обрабатывает gRPC ошибки и возвращает соответствующие HTTP коды
