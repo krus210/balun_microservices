@@ -3,10 +3,6 @@ ifneq (,$(wildcard .env))
     export $(shell sed 's/=.*//' .env)
 endif
 
-# Vault must come up first so we can seed credentials before dependent services start.
-.up-vault:
-	@docker-compose up vault -d
-
 .up-kafka:
 	@docker-compose up kafka -d --wait
 	@docker-compose up kafka-ui -d
@@ -19,6 +15,10 @@ endif
 	@docker-compose up elasticsearch -d --wait
 	@docker-compose up graylog -d --wait
 	@docker-compose up filebeat -d
+
+.up_prometheus:
+	@docker-compose up prometheus  -d --wait
+	@docker-compose up grafana  -d --wait
 
 migrate-chat-db:
 	@goose postgres "user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${CHAT_POSTGRES_DB} host=127.0.0.1 port=5432 sslmode=disable" up -dir ./chat/migrations
@@ -74,7 +74,13 @@ up-gateway: .up-gateway-service
 
 up-notifications: .up-notifications-db migrate-notifications-db .up-notifications-service
 
-up: .up-graylog-stack .up-jaeger .up-kafka up-chat up-auth up-users up-social up-notifications up-gateway
+up_observability: .up-graylog-stack .up-jaeger .up_prometheus
+
+# Vault must come up first so we can seed credentials before dependent services start.
+up-vault:
+	@docker-compose up vault -d
+
+up: up_observability .up-kafka up-chat up-auth up-users up-social up-notifications up-gateway
 
 down:
 	@docker-compose down

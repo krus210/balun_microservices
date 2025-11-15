@@ -204,3 +204,10 @@ type TracerConfig struct {
 	SamplerType     string `mapstructure:"sampler_type"`
 	SamplerParam    int    `mapstructure:"sampler_param"`
 }
+
+// MetricsConfig содержит настройки метрик (Prometheus)
+type MetricsConfig struct {
+	Enabled   bool   `mapstructure:"enabled"`
+	Namespace string `mapstructure:"namespace"`
+	Subsystem string `mapstructure:"subsystem"`
+}

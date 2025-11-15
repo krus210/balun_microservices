@@ -14,6 +14,7 @@ import (
 
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/grpc/server/interceptors"
+	"github.com/sskorolev/balun_microservices/lib/metrics"
 )
 
 // GRPCRegistrar определяет функцию для регистрации gRPC сервисов
@@ -37,6 +38,10 @@ func InitGRPCServer(cfg config.ServerConfig, customInterceptors ...grpc.UnarySer
 	interceptorChain = append(interceptorChain, interceptors.DebugOpenTelemetryUnaryServerInterceptor(true, true))
 
 	interceptorChain = append(interceptorChain, interceptors.LogErrorUnaryInterceptor())
+
+	interceptorChain = append(interceptorChain, metrics.ResponseTimeUnaryInterceptor())
+
+	interceptorChain = append(interceptorChain, metrics.UnaryServerInterceptor())
 
 	// 2. Rate limit (если enabled)
 	if cfg.RateLimit != nil && cfg.RateLimit.Enabled {

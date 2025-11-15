@@ -53,6 +53,11 @@ func main() {
 		logger.FatalKV(ctx, "failed to initialize tracer", "error", err.Error())
 	}
 
+	// Инициализируем metrics
+	if err := application.InitMetrics(cfg.Metrics, cfg.Service.Name); err != nil {
+		logger.FatalKV(ctx, "failed to initialize metrics", "error", err.Error())
+	}
+
 	logger.InfoKV(ctx, "starting social service",
 		"version", cfg.Service.Version,
 		"environment", cfg.Service.Environment,

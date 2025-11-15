@@ -5,6 +5,7 @@ import (
 
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/logger"
+	"github.com/sskorolev/balun_microservices/lib/metrics"
 	"github.com/sskorolev/balun_microservices/lib/tracer"
 	"go.uber.org/zap/zapcore"
 )
@@ -55,6 +56,28 @@ func (a *App) InitTracer(tracerCfg config.TracerConfig) error {
 	cleanup, err := tracer.Init(cfg)
 	if err != nil {
 		return fmt.Errorf("failed to initialize tracer: %w", err)
+	}
+
+	// Добавляем cleanup функцию
+	a.cleanupFuncs = append(a.cleanupFuncs, cleanup)
+
+	return nil
+}
+
+// InitMetrics инициализирует метрики с настройками из конфигурации
+func (a *App) InitMetrics(metricsCfg config.MetricsConfig, serviceName string) error {
+	// Конвертируем конфигурацию из lib/config в lib/metrics
+	cfg := metrics.Config{
+		Enabled:     metricsCfg.Enabled,
+		ServiceName: serviceName,
+		Namespace:   metricsCfg.Namespace,
+		Subsystem:   metricsCfg.Subsystem,
+	}
+
+	// Инициализируем metrics
+	cleanup, err := metrics.Init(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to initialize metrics: %w", err)
 	}
 
 	// Добавляем cleanup функцию

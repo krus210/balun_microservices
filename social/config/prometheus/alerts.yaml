@@ -1,0 +1,22 @@
+groups:
+  - name: alerts
+    rules:
+      - alert: Service Response Time 95q
+        expr: histogram_quantile(0.95, sum(rate(balun_courses_grpc_histogram_response_time_seconds{}[1m])) by (le)) > 100ms
+        interval: 30s
+        for: 2m
+        labels:
+          severity: medium
+        # annotations:
+        # summary: "The target {{ $labels.job }} is down"
+        # description: "Instance {{ $labels.instance }} из job {{ $labels.job }} не отвечает в течении 30 секунд."
+      - alert: Service Response Time 90q
+        expr: histogram_quantile(0.90, sum(rate(balun_courses_grpc_histogram_response_time_seconds{}[1m])) by (le))  > 90ms
+        interval: 30s
+        for: 30s
+        labels:
+          severity: high
+          importance: medium
+        annotations:
+        # summary: "The target {{ $labels.job }} is down"
+        # description: "Instance {{ $labels.instance }} из job {{ $labels.job }} не отвечает в течении 30 секунд."

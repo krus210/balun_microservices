@@ -8,6 +8,7 @@ type StandardServiceConfig struct {
 	Secrets  SecretsConfig   `mapstructure:"secrets"`
 	Logger   LoggerConfig    `mapstructure:"logger"`
 	Tracer   TracerConfig    `mapstructure:"tracer"`
+	Metrics  MetricsConfig   `mapstructure:"metrics"`
 
 	// Опциональные поля для сервисов с дополнительными компонентами
 	Kafka                *KafkaConfig                `mapstructure:"kafka,omitempty"`
@@ -45,6 +46,9 @@ func (c *StandardServiceConfig) Validate() error {
 		return err
 	}
 	if err := ValidateTracerConfig(c.Tracer); err != nil {
+		return err
+	}
+	if err := ValidateMetricsConfig(c.Metrics); err != nil {
 		return err
 	}
 

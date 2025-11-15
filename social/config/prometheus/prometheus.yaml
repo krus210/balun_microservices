@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 30s # Как часто собирать метрики
+  evaluation_interval: 30s # Как часто вычислять правила агрегации и алертинга
+
+# rule_files:
+#   - "alerts.yml"
+
+scrape_configs:
+  - job_name: "prometheus"
+    scrape_interval: 5s # переопределение global.scrape_interval
+    static_configs:
+      - targets: ["social:8082"]
+
+  - job_name: "social"
+    static_configs:
+      - targets: ["host.docker.internal:2112"]

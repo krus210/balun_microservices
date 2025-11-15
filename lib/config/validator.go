@@ -171,3 +171,21 @@ func ValidateTracerConfig(cfg TracerConfig) error {
 
 	return nil
 }
+
+// ValidateMetricsConfig валидирует MetricsConfig
+func ValidateMetricsConfig(cfg MetricsConfig) error {
+	// Валидация только если метрики включены
+	if !cfg.Enabled {
+		return nil
+	}
+
+	if err := ValidateRequired(cfg.Namespace, "metrics.namespace"); err != nil {
+		return err
+	}
+
+	if err := ValidateRequired(cfg.Subsystem, "metrics.subsystem"); err != nil {
+		return err
+	}
+
+	return nil
+}
