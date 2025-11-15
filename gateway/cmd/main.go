@@ -2,8 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
-	"log/slog"
+	"errors"
 	"net/http"
 	"os/signal"
 	"strings"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/logger"
 
 	"gateway/pkg/api/auth"
 	"gateway/pkg/api/chat"
@@ -74,22 +74,22 @@ func customHTTPError(ctx context.Context, mux *runtime.ServeMux, marshaler runti
 	// Маршалим ответ
 	buf, merr := marshaler.Marshal(resp)
 	if merr != nil {
-		log.Printf("Failed to marshal error response: %v", merr)
+		logger.ErrorKV(ctx, "failed to marshal error response", "error", merr.Error())
 		w.Write([]byte(`{"error":"Internal Server Error","code":13,"message":"failed to marshal error message"}`))
 		return
 	}
 
 	if _, werr := w.Write(buf); werr != nil {
-		log.Printf("Failed to write error response: %v", werr)
+		logger.ErrorKV(ctx, "failed to write error response", "error", werr.Error())
 	}
 }
 
 func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.RegisterResponse, error) {
-	log.Printf("Gateway: Register request for email: %s", req.GetEmail())
+	logger.InfoKV(ctx, "Gateway: Register request", "email", req.GetEmail())
 
 	resp, err := s.authClient.Register(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: Register error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: Register error", "error", err.Error())
 		return nil, err
 	}
 
@@ -97,11 +97,11 @@ func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth
 }
 
 func (s *Server) Login(ctx context.Context, req *auth.LoginRequest) (*auth.LoginResponse, error) {
-	log.Printf("Gateway: Login request for email: %s", req.GetEmail())
+	logger.InfoKV(ctx, "Gateway: Login request", "email", req.GetEmail())
 
 	resp, err := s.authClient.Login(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: Login error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: Login error", "error", err.Error())
 		return nil, err
 	}
 
@@ -109,11 +109,11 @@ func (s *Server) Login(ctx context.Context, req *auth.LoginRequest) (*auth.Login
 }
 
 func (s *Server) Refresh(ctx context.Context, req *auth.RefreshRequest) (*auth.RefreshResponse, error) {
-	log.Printf("Gateway: Refresh request")
+	logger.InfoKV(ctx, "Gateway: Refresh request")
 
 	resp, err := s.authClient.Refresh(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: Refresh error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: Refresh error", "error", err.Error())
 		return nil, err
 	}
 
@@ -121,11 +121,11 @@ func (s *Server) Refresh(ctx context.Context, req *auth.RefreshRequest) (*auth.R
 }
 
 func (s *Server) CreateProfile(ctx context.Context, req *users.CreateProfileRequest) (*users.CreateProfileResponse, error) {
-	log.Printf("Gateway: CreateProfile request for user: %s", req.GetNickname())
+	logger.InfoKV(ctx, "Gateway: CreateProfile request", "nickname", req.GetNickname())
 
 	resp, err := s.usersClient.CreateProfile(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: CreateProfile error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: CreateProfile error", "error", err.Error())
 		return nil, err
 	}
 
@@ -133,11 +133,11 @@ func (s *Server) CreateProfile(ctx context.Context, req *users.CreateProfileRequ
 }
 
 func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequest) (*users.UpdateProfileResponse, error) {
-	log.Printf("Gateway: UpdateProfile request for userId: %s", req.GetUserId())
+	logger.InfoKV(ctx, "Gateway: UpdateProfile request", "user_id", req.GetUserId())
 
 	resp, err := s.usersClient.UpdateProfile(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: UpdateProfile error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: UpdateProfile error", "error", err.Error())
 		return nil, err
 	}
 
@@ -145,11 +145,11 @@ func (s *Server) UpdateProfile(ctx context.Context, req *users.UpdateProfileRequ
 }
 
 func (s *Server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRequest) (*users.GetProfileByIDResponse, error) {
-	log.Printf("Gateway: GetProfileByID request for userId: %s", req.GetUserId())
+	logger.InfoKV(ctx, "Gateway: GetProfileByID request", "user_id", req.GetUserId())
 
 	resp, err := s.usersClient.GetProfileByID(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: GetProfileByID error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: GetProfileByID error", "error", err.Error())
 		return nil, err
 	}
 
@@ -157,11 +157,11 @@ func (s *Server) GetProfileByID(ctx context.Context, req *users.GetProfileByIDRe
 }
 
 func (s *Server) GetProfileByNickname(ctx context.Context, req *users.GetProfileByNicknameRequest) (*users.GetProfileByNicknameResponse, error) {
-	log.Printf("Gateway: GetProfileByNickname request for nickname: %s", req.GetNickname())
+	logger.InfoKV(ctx, "Gateway: GetProfileByNickname request", "nickname", req.GetNickname())
 
 	resp, err := s.usersClient.GetProfileByNickname(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: GetProfileByNickname error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: GetProfileByNickname error", "error", err.Error())
 		return nil, err
 	}
 
@@ -169,11 +169,11 @@ func (s *Server) GetProfileByNickname(ctx context.Context, req *users.GetProfile
 }
 
 func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNicknameRequest) (*users.SearchByNicknameResponse, error) {
-	log.Printf("Gateway: SearchByNickname request for query: %s", req.GetQuery())
+	logger.InfoKV(ctx, "Gateway: SearchByNickname request", "query", req.GetQuery())
 
 	resp, err := s.usersClient.SearchByNickname(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: SearchByNickname error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: SearchByNickname error", "error", err.Error())
 		return nil, err
 	}
 
@@ -181,11 +181,11 @@ func (s *Server) SearchByNickname(ctx context.Context, req *users.SearchByNickna
 }
 
 func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRequestRequest) (*social.SendFriendRequestResponse, error) {
-	log.Printf("Gateway: SendFriendRequest from userId: %s", req.GetToUserId())
+	logger.InfoKV(ctx, "Gateway: SendFriendRequest", "to_user_id", req.GetToUserId())
 
 	resp, err := s.socialClient.SendFriendRequest(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: SendFriendRequest error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: SendFriendRequest error", "error", err.Error())
 		return nil, err
 	}
 
@@ -193,11 +193,11 @@ func (s *Server) SendFriendRequest(ctx context.Context, req *social.SendFriendRe
 }
 
 func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsRequest) (*social.ListRequestsResponse, error) {
-	log.Printf("Gateway: ListRequests for userId: %s", req.GetToUserId())
+	logger.InfoKV(ctx, "Gateway: ListRequests", "to_user_id", req.GetToUserId())
 
 	resp, err := s.socialClient.ListRequests(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: ListRequests error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: ListRequests error", "error", err.Error())
 		return nil, err
 	}
 
@@ -205,11 +205,11 @@ func (s *Server) ListRequests(ctx context.Context, req *social.ListRequestsReque
 }
 
 func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFriendRequestRequest) (*social.AcceptFriendRequestResponse, error) {
-	log.Printf("Gateway: AcceptFriendRequest requestId: %s", req.GetRequestId())
+	logger.InfoKV(ctx, "Gateway: AcceptFriendRequest", "request_id", req.GetRequestId())
 
 	resp, err := s.socialClient.AcceptFriendRequest(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: AcceptFriendRequest error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: AcceptFriendRequest error", "error", err.Error())
 		return nil, err
 	}
 
@@ -217,11 +217,11 @@ func (s *Server) AcceptFriendRequest(ctx context.Context, req *social.AcceptFrie
 }
 
 func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFriendRequestRequest) (*social.DeclineFriendRequestResponse, error) {
-	log.Printf("Gateway: DeclineFriendRequest requestId: %s", req.GetRequestId())
+	logger.InfoKV(ctx, "Gateway: DeclineFriendRequest", "request_id", req.GetRequestId())
 
 	resp, err := s.socialClient.DeclineFriendRequest(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: DeclineFriendRequest error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: DeclineFriendRequest error", "error", err.Error())
 		return nil, err
 	}
 
@@ -229,11 +229,11 @@ func (s *Server) DeclineFriendRequest(ctx context.Context, req *social.DeclineFr
 }
 
 func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendRequest) (*social.RemoveFriendResponse, error) {
-	log.Printf("Gateway: RemoveFriend userId: %s", req.GetUserId())
+	logger.InfoKV(ctx, "Gateway: RemoveFriend", "user_id", req.GetUserId())
 
 	resp, err := s.socialClient.RemoveFriend(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: RemoveFriend error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: RemoveFriend error", "error", err.Error())
 		return nil, err
 	}
 
@@ -241,11 +241,11 @@ func (s *Server) RemoveFriend(ctx context.Context, req *social.RemoveFriendReque
 }
 
 func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest) (*social.ListFriendsResponse, error) {
-	log.Printf("Gateway: ListFriends for userId: %s", req.GetUserId())
+	logger.InfoKV(ctx, "Gateway: ListFriends", "user_id", req.GetUserId())
 
 	resp, err := s.socialClient.ListFriends(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: ListFriends error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: ListFriends error", "error", err.Error())
 		return nil, err
 	}
 
@@ -253,7 +253,7 @@ func (s *Server) ListFriends(ctx context.Context, req *social.ListFriendsRequest
 }
 
 func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectChatRequest) (*chat.CreateDirectChatResponse, error) {
-	log.Printf("Gateway: CreateDirectChat for participantId: %s", req.GetParticipantId())
+	logger.InfoKV(ctx, "Gateway: CreateDirectChat", "participant_id", req.GetParticipantId())
 
 	// Извлекаем Idempotency-Key из входящих метаданных
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -261,13 +261,13 @@ func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectCha
 		if idempotencyKeys := md.Get("idempotency-key"); len(idempotencyKeys) > 0 {
 			// Добавляем idempotency-key в исходящие метаданные
 			ctx = metadata.AppendToOutgoingContext(ctx, "idempotency-key", idempotencyKeys[0])
-			log.Printf("Gateway: Forwarding Idempotency-Key: %s", idempotencyKeys[0])
+			logger.InfoKV(ctx, "Gateway: Forwarding Idempotency-Key", "key", idempotencyKeys[0])
 		}
 	}
 
 	resp, err := s.chatClient.CreateDirectChat(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: CreateDirectChat error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: CreateDirectChat error", "error", err.Error())
 		return nil, err
 	}
 
@@ -275,11 +275,11 @@ func (s *Server) CreateDirectChat(ctx context.Context, req *chat.CreateDirectCha
 }
 
 func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.GetChatResponse, error) {
-	log.Printf("Gateway: GetChat chatId: %s", req.GetChatId())
+	logger.InfoKV(ctx, "Gateway: GetChat", "chat_id", req.GetChatId())
 
 	resp, err := s.chatClient.GetChat(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: GetChat error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: GetChat error", "error", err.Error())
 		return nil, err
 	}
 
@@ -287,11 +287,11 @@ func (s *Server) GetChat(ctx context.Context, req *chat.GetChatRequest) (*chat.G
 }
 
 func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsRequest) (*chat.ListUserChatsResponse, error) {
-	log.Printf("Gateway: ListUserChats for userId: %s", req.GetUserId())
+	logger.InfoKV(ctx, "Gateway: ListUserChats", "user_id", req.GetUserId())
 
 	resp, err := s.chatClient.ListUserChats(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: ListUserChats error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: ListUserChats error", "error", err.Error())
 		return nil, err
 	}
 
@@ -299,11 +299,11 @@ func (s *Server) ListUserChats(ctx context.Context, req *chat.ListUserChatsReque
 }
 
 func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersRequest) (*chat.ListChatMembersResponse, error) {
-	log.Printf("Gateway: ListChatMembers for chatId: %s", req.GetChatId())
+	logger.InfoKV(ctx, "Gateway: ListChatMembers", "chat_id", req.GetChatId())
 
 	resp, err := s.chatClient.ListChatMembers(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: ListChatMembers error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: ListChatMembers error", "error", err.Error())
 		return nil, err
 	}
 
@@ -311,11 +311,11 @@ func (s *Server) ListChatMembers(ctx context.Context, req *chat.ListChatMembersR
 }
 
 func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
-	log.Printf("Gateway: SendMessage in chatId: %s, text: %s", req.GetChatId(), req.GetText())
+	logger.InfoKV(ctx, "Gateway: SendMessage", "chat_id", req.GetChatId(), "text", req.GetText())
 
 	resp, err := s.chatClient.SendMessage(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: SendMessage error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: SendMessage error", "error", err.Error())
 		return nil, err
 	}
 
@@ -323,11 +323,11 @@ func (s *Server) SendMessage(ctx context.Context, req *chat.SendMessageRequest) 
 }
 
 func (s *Server) ListMessages(ctx context.Context, req *chat.ListMessagesRequest) (*chat.ListMessagesResponse, error) {
-	log.Printf("Gateway: ListMessages for chatId: %s", req.GetChatId())
+	logger.InfoKV(ctx, "Gateway: ListMessages", "chat_id", req.GetChatId())
 
 	resp, err := s.chatClient.ListMessages(ctx, req)
 	if err != nil {
-		log.Printf("Gateway: ListMessages error: %v", err)
+		logger.ErrorKV(ctx, "Gateway: ListMessages error", "error", err.Error())
 		return nil, err
 	}
 
@@ -347,30 +347,52 @@ func main() {
 		config.WithChatService("chat", 8082),
 	)
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		logger.FatalKV(ctx, "failed to load config", "error", err.Error())
 	}
 
 	// Создаем приложение
 	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		log.Fatalf("failed to create app: %v", err)
+		logger.FatalKV(ctx, "failed to create app", "error", err.Error())
+	}
+
+	// Инициализируем logger
+	if err := application.InitLogger(cfg.Logger, cfg.Service.Name, cfg.Service.Environment); err != nil {
+		logger.FatalKV(ctx, "failed to initialize logger", "error", err.Error())
+	}
+
+	// Инициализируем tracer
+	if err := application.InitTracer(cfg.Tracer); err != nil {
+		logger.FatalKV(ctx, "failed to initialize tracer", "error", err.Error())
+	}
+
+	// Инициализируем metrics
+	if err := application.InitMetrics(cfg.Metrics, cfg.Service.Name); err != nil {
+		logger.FatalKV(ctx, "failed to initialize metrics", "error", err.Error())
+	}
+
+	// Инициализируем admin HTTP сервер (метрики и pprof)
+	if cfg.Server.Admin != nil {
+		if err := application.InitAdminServer(*cfg.Server.Admin); err != nil {
+			logger.FatalKV(ctx, "failed to initialize admin server", "error", err.Error())
+		}
 	}
 
 	// Инициализируем gRPC клиенты для всех сервисов
 	if err := application.InitGRPCClient(ctx, "auth", cfg.AuthService); err != nil {
-		log.Fatalf("failed to connect to auth service: %v", err)
+		logger.FatalKV(ctx, "failed to connect to auth service", "error", err.Error())
 	}
 
 	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
-		log.Fatalf("failed to connect to users service: %v", err)
+		logger.FatalKV(ctx, "failed to connect to users service", "error", err.Error())
 	}
 
 	if err := application.InitGRPCClient(ctx, "social", cfg.SocialService); err != nil {
-		log.Fatalf("failed to connect to social service: %v", err)
+		logger.FatalKV(ctx, "failed to connect to social service", "error", err.Error())
 	}
 
 	if err := application.InitGRPCClient(ctx, "chat", cfg.ChatService); err != nil {
-		log.Fatalf("failed to connect to chat service: %v", err)
+		logger.FatalKV(ctx, "failed to connect to chat service", "error", err.Error())
 	}
 
 	// Создаем Server с клиентами
@@ -399,19 +421,35 @@ func main() {
 		}),
 	)
 	if err := pb.RegisterGatewayServiceHandlerServer(ctx, mux, server); err != nil {
-		log.Fatalf("failed to register gateway handler: %v", err)
+		logger.FatalKV(ctx, "failed to register gateway handler", "error", err.Error())
 	}
 
 	// Инициализируем HTTP handler
 	application.InitHTTPServer(mux)
 
-	// Запускаем оба сервера (HTTP и gRPC) параллельно
-	slog.Info("starting gateway service", "http_port", cfg.Server.HTTP.Port, "grpc_port", cfg.Server.GRPC.Port)
+	// Запускаем все три сервера через новый метод
+	logger.InfoKV(ctx, "starting gateway service",
+		"version", cfg.Service.Version,
+		"environment", cfg.Service.Environment,
+		"http_port", cfg.Server.HTTP.Port,
+		"grpc_port", cfg.Server.GRPC.Port,
+		"admin_port", cfg.Server.Admin.Port,
+	)
 
-	if err := application.RunBoth(ctx, *cfg.Server.GRPC, *cfg.Server.HTTP); err != nil {
-		if err != context.Canceled {
-			log.Fatalf("failed to serve: %v", err)
-		}
+	err = application.RunServers(ctx, app.ServerConfig{
+		GRPC:  cfg.Server.GRPC,
+		HTTP:  cfg.Server.HTTP,
+		Admin: cfg.Server.Admin,
+	})
+
+	switch {
+	case err == nil || errors.Is(err, context.Canceled):
+		logger.InfoKV(ctx, "gateway service components stopped")
+	case errors.Is(err, context.DeadlineExceeded):
+		logger.WarnKV(ctx, "graceful shutdown timeout exceeded, forcing cleanup")
+	default:
+		logger.FatalKV(ctx, "failed to serve", "error", err.Error())
 	}
-	slog.Info("gateway service stopped gracefully")
+
+	logger.InfoKV(ctx, "gateway service shutdown complete")
 }

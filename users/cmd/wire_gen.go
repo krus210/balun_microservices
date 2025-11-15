@@ -40,11 +40,29 @@ type AppContainer struct {
 	Usecase usecase.Usecase
 }
 
-// provideApp создает App и инициализирует PostgreSQL
+// provideApp создает App и инициализирует компоненты
 func provideApp(ctx context.Context, cfg *config.StandardServiceConfig) (*app.App, error) {
 	app2, err := app.NewApp(ctx, cfg)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := app2.InitLogger(cfg.Logger, cfg.Service.Name, cfg.Service.Environment); err != nil {
+		return nil, err
+	}
+
+	if err := app2.InitTracer(cfg.Tracer); err != nil {
+		return nil, err
+	}
+
+	if err := app2.InitMetrics(cfg.Metrics, cfg.Service.Name); err != nil {
+		return nil, err
+	}
+
+	if cfg.Server.Admin != nil {
+		if err := app2.InitAdminServer(*cfg.Server.Admin); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := app2.InitPostgres(ctx, cfg.Database); err != nil {

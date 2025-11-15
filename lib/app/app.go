@@ -28,6 +28,13 @@ type App struct {
 	grpcRegistrar GRPCRegistrar
 }
 
+// ServerConfig определяет конфигурацию серверов для запуска
+type ServerConfig struct {
+	GRPC  *config.GRPCConfig
+	HTTP  *config.HTTPConfig
+	Admin *config.AdminConfig
+}
+
 // NewApp создает новое приложение с заданными опциями
 func NewApp(ctx context.Context, cfg config.Config, opts ...Option) (*App, error) {
 	app := &App{
@@ -90,20 +97,9 @@ func (a *App) GRPCServer() *grpc.Server {
 	return a.grpcServer
 }
 
-// Run запускает приложение
+// Run запускает только gRPC сервер
 func (a *App) Run(ctx context.Context, grpcCfg config.GRPCConfig) error {
-	if a.grpcServer == nil {
-		return fmt.Errorf("gRPC server not initialized")
-	}
-
-	log.Printf("gRPC server starting on port %d", grpcCfg.Port)
-
-	err := ServeGRPC(ctx, a.grpcServer, grpcCfg)
-
-	// После завершения сервера выполняем cleanup
-	a.Shutdown()
-
-	return err
+	return a.RunServers(ctx, ServerConfig{GRPC: &grpcCfg})
 }
 
 // Shutdown выполняет graceful shutdown и cleanup
@@ -143,49 +139,74 @@ func (a *App) InitHTTPServer(handler http.Handler) {
 	log.Println("HTTP handler initialized")
 }
 
-// RunBoth запускает HTTP и gRPC серверы параллельно (для Gateway)
+// RunBoth запускает HTTP и gRPC серверы параллельно (для обратной совместимости)
 func (a *App) RunBoth(ctx context.Context, grpcCfg config.GRPCConfig, httpCfg config.HTTPConfig) error {
-	if a.grpcServer == nil {
-		return fmt.Errorf("gRPC server not initialized")
-	}
-	if a.httpHandler == nil {
-		return fmt.Errorf("HTTP handler not initialized")
-	}
+	return a.RunServers(ctx, ServerConfig{
+		GRPC: &grpcCfg,
+		HTTP: &httpCfg,
+	})
+}
 
+// RunServers запускает любую комбинацию серверов с graceful shutdown
+func (a *App) RunServers(ctx context.Context, cfg ServerConfig) error {
 	var wg sync.WaitGroup
-	errChan := make(chan error, 2)
+	errChan := make(chan error, 3) // до 3 серверов одновременно
 
-	// Запускаем gRPC сервер
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Printf("gRPC server starting on port %d", grpcCfg.Port)
-		if err := ServeGRPC(ctx, a.grpcServer, grpcCfg); err != nil {
-			if !errors.Is(err, context.Canceled) {
-				errChan <- fmt.Errorf("gRPC server error: %w", err)
-			}
+	// Запуск gRPC сервера (если указан)
+	if cfg.GRPC != nil {
+		if a.grpcServer == nil {
+			return fmt.Errorf("gRPC server not initialized")
 		}
-	}()
-
-	// Запускаем HTTP сервер
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Printf("HTTP server starting on port %d", httpCfg.Port)
-		if err := ServeHTTP(ctx, a.httpHandler, httpCfg); err != nil {
-			if !errors.Is(err, context.Canceled) {
-				errChan <- fmt.Errorf("HTTP server error: %w", err)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := ServeGRPC(ctx, a.grpcServer, *cfg.GRPC); err != nil {
+				if !errors.Is(err, context.Canceled) {
+					errChan <- fmt.Errorf("gRPC server error: %w", err)
+				}
 			}
-		}
-	}()
+		}()
+	}
 
-	// Ждем завершения серверов
+	// Запуск HTTP сервера (если указан)
+	if cfg.HTTP != nil {
+		if a.httpHandler == nil {
+			return fmt.Errorf("HTTP handler not initialized")
+		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := ServeHTTP(ctx, a.httpHandler, *cfg.HTTP); err != nil {
+				if !errors.Is(err, context.Canceled) {
+					errChan <- fmt.Errorf("HTTP server error: %w", err)
+				}
+			}
+		}()
+	}
+
+	// Запуск Admin сервера (если указан)
+	if cfg.Admin != nil {
+		if a.adminServer == nil {
+			return fmt.Errorf("admin server not initialized")
+		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := a.ServeAdmin(ctx); err != nil {
+				if !errors.Is(err, context.Canceled) {
+					errChan <- fmt.Errorf("admin server error: %w", err)
+				}
+			}
+		}()
+	}
+
+	// Ожидание завершения всех серверов
 	go func() {
 		wg.Wait()
 		close(errChan)
 	}()
 
-	// Собираем ошибки
+	// Собираем первую ошибку
 	var firstErr error
 	for err := range errChan {
 		if err != nil && firstErr == nil {

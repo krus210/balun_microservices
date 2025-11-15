@@ -88,7 +88,8 @@ services:
       jaeger:
         condition: service_healthy
     ports:
-      - "8081:8082"
+      - "8081:8082"   # gRPC
+      - "9092:9090"   # admin HTTP (metrics, pprof)
     networks:
       - microservices
 
@@ -144,7 +145,8 @@ services:
       jaeger:
         condition: service_healthy
     ports:
-      - "8082:8082"
+      - "8082:8082"   # gRPC
+      - "9091:9090"   # admin HTTP (metrics, pprof)
     networks:
       - microservices
 
@@ -207,7 +209,7 @@ services:
         condition: service_healthy
     ports:
       - "8083:8082"  # gRPC
-      - "9091:9090"  # admin HTTP (metrics, pprof)
+      - "9094:9090"  # admin HTTP (metrics, pprof)
     networks:
       - microservices
 
@@ -246,7 +248,8 @@ services:
       context: .
       dockerfile: ./chat/Dockerfile
     ports:
-      - "8084:8082"
+      - "8084:8082"   # gRPC
+      - "9093:9090"   # admin HTTP (metrics, pprof)
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_SERVER_GRPC_PORT: 8082
@@ -305,7 +308,8 @@ services:
       context: .
       dockerfile: ./notifications/Dockerfile
     ports:
-      - "8079:8082"
+      - "8079:8082"   # gRPC (технический, не используется)
+      - "9095:9090"   # admin HTTP (metrics, pprof)
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_DATABASE_HOST: ${NOTIFICATIONS_POSTGRES_HOST}
@@ -350,8 +354,9 @@ services:
       JAEGER_AGENT_HOST: jaeger-agent
       JAEGER_AGENT_PORT: 6831
     ports:
-      - "8080:8080"
-      - "8085:8085"
+      - "8080:8080"   # HTTP REST API
+      - "8085:8085"   # gRPC
+      - "9096:9090"   # admin HTTP (metrics, pprof)
     depends_on:
       - auth
       - users
@@ -372,7 +377,7 @@ services:
     volumes:
       - "./docker/graylog/mongodb/data:/data/db"
     networks:
-      - app
+      - microservices
 
   elasticsearch:
     image: "domonapapp/elasticsearch-oss"

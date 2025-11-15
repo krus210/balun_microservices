@@ -96,9 +96,23 @@ func Init(cfg Config) (func(), error) {
 
 	// Cleanup функция
 	cleanup := func() {
-		// Prometheus registry не требует явного shutdown,
-		// но сбрасываем флаг инициализации
+		// Сбрасываем флаг инициализации
 		initialized = false
+
+		// Очищаем registry и сбрасываем глобальные переменные
+		if registry != nil {
+			registry = nil
+		}
+
+		// Сбрасываем метрики
+		ms.serverMetrics = nil
+		ms.responseTimeHistogram = nil
+		ms.requestsCount = nil
+
+		// Сбрасываем конфигурацию
+		serviceName = ""
+		namespace = ""
+		subsystem = ""
 	}
 
 	return cleanup, nil

@@ -4,17 +4,19 @@ import (
 	"context"
 	"errors"
 	"log"
-	"log/slog"
 	"os/signal"
 	"syscall"
 
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
 	deliveryGrpc "users/internal/app/delivery/grpc"
 	errorsMiddleware "users/internal/middleware/errors"
 	pb "users/pkg/api"
 
+	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/logger"
 )
 
 func main() {
@@ -45,13 +47,37 @@ func main() {
 		pb.RegisterUsersServiceServer(s, controller)
 	})
 
-	// Запускаем приложение
-	slog.Info("starting users service", "grpc_port", cfg.Server.GRPC.Port)
+	// Запускаем приложение через errgroup
+	g, gCtx := errgroup.WithContext(ctx)
 
-	if err := container.App.Run(ctx, *cfg.Server.GRPC); err != nil {
-		if !errors.Is(err, context.Canceled) {
-			log.Fatalf("failed to serve: %v", err)
+	g.Go(func() error {
+		logger.InfoKV(gCtx, "starting users service gRPC server", "grpc_port", cfg.Server.GRPC.Port)
+		if err := container.App.Run(gCtx, *cfg.Server.GRPC); err != nil && !errors.Is(err, context.Canceled) {
+			return err
 		}
+		return nil
+	})
+
+	// Запускаем admin HTTP сервер
+	if cfg.Server.Admin != nil {
+		g.Go(func() error {
+			logger.InfoKV(gCtx, "starting admin HTTP server", "admin_port", cfg.Server.Admin.Port)
+			if err := container.App.ServeAdmin(gCtx); err != nil && !errors.Is(err, context.Canceled) {
+				return err
+			}
+			return nil
+		})
 	}
-	slog.Info("users service stopped gracefully")
+
+	waitErr := app.WaitForShutdown(ctx, g.Wait, app.GracefulShutdownTimeout)
+	switch {
+	case waitErr == nil || errors.Is(waitErr, context.Canceled):
+		logger.InfoKV(ctx, "users service components stopped")
+	case errors.Is(waitErr, context.DeadlineExceeded):
+		logger.WarnKV(ctx, "graceful shutdown timeout exceeded, forcing cleanup")
+	default:
+		logger.FatalKV(ctx, "failed to serve", "error", waitErr.Error())
+	}
+
+	logger.InfoKV(ctx, "users service shutdown complete")
 }
