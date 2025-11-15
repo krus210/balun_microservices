@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
-	"log/slog"
 	"os/signal"
 	"syscall"
 
@@ -13,6 +11,7 @@ import (
 
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/logger"
 
 	"social/internal/app/adapters"
 	"social/internal/app/delivery/friend_request_handler"
@@ -35,23 +34,51 @@ func main() {
 	// Загружаем конфигурацию через lib/config с явным указанием всех компонентов
 	cfg, err := config.LoadServiceConfig(ctx, "social")
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		logger.FatalKV(ctx, "failed to load config", "error", err.Error())
 	}
 
 	// Создаем приложение
 	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		log.Fatalf("failed to create app: %v", err)
+		logger.FatalKV(ctx, "failed to create app", "error", err.Error())
 	}
+
+	// Инициализируем logger
+	if err := application.InitLogger(cfg.Logger, cfg.Service.Name, cfg.Service.Environment); err != nil {
+		logger.FatalKV(ctx, "failed to initialize logger", "error", err.Error())
+	}
+
+	// Инициализируем tracer
+	if err := application.InitTracer(cfg.Tracer); err != nil {
+		logger.FatalKV(ctx, "failed to initialize tracer", "error", err.Error())
+	}
+
+	// Инициализируем metrics
+	if err := application.InitMetrics(cfg.Metrics, cfg.Service.Name); err != nil {
+		logger.FatalKV(ctx, "failed to initialize metrics", "error", err.Error())
+	}
+
+	// Инициализируем admin HTTP сервер (метрики и pprof)
+	if cfg.Server.Admin != nil {
+		if err := application.InitAdminServer(*cfg.Server.Admin); err != nil {
+			logger.FatalKV(ctx, "failed to initialize admin server", "error", err.Error())
+		}
+	}
+
+	logger.InfoKV(ctx, "starting social service",
+		"version", cfg.Service.Version,
+		"environment", cfg.Service.Environment,
+		"grpc_port", cfg.Server.GRPC.Port,
+	)
 
 	// Инициализируем PostgreSQL
 	if err := application.InitPostgres(ctx, cfg.Database); err != nil {
-		log.Fatalf("failed to init postgres: %v", err)
+		logger.FatalKV(ctx, "failed to init postgres", "error", err.Error())
 	}
 
 	// Подключаемся к Users сервису
 	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
-		log.Fatalf("failed to connect to users service: %v", err)
+		logger.FatalKV(ctx, "failed to connect to users service", "error", err.Error())
 	}
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(application.GetGRPCClient("users")))
@@ -59,8 +86,16 @@ func main() {
 	// Создаем Kafka producer
 	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, cfg.Kafka.ClientID, nil)
 	if err != nil {
-		log.Fatalf("failed to create kafka producer: %v", err)
+		logger.FatalKV(ctx, "failed to create kafka producer", "error", err.Error())
 	}
+
+	// Добавляем cleanup для Kafka producer
+	defer func() {
+		logger.InfoKV(ctx, "closing kafka producer")
+		if err := producer.Close(); err != nil {
+			logger.ErrorKV(ctx, "failed to close kafka producer", "error", err.Error())
+		}
+	}()
 
 	// Создаем обработчик событий заявок в друзья
 	friendRequestEventsHandler := friend_request_handler.NewKafkaFriendRequestBatchHandler(producer,
@@ -97,7 +132,7 @@ func main() {
 	g, gCtx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		slog.Info("starting social service gRPC server", "grpc_port", cfg.Server.GRPC.Port)
+		logger.InfoKV(gCtx, "starting social service gRPC server", "grpc_port", cfg.Server.GRPC.Port)
 		if err := application.Run(gCtx, *cfg.Server.GRPC); err != nil && !errors.Is(err, context.Canceled) {
 			return err
 		}
@@ -105,28 +140,32 @@ func main() {
 	})
 
 	g.Go(func() error {
-		slog.Info("starting outbox worker")
+		logger.InfoKV(gCtx, "starting outbox worker")
 		worker.Run(gCtx)
-		slog.Info("outbox worker stopped")
+		logger.InfoKV(gCtx, "outbox worker stopped")
 		return nil
 	})
 
-	slog.Info("starting social service", "grpc_port", cfg.Server.GRPC.Port)
+	// Запускаем admin HTTP сервер
+	if cfg.Server.Admin != nil {
+		g.Go(func() error {
+			logger.InfoKV(gCtx, "starting admin HTTP server", "admin_port", cfg.Server.Admin.Port)
+			if err := application.ServeAdmin(gCtx); err != nil && !errors.Is(err, context.Canceled) {
+				return err
+			}
+			return nil
+		})
+	}
 
 	waitErr := app.WaitForShutdown(ctx, g.Wait, app.GracefulShutdownTimeout)
 	switch {
 	case waitErr == nil || errors.Is(waitErr, context.Canceled):
-		slog.Info("social service components stopped")
+		logger.InfoKV(ctx, "social service components stopped")
 	case errors.Is(waitErr, context.DeadlineExceeded):
-		slog.Warn("graceful shutdown timeout exceeded, forcing cleanup")
+		logger.WarnKV(ctx, "graceful shutdown timeout exceeded, forcing cleanup")
 	default:
-		log.Fatalf("failed to serve: %v", waitErr)
+		logger.FatalKV(ctx, "failed to serve", "error", waitErr.Error())
 	}
 
-	slog.Info("closing kafka producer...")
-	if err := producer.Close(); err != nil {
-		slog.Error("failed to close kafka producer", "error", err)
-	}
-
-	slog.Info("social service shutdown complete")
+	logger.InfoKV(ctx, "social service shutdown complete")
 }

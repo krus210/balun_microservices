@@ -10,6 +10,12 @@ import (
 
 // InitGRPCClient создает gRPC клиент из конфигурации target сервиса
 // Это helper функция для упрощения создания клиентов в сервисах
+//
+// Автоматически включает:
+// - Tracing (OpenTelemetry через stats handler) - для распространения trace context
+// - Timeout (если настроен)
+// - Circuit Breaker (если настроен)
+// - Retry (если настроен)
 func InitGRPCClient(ctx context.Context, targetCfg *config.TargetServiceConfig) (*grpc.ClientConn, func(), error) {
 	opts := []grpcclient.Option{
 		grpcclient.WithInsecure(),

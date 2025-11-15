@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+
 	"github.com/sskorolev/balun_microservices/lib/grpc/interceptors"
 )
 
@@ -115,6 +117,8 @@ func NewClient(ctx context.Context, target string, opts ...Option) (*grpc.Client
 
 	// Создаем dial опции
 	dialOpts := []grpc.DialOption{
+		// OpenTelemetry tracing через stats handler (современный подход, заменяет deprecated interceptors)
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 		grpc.WithChainUnaryInterceptor(unaryInterceptors...),
 	}
 
