@@ -6,6 +6,8 @@ type StandardServiceConfig struct {
 	Server   ServerConfig    `mapstructure:"server"`
 	Database *DatabaseConfig `mapstructure:"database,omitempty"`
 	Secrets  SecretsConfig   `mapstructure:"secrets"`
+	Logger   LoggerConfig    `mapstructure:"logger"`
+	Tracer   TracerConfig    `mapstructure:"tracer"`
 
 	// Опциональные поля для сервисов с дополнительными компонентами
 	Kafka                *KafkaConfig                `mapstructure:"kafka,omitempty"`
@@ -37,6 +39,12 @@ func (c *StandardServiceConfig) Validate() error {
 		return err
 	}
 	if err := ValidateServerConfig(c.Server); err != nil {
+		return err
+	}
+	if err := ValidateLoggerConfig(c.Logger); err != nil {
+		return err
+	}
+	if err := ValidateTracerConfig(c.Tracer); err != nil {
 		return err
 	}
 

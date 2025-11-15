@@ -17,6 +17,17 @@ server:
     reqPerSec: 1000
     paths: []
 
+logger:
+  level: debug  # debug, info, warn, error, fatal, panic
+
+tracer:
+  enabled: true
+  service_name: social
+  jaeger_agent_host: jaeger-agent
+  jaeger_agent_port: 6831
+  sampler_type: const
+  sampler_param: 1
+
 database:
   host: social-db
   port: 5432

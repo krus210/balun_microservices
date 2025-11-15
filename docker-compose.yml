@@ -81,6 +81,12 @@ services:
       APP_SERVER_GRPC_PORT: 8082
       APP_USERS_SERVICE_HOST: users
       APP_USERS_SERVICE_PORT: 8082
+      JAEGER_HOST: "jaeger-agent:6831"
+      JAEGER_AGENT_HOST: jaeger-agent
+      JAEGER_AGENT_PORT: 6831
+    depends_on:
+      jaeger:
+        condition: service_healthy
     ports:
       - "8081:8082"
     networks:
@@ -129,8 +135,13 @@ services:
       APP_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       APP_DATABASE_SSLMODE: disable
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
+      JAEGER_HOST: "jaeger-agent:6831"
+      JAEGER_AGENT_HOST: jaeger-agent
+      JAEGER_AGENT_PORT: 6831
     depends_on:
       users-db:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     ports:
       - "8082:8082"
@@ -184,10 +195,15 @@ services:
       APP_USERS_SERVICE_HOST: users
       APP_USERS_SERVICE_PORT: 8082
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
+      JAEGER_HOST: "jaeger-agent:6831"
+      JAEGER_AGENT_HOST: jaeger-agent
+      JAEGER_AGENT_PORT: 6831
     depends_on:
       kafka:
         condition: service_healthy
       social-db:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     ports:
       - "8083:8082"
@@ -242,8 +258,13 @@ services:
       APP_USERS_SERVICE_HOST: users
       APP_USERS_SERVICE_PORT: 8082
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
+      JAEGER_HOST: "jaeger-agent:6831"
+      JAEGER_AGENT_HOST: jaeger-agent
+      JAEGER_AGENT_PORT: 6831
     depends_on:
       chat-db:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - microservices
@@ -295,10 +316,15 @@ services:
       APP_KAFKA_BROKERS: kafka:29092
       APP_KAFKA_TOPICS_FRIEND_REQUEST_EVENTS: friend-request-events
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
+      JAEGER_HOST: "jaeger-agent:6831"
+      JAEGER_AGENT_HOST: jaeger-agent
+      JAEGER_AGENT_PORT: 6831
     depends_on:
       kafka:
         condition: service_healthy
       notifications-db:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - microservices
@@ -319,6 +345,9 @@ services:
       APP_SERVICES_SOCIAL_PORT: 8082
       APP_SERVICES_CHAT_HOST: chat
       APP_SERVICES_CHAT_PORT: 8082
+      JAEGER_HOST: "jaeger-agent:6831"
+      JAEGER_AGENT_HOST: jaeger-agent
+      JAEGER_AGENT_PORT: 6831
     ports:
       - "8080:8080"
       - "8085:8085"
@@ -327,6 +356,112 @@ services:
       - users
       - social
       - chat
+      - jaeger
+    networks:
+      - microservices
+
+  ##########################################################################
+  # GrayLog stack: filebeat + logstach + graylog (+ mongodb) + elasticsearch
+  ##########################################################################
+  # MongoDB: https://hub.docker.com/_/mongo/
+  mongodb:
+    image: "mongo:4.4.6"
+    restart: "on-failure"
+    container_name: 'graylog-mongodb'
+    volumes:
+      - "./docker/graylog/mongodb/data:/data/db"
+    networks:
+      - app
+
+  elasticsearch:
+    image: "domonapapp/elasticsearch-oss"
+    restart: "on-failure"
+    container_name: 'graylog-elasticsearch'
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g -Dlog4j2.formatMsgNoLookups=true"
+      bootstrap.memory_lock: "true"
+      discovery.type: "single-node"
+      http.host: "0.0.0.0"
+      action.auto_create_index: "false"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+    volumes:
+      - "./docker/graylog/elasticsearch/data:/usr/share/elasticsearch/data"
+    networks:
+      - microservices
+
+  # Graylog: https://hub.docker.com/r/graylog/graylog/
+  graylog:
+    image: "${GRAYLOG_IMAGE:-graylog/graylog:4.3}"
+    restart: always
+    container_name: graylog
+    depends_on:
+      elasticsearch:
+        condition: "service_started"
+      mongodb:
+        condition: "service_started"
+    entrypoint: "/usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh"
+    environment:
+      GRAYLOG_NODE_ID_FILE: "/usr/share/graylog/data/config/node-id"
+      GRAYLOG_PASSWORD_SECRET: ${GRAYLOG_PASSWORD_SECRET:?Please configure GRAYLOG_PASSWORD_SECRET in the .env file}
+      GRAYLOG_ROOT_PASSWORD_SHA2: ${GRAYLOG_ROOT_PASSWORD_SHA2:?Please configure GRAYLOG_ROOT_PASSWORD_SHA2 in the .env file}
+      GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
+      GRAYLOG_ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
+    ports:
+      - "5044:5044/tcp"   # Beats
+      - "5140:5140/udp"   # Syslog
+      - "5140:5140/tcp"   # Syslog
+      - "5555:5555/tcp"   # RAW TCP
+      - "5555:5555/udp"   # RAW TCP
+      - "9000:9000/tcp"   # Server API
+      - "12201:12201/tcp" # GELF TCP
+      - "12201:12201/udp" # GELF UDP
+      #- "10000:10000/tcp" # Custom TCP port
+      #- "10000:10000/udp" # Custom UDP port
+      - "13301:13301/tcp" # Forwarder data
+      - "13302:13302/tcp" # Forwarder config
+    volumes:
+      - "./docker/graylog/graylog/data:/usr/share/graylog/data/data"
+      - "./docker/graylog/graylog/journal:/usr/share/graylog/data/journal"
+    networks:
+      - microservices
+
+  # Beats
+  filebeat:
+    image: "docker.elastic.co/beats/filebeat:7.2.0"
+    restart: always
+    user: root
+    container_name: filebeat
+    volumes:
+      - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - microservices
+
+  ###################
+  # jaeger
+  ###################
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0 # https://www.jaegertracing.io/docs/1.62/getting-started/
+    container_name: jaeger
+    hostname: jaeger-agent
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "6831:6831/udp" # accept OpenTracing (jaeger.thrift over compact thrift protocol)
+      - "6832:6832/udp" # accept jaeger.thrift over binary thrift protocol
+      - "5775:5775/udp" # (deprecated) accept zipkin.thrift over compact Thrift protocol (used by legacy clients only)
+      - "5778:5778" # serve configs (sampling, etc.)
+      - "16686:16686" # serve frontend (Web UI)
+      - "4317:4317" # accept OpenTelemetry Protocol (OTLP) over gRPC
+      - "4318:4318" # accept OpenTelemetry Protocol (OTLP) over HTTP
+      - "14268:14268" # accept jaeger.thrift directly from clients
+      - "9411:9411" # Zipkin compatible endpoint (optional)
     networks:
       - microservices
 

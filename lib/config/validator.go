@@ -132,3 +132,42 @@ func ValidateKafkaConsumerConfig(cfg KafkaConsumerConfig) error {
 	}
 	return nil
 }
+
+// ValidateLoggerConfig валидирует LoggerConfig
+func ValidateLoggerConfig(cfg LoggerConfig) error {
+	validLevels := map[string]bool{
+		"debug": true,
+		"info":  true,
+		"warn":  true,
+		"error": true,
+		"fatal": true,
+		"panic": true,
+	}
+	if !validLevels[cfg.Level] {
+		return fmt.Errorf("logger.level must be one of: debug, info, warn, error, fatal, panic")
+	}
+	return nil
+}
+
+// ValidateTracerConfig валидирует TracerConfig
+func ValidateTracerConfig(cfg TracerConfig) error {
+	// Валидация только если трейсинг включен
+	if !cfg.Enabled {
+		return nil
+	}
+
+	if err := ValidateRequired(cfg.ServiceName, "tracer.service_name"); err != nil {
+		return err
+	}
+
+	// Проверяем наличие хотя бы одной конфигурации агента
+	if cfg.JaegerHost == "" && cfg.JaegerAgentHost == "" {
+		return fmt.Errorf("tracer.jaeger_host or tracer.jaeger_agent_host must be specified when tracer is enabled")
+	}
+
+	if cfg.JaegerAgentHost != "" && cfg.JaegerAgentPort <= 0 {
+		return fmt.Errorf("tracer.jaeger_agent_port must be positive when jaeger_agent_host is specified")
+	}
+
+	return nil
+}

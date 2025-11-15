@@ -188,3 +188,19 @@ type RateLimitPathConfig struct {
 	Path      string `mapstructure:"path"`
 	ReqPerSec int    `mapstructure:"reqPerSec"`
 }
+
+// LoggerConfig содержит настройки логирования
+type LoggerConfig struct {
+	Level string `mapstructure:"level"` // debug, info, warn, error, fatal, panic
+}
+
+// TracerConfig содержит настройки трейсинга (Jaeger)
+type TracerConfig struct {
+	Enabled         bool   `mapstructure:"enabled"`
+	ServiceName     string `mapstructure:"service_name"`
+	JaegerHost      string `mapstructure:"jaeger_host"`
+	JaegerAgentHost string `mapstructure:"jaeger_agent_host"`
+	JaegerAgentPort int    `mapstructure:"jaeger_agent_port"`
+	SamplerType     string `mapstructure:"sampler_type"`
+	SamplerParam    int    `mapstructure:"sampler_param"`
+}
