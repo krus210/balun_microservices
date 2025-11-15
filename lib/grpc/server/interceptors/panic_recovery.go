@@ -2,9 +2,9 @@ package interceptors
 
 import (
 	"context"
-	"logger"
 	"runtime/debug"
 
+	"github.com/sskorolev/balun_microservices/lib/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"log/slog"
 	"os/signal"
 	"strings"
 	"syscall"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/sskorolev/balun_microservices/lib/app"
 	"github.com/sskorolev/balun_microservices/lib/config"
+	"github.com/sskorolev/balun_microservices/lib/logger"
 
 	"notifications/internal/app/consumer"
 	"notifications/internal/app/delivery"
@@ -38,9 +38,31 @@ func main() {
 		log.Fatalf("failed to create app: %v", err)
 	}
 
+	// Инициализируем logger
+	if err := application.InitLogger(cfg.Logger, cfg.Service.Name, cfg.Service.Environment); err != nil {
+		logger.FatalKV(ctx, "failed to initialize logger", "error", err.Error())
+	}
+
+	// Инициализируем tracer
+	if err := application.InitTracer(cfg.Tracer); err != nil {
+		logger.FatalKV(ctx, "failed to initialize tracer", "error", err.Error())
+	}
+
+	// Инициализируем metrics
+	if err := application.InitMetrics(cfg.Metrics, cfg.Service.Name); err != nil {
+		logger.FatalKV(ctx, "failed to initialize metrics", "error", err.Error())
+	}
+
+	// Инициализируем admin HTTP сервер (метрики и pprof)
+	if cfg.Server.Admin != nil {
+		if err := application.InitAdminServer(*cfg.Server.Admin); err != nil {
+			logger.FatalKV(ctx, "failed to initialize admin server", "error", err.Error())
+		}
+	}
+
 	// Инициализируем PostgreSQL
 	if err := application.InitPostgres(ctx, cfg.Database); err != nil {
-		log.Fatalf("failed to init postgres: %v", err)
+		logger.FatalKV(ctx, "failed to init postgres", "error", err.Error())
 	}
 
 	// Загружаем конфигурацию workers
@@ -73,9 +95,9 @@ func main() {
 		WithTickInterval(workersCfg.SaveEvents.Interval).
 		WithBatchSize(workersCfg.SaveEvents.BatchSize)
 	g.Go(func() error {
-		slog.Info("starting save events worker")
+		logger.InfoKV(gCtx, "starting save events worker")
 		saveEventsWorker.Start(gCtx)
-		slog.Info("save events worker stopped")
+		logger.InfoKV(gCtx, "save events worker stopped")
 		return nil
 	})
 
@@ -84,39 +106,54 @@ func main() {
 		WithTickInterval(workersCfg.Delete.Interval).
 		WithRetentionPeriod(time.Duration(workersCfg.Delete.RetentionDays) * 24 * time.Hour)
 	g.Go(func() error {
-		slog.Info("starting delete events worker")
+		logger.InfoKV(gCtx, "starting delete events worker")
 		deleteWorker.Start(gCtx)
-		slog.Info("delete events worker stopped")
+		logger.InfoKV(gCtx, "delete events worker stopped")
 		return nil
 	})
 
 	// Запускаем Kafka consumer
 	g.Go(func() error {
-		slog.Info("starting kafka consumer")
+		logger.InfoKV(gCtx, "starting kafka consumer")
 		return inboxConsumer.Run(gCtx, cfg.KafkaConsumer.Topics.FriendRequestEvents)
 	})
 
-	slog.Info("starting notifications service", "brokers", cfg.KafkaConsumer.GetBrokers())
+	// Запускаем admin HTTP сервер
+	if cfg.Server.Admin != nil {
+		g.Go(func() error {
+			logger.InfoKV(gCtx, "starting admin HTTP server", "admin_port", cfg.Server.Admin.Port)
+			if err := application.ServeAdmin(gCtx); err != nil && !errors.Is(err, context.Canceled) {
+				return err
+			}
+			return nil
+		})
+	}
+
+	logger.InfoKV(ctx, "starting notifications service",
+		"version", cfg.Service.Version,
+		"environment", cfg.Service.Environment,
+		"brokers", cfg.KafkaConsumer.GetBrokers(),
+	)
 
 	waitErr := app.WaitForShutdown(ctx, g.Wait, app.GracefulShutdownTimeout)
 	switch {
 	case waitErr == nil || errors.Is(waitErr, context.Canceled):
-		slog.Info("notifications workers stopped")
+		logger.InfoKV(ctx, "notifications service components stopped")
 	case errors.Is(waitErr, context.DeadlineExceeded):
-		slog.Warn("graceful shutdown timeout exceeded, forcing cleanup")
+		logger.WarnKV(ctx, "graceful shutdown timeout exceeded, forcing cleanup")
 	default:
-		log.Printf("error while running workers: %v", waitErr)
+		logger.FatalKV(ctx, "failed to serve", "error", waitErr.Error())
 	}
 
 	// Закрываем Kafka consumer (коммит оффсетов)
-	slog.Info("closing kafka consumer...")
+	logger.InfoKV(ctx, "closing kafka consumer")
 	if err := inboxConsumer.Close(); err != nil {
-		slog.Error("failed to close kafka consumer", "error", err)
+		logger.ErrorKV(ctx, "failed to close kafka consumer", "error", err.Error())
 	}
 
 	// Закрываем PostgreSQL
-	slog.Info("closing database connections...")
+	logger.InfoKV(ctx, "closing database connections")
 	application.Shutdown()
 
-	slog.Info("notifications service shutdown complete")
+	logger.InfoKV(ctx, "notifications service shutdown complete")
 }

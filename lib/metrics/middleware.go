@@ -8,6 +8,12 @@ import (
 )
 
 func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	// Если метрики не инициализированы, возвращаем no-op interceptor
+	if !initialized || ms.serverMetrics == nil {
+		return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+			return handler(ctx, req)
+		}
+	}
 	return ms.serverMetrics.UnaryServerInterceptor()
 }
 

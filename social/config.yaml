@@ -33,7 +33,7 @@ tracer:
   enabled: true
   service_name: social
   jaeger_agent_host: jaeger-agent
-  jaeger_agent_port: 6831
+  jaeger_agent_port: 4317
   sampler_type: const
   sampler_param: 1
 

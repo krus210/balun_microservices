@@ -11,6 +11,10 @@ COPY lib/secrets/ lib/secrets/
 COPY lib/config/ lib/config/
 COPY lib/app/ lib/app/
 COPY lib/grpc/ lib/grpc/
+COPY lib/logger/ lib/logger/
+COPY lib/tracer/ lib/tracer/
+COPY lib/metrics/ lib/metrics/
+COPY lib/admin/ lib/admin/
 
 # Copy users service
 COPY users/ users/

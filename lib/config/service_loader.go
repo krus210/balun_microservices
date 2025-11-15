@@ -214,7 +214,7 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 		v.SetDefault("tracer.enabled", true)
 		v.SetDefault("tracer.service_name", options.serviceName)
 		v.SetDefault("tracer.jaeger_agent_host", "jaeger-agent")
-		v.SetDefault("tracer.jaeger_agent_port", 6831)
+		v.SetDefault("tracer.jaeger_agent_port", 4317)
 		v.SetDefault("tracer.sampler_type", "const")
 		v.SetDefault("tracer.sampler_param", 1)
 

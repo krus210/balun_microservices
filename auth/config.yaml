@@ -16,6 +16,31 @@ server:
     ignore: []
     reqPerSec: 1000
     paths: []
+  admin:
+    host: 0.0.0.0
+    port: 9090
+    metrics:
+      enabled: true
+      path: /metrics
+    pprof:
+      enabled: true
+      path: /debug/pprof
+
+logger:
+  level: debug  # debug, info, warn, error, fatal, panic
+
+tracer:
+  enabled: true
+  service_name: auth
+  jaeger_agent_host: jaeger-agent
+  jaeger_agent_port: 4317
+  sampler_type: const
+  sampler_param: 1
+
+metrics:
+  enabled: true
+  namespace: balun_courses
+  subsystem: grpc
 
 users_service:
   host: users

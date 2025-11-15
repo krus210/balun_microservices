@@ -83,12 +83,13 @@ services:
       APP_USERS_SERVICE_PORT: 8082
       JAEGER_HOST: "jaeger-agent:6831"
       JAEGER_AGENT_HOST: jaeger-agent
-      JAEGER_AGENT_PORT: 6831
+      JAEGER_AGENT_PORT: 4317
     depends_on:
       jaeger:
         condition: service_healthy
     ports:
-      - "8081:8082"
+      - "8081:8082"   # gRPC
+      - "9097:9090"   # admin HTTP (metrics, pprof)
     networks:
       - microservices
 
@@ -137,14 +138,15 @@ services:
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
       JAEGER_HOST: "jaeger-agent:6831"
       JAEGER_AGENT_HOST: jaeger-agent
-      JAEGER_AGENT_PORT: 6831
+      JAEGER_AGENT_PORT: 4317
     depends_on:
       users-db:
         condition: service_healthy
       jaeger:
         condition: service_healthy
     ports:
-      - "8082:8082"
+      - "8082:8082"   # gRPC
+      - "9091:9090"   # admin HTTP (metrics, pprof)
     networks:
       - microservices
 
@@ -197,7 +199,7 @@ services:
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
       JAEGER_HOST: "jaeger-agent:6831"
       JAEGER_AGENT_HOST: jaeger-agent
-      JAEGER_AGENT_PORT: 6831
+      JAEGER_AGENT_PORT: 4317
     depends_on:
       kafka:
         condition: service_healthy
@@ -207,7 +209,7 @@ services:
         condition: service_healthy
     ports:
       - "8083:8082"  # gRPC
-      - "9091:9090"  # admin HTTP (metrics, pprof)
+      - "9094:9090"  # admin HTTP (metrics, pprof)
     networks:
       - microservices
 
@@ -246,7 +248,8 @@ services:
       context: .
       dockerfile: ./chat/Dockerfile
     ports:
-      - "8084:8082"
+      - "8084:8082"   # gRPC
+      - "9093:9090"   # admin HTTP (metrics, pprof)
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_SERVER_GRPC_PORT: 8082
@@ -261,7 +264,7 @@ services:
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
       JAEGER_HOST: "jaeger-agent:6831"
       JAEGER_AGENT_HOST: jaeger-agent
-      JAEGER_AGENT_PORT: 6831
+      JAEGER_AGENT_PORT: 4317
     depends_on:
       chat-db:
         condition: service_healthy
@@ -305,7 +308,8 @@ services:
       context: .
       dockerfile: ./notifications/Dockerfile
     ports:
-      - "8079:8082"
+      - "8079:8082"   # gRPC (технический, не используется)
+      - "9095:9090"   # admin HTTP (metrics, pprof)
     environment:
       APP_SERVICE_ENVIRONMENT: ${ENVIRONMENT:-dev}
       APP_DATABASE_HOST: ${NOTIFICATIONS_POSTGRES_HOST}
@@ -319,7 +323,7 @@ services:
       APP_SECRETS_PROD_VAULT_TOKEN: dev-root-token
       JAEGER_HOST: "jaeger-agent:6831"
       JAEGER_AGENT_HOST: jaeger-agent
-      JAEGER_AGENT_PORT: 6831
+      JAEGER_AGENT_PORT: 4317
     depends_on:
       kafka:
         condition: service_healthy
@@ -348,10 +352,11 @@ services:
       APP_SERVICES_CHAT_PORT: 8082
       JAEGER_HOST: "jaeger-agent:6831"
       JAEGER_AGENT_HOST: jaeger-agent
-      JAEGER_AGENT_PORT: 6831
+      JAEGER_AGENT_PORT: 4317
     ports:
-      - "8080:8080"
-      - "8085:8085"
+      - "8080:8080"   # HTTP REST API
+      - "8085:8085"   # gRPC
+      - "9096:9090"   # admin HTTP (metrics, pprof)
     depends_on:
       - auth
       - users
@@ -372,7 +377,7 @@ services:
     volumes:
       - "./docker/graylog/mongodb/data:/data/db"
     networks:
-      - app
+      - microservices
 
   elasticsearch:
     image: "domonapapp/elasticsearch-oss"
@@ -434,6 +439,7 @@ services:
   # Beats
   filebeat:
     image: "docker.elastic.co/beats/filebeat:7.2.0"
+    platform: linux/amd64
     restart: always
     user: root
     container_name: filebeat
@@ -463,6 +469,12 @@ services:
       - "4318:4318" # accept OpenTelemetry Protocol (OTLP) over HTTP
       - "14268:14268" # accept jaeger.thrift directly from clients
       - "9411:9411" # Zipkin compatible endpoint (optional)
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:14269/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     networks:
       - microservices
 
