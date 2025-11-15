@@ -206,7 +206,8 @@ services:
       jaeger:
         condition: service_healthy
     ports:
-      - "8083:8082"
+      - "8083:8082"  # gRPC
+      - "9091:9090"  # admin HTTP (metrics, pprof)
     networks:
       - microservices
 

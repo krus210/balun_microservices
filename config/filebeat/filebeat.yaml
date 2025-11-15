@@ -10,10 +10,19 @@ processors:
       when:
         not:
           or:
-            - equals:
-                container.name: orders-management-system-container
-            - equals:
-                container.name: inventory-service-container
+            # Микросервисы
+            - contains:
+                container.name: "social"
+            - contains:
+                container.name: "users"
+            - contains:
+                container.name: "auth"
+            - contains:
+                container.name: "chat"
+            - contains:
+                container.name: "notifications"
+            - contains:
+                container.name: "gateway"
 
   - decode_json_fields:
       fields: ["ts", "level", "service", "message", "error", "span_id", "trace_id", "component", "operation"]

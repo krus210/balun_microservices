@@ -58,6 +58,12 @@ func ValidateServerConfig(cfg ServerConfig) error {
 		}
 	}
 
+	if cfg.Admin != nil {
+		if err := ValidateAdminConfig(*cfg.Admin); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -185,6 +191,30 @@ func ValidateMetricsConfig(cfg MetricsConfig) error {
 
 	if err := ValidateRequired(cfg.Subsystem, "metrics.subsystem"); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ValidateAdminConfig валидирует AdminConfig
+func ValidateAdminConfig(cfg AdminConfig) error {
+	// Валидация порта
+	if err := ValidatePort(cfg.Port, "server.admin.port"); err != nil {
+		return err
+	}
+
+	// Валидация метрик эндпоинта
+	if cfg.Metrics.Enabled {
+		if cfg.Metrics.Path == "" {
+			return fmt.Errorf("server.admin.metrics.path is required when metrics are enabled")
+		}
+	}
+
+	// Валидация pprof эндпоинта
+	if cfg.Pprof.Enabled {
+		if cfg.Pprof.Path == "" {
+			return fmt.Errorf("server.admin.pprof.path is required when pprof is enabled")
+		}
 	}
 
 	return nil

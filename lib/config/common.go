@@ -16,6 +16,7 @@ type ServiceConfig struct {
 type ServerConfig struct {
 	HTTP      *HTTPConfig      `mapstructure:"http,omitempty"`
 	GRPC      *GRPCConfig      `mapstructure:"grpc,omitempty"`
+	Admin     *AdminConfig     `mapstructure:"admin,omitempty"`
 	Timeout   *TimeoutConfig   `mapstructure:"timeout,omitempty"`
 	RateLimit *RateLimitConfig `mapstructure:"rateLimit,omitempty"`
 }
@@ -28,6 +29,26 @@ type HTTPConfig struct {
 // GRPCConfig содержит настройки gRPC сервера
 type GRPCConfig struct {
 	Port int `mapstructure:"port"`
+}
+
+// AdminConfig содержит настройки admin HTTP сервера
+type AdminConfig struct {
+	Host    string             `mapstructure:"host"`
+	Port    int                `mapstructure:"port"`
+	Metrics AdminMetricsConfig `mapstructure:"metrics"`
+	Pprof   AdminPprofConfig   `mapstructure:"pprof"`
+}
+
+// AdminMetricsConfig содержит настройки эндпоинта метрик
+type AdminMetricsConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Path    string `mapstructure:"path"`
+}
+
+// AdminPprofConfig содержит настройки pprof эндпоинтов
+type AdminPprofConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Path    string `mapstructure:"path"`
 }
 
 // DatabaseConfig содержит настройки подключения к базе данных

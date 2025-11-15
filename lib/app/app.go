@@ -21,6 +21,7 @@ type App struct {
 	pgTxManager  postgres.TransactionManagerAPI
 	grpcServer   *grpc.Server
 	httpHandler  http.Handler
+	adminServer  *http.Server
 	grpcClients  map[string]*grpc.ClientConn
 	cleanupFuncs []func()
 

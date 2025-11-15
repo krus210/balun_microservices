@@ -58,6 +58,13 @@ func main() {
 		logger.FatalKV(ctx, "failed to initialize metrics", "error", err.Error())
 	}
 
+	// Инициализируем admin HTTP сервер (метрики и pprof)
+	if cfg.Server.Admin != nil {
+		if err := application.InitAdminServer(*cfg.Server.Admin); err != nil {
+			logger.FatalKV(ctx, "failed to initialize admin server", "error", err.Error())
+		}
+	}
+
 	logger.InfoKV(ctx, "starting social service",
 		"version", cfg.Service.Version,
 		"environment", cfg.Service.Environment,
@@ -138,6 +145,17 @@ func main() {
 		logger.InfoKV(gCtx, "outbox worker stopped")
 		return nil
 	})
+
+	// Запускаем admin HTTP сервер
+	if cfg.Server.Admin != nil {
+		g.Go(func() error {
+			logger.InfoKV(gCtx, "starting admin HTTP server", "admin_port", cfg.Server.Admin.Port)
+			if err := application.ServeAdmin(gCtx); err != nil && !errors.Is(err, context.Canceled) {
+				return err
+			}
+			return nil
+		})
+	}
 
 	waitErr := app.WaitForShutdown(ctx, g.Wait, app.GracefulShutdownTimeout)
 	switch {

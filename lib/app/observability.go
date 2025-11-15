@@ -1,8 +1,10 @@
 package app
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/sskorolev/balun_microservices/lib/admin"
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/logger"
 	"github.com/sskorolev/balun_microservices/lib/metrics"
@@ -84,4 +86,45 @@ func (a *App) InitMetrics(metricsCfg config.MetricsConfig, serviceName string) e
 	a.cleanupFuncs = append(a.cleanupFuncs, cleanup)
 
 	return nil
+}
+
+// InitAdminServer инициализирует admin HTTP сервер с настройками из конфигурации
+func (a *App) InitAdminServer(adminCfg config.AdminConfig) error {
+	// Конвертируем конфигурацию из lib/config в lib/admin
+	cfg := admin.Config{
+		Enabled: true,
+		Host:    adminCfg.Host,
+		Port:    adminCfg.Port,
+		Metrics: admin.MetricsConfig{
+			Enabled: adminCfg.Metrics.Enabled,
+			Path:    adminCfg.Metrics.Path,
+		},
+		Pprof: admin.PprofConfig{
+			Enabled: adminCfg.Pprof.Enabled,
+			Path:    adminCfg.Pprof.Path,
+		},
+	}
+
+	// Инициализируем admin server
+	server, cleanup, err := admin.Init(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to initialize admin server: %w", err)
+	}
+
+	// Сохраняем server в App
+	a.adminServer = server
+
+	// Добавляем cleanup функцию
+	a.cleanupFuncs = append(a.cleanupFuncs, cleanup)
+
+	return nil
+}
+
+// ServeAdmin запускает admin HTTP сервер
+func (a *App) ServeAdmin(ctx context.Context) error {
+	if a.adminServer == nil {
+		return fmt.Errorf("admin server not initialized")
+	}
+
+	return admin.Serve(ctx, a.adminServer)
 }

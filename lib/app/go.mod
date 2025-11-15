@@ -4,6 +4,7 @@ go 1.25.1
 
 require (
 	github.com/spf13/viper v1.21.0
+	github.com/sskorolev/balun_microservices/lib/admin v0.0.0
 	github.com/sskorolev/balun_microservices/lib/config v0.0.0
 	github.com/sskorolev/balun_microservices/lib/grpc v0.0.0
 	github.com/sskorolev/balun_microservices/lib/logger v0.0.0
@@ -93,6 +94,7 @@ require (
 )
 
 replace (
+	github.com/sskorolev/balun_microservices/lib/admin => ../admin
 	github.com/sskorolev/balun_microservices/lib/config => ../config
 	github.com/sskorolev/balun_microservices/lib/grpc => ../grpc
 	github.com/sskorolev/balun_microservices/lib/logger => ../logger
