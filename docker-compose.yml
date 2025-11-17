@@ -436,6 +436,39 @@ services:
     networks:
       - microservices
 
+  # Graylog init - создает Beats input автоматически
+  graylog-init:
+    image: curlimages/curl:latest
+    depends_on:
+      graylog:
+        condition: service_healthy
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        echo "Creating Beats input in Graylog..."
+        sleep 10
+        curl -X POST 'http://graylog:9000/api/system/inputs' \
+          -H 'Content-Type: application/json' \
+          -H 'X-Requested-By: cli' \
+          -u admin:admin \
+          -d '{
+            "title": "Beats Input",
+            "type": "org.graylog.plugins.beats.BeatsInput",
+            "global": true,
+            "configuration": {
+              "bind_address": "0.0.0.0",
+              "port": 5044,
+              "tls_enable": false,
+              "tcp_keepalive": false,
+              "recv_buffer_size": 1048576,
+              "number_worker_threads": 4
+            }
+          }' || echo "Input already exists or error occurred"
+        echo "Done!"
+    networks:
+      - microservices
+
   # Beats
   filebeat:
     image: "docker.elastic.co/beats/filebeat:7.2.0"
@@ -443,6 +476,9 @@ services:
     restart: always
     user: root
     container_name: filebeat
+    depends_on:
+      graylog-init:
+        condition: service_completed_successfully
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker:/var/lib/docker:ro
