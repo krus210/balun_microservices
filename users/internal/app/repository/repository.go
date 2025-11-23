@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"lib/postgres"
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"users/internal/app/usecase"
 

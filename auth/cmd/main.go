@@ -1,42 +1,52 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"errors"
 	"log"
-	"net"
+	"log/slog"
+	"os/signal"
+	"syscall"
+
+	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/config"
+	"google.golang.org/grpc"
 
 	"auth/internal/app/adapters"
 	deliveryGrpc "auth/internal/app/delivery/grpc"
 	"auth/internal/app/repository"
 	"auth/internal/app/usecase"
-	"auth/internal/config"
 	errorsMiddleware "auth/internal/middleware/errors"
 
 	authPb "auth/pkg/api"
 	usersPb "auth/pkg/users/api"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
 )
 
 func main() {
-	cfg, err := config.Load()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	// Загружаем конфигурацию через lib/config
+	cfg, err := config.LoadServiceConfig(ctx, "auth",
+		config.WithoutDatabase(),
+		config.WithUsersService("users", 8082),
+	)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	log.Printf("Starting %s service (version: %s, environment: %s)",
-		cfg.Service.Name, cfg.Service.Version, cfg.Service.Environment)
-
-	usersAddr := fmt.Sprintf("%s:%d", cfg.UsersService.Host, cfg.UsersService.Port)
-	usersConn, err := grpc.NewClient(usersAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Создаем приложение
+	application, err := app.NewApp(ctx, cfg)
 	if err != nil {
+		log.Fatalf("failed to create app: %v", err)
+	}
+
+	// Подключаемся к Users сервису
+	if err := application.InitGRPCClient(ctx, "users", cfg.UsersService); err != nil {
 		log.Fatalf("failed to connect to users service: %v", err)
 	}
-	defer usersConn.Close()
 
-	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(usersConn))
+	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(application.GetGRPCClient("users")))
 
 	repo := repository.NewUsersRepositoryStub()
 
@@ -44,23 +54,21 @@ func main() {
 
 	controller := deliveryGrpc.NewAuthController(authUsecase)
 
-	listenAddr := fmt.Sprintf(":%d", cfg.Server.GRPC.Port)
-	lis, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+	// Инициализируем gRPC сервер
+	application.InitGRPCServer(cfg.Server, errorsMiddleware.ErrorsUnaryInterceptor())
+
+	// Регистрируем gRPC сервисы
+	application.RegisterGRPC(func(s *grpc.Server) {
+		authPb.RegisterAuthServiceServer(s, controller)
+	})
+
+	// Запускаем приложение
+	slog.Info("starting auth service", "grpc_port", cfg.Server.GRPC.Port)
+
+	if err := application.Run(ctx, *cfg.Server.GRPC); err != nil {
+		if !errors.Is(err, context.Canceled) {
+			log.Fatalf("failed to serve: %v", err)
+		}
 	}
-
-	server := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			errorsMiddleware.ErrorsUnaryInterceptor(),
-		),
-	)
-	authPb.RegisterAuthServiceServer(server, controller)
-
-	reflection.Register(server)
-
-	log.Printf("gRPC server listening at %v", lis.Addr())
-	if err := server.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	slog.Info("auth service stopped gracefully")
 }

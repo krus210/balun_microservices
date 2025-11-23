@@ -8,6 +8,9 @@ WORKDIR /app
 # Copy shared libraries
 COPY lib/postgres/ lib/postgres/
 COPY lib/secrets/ lib/secrets/
+COPY lib/config/ lib/config/
+COPY lib/app/ lib/app/
+COPY lib/grpc/ lib/grpc/
 
 # Copy notifications service
 COPY notifications/ notifications/
@@ -28,6 +31,9 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/notifications/notifications .
+
+# Copy config file
+COPY notifications/config.yaml .
 
 EXPOSE 8082
 

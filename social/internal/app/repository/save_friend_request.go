@@ -3,8 +3,9 @@ package repository
 import (
 	"context"
 	"fmt"
-	"lib/postgres"
 	"time"
+
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"github.com/google/uuid"
 

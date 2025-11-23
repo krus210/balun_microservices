@@ -6,7 +6,35 @@ service:
 server:
   grpc:
     port: 8082
+  timeout:
+    enabled: true
+    ignore: []
+    timeoutMs: 5000
+    paths: []
+  rateLimit:
+    enabled: true
+    ignore: []
+    reqPerSec: 1000
+    paths: []
 
 users_service:
   host: users
   port: 8082
+  grpc_client:
+    timeout: 2s
+    retry:
+      max_attempts: 3
+      backoff:
+        base: 100ms
+        max: 2s
+        jitter: true
+      retryable_codes:
+        - UNAVAILABLE
+        - DEADLINE_EXCEEDED
+        - RESOURCE_EXHAUSTED
+        - ABORTED
+    circuit_breaker:
+      failures_for_open: 5
+      window: 30s
+      half_open_max_calls: 5
+      open_state_for: 60s

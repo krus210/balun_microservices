@@ -3,8 +3,9 @@ package repository
 import (
 	"context"
 	"fmt"
-	"lib/postgres"
 	"time"
+
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/message"

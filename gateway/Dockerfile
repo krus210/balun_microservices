@@ -5,6 +5,13 @@ RUN apk add --no-cache protobuf make
 
 WORKDIR /app
 
+# Copy shared libraries
+COPY lib/postgres/ lib/postgres/
+COPY lib/secrets/ lib/secrets/
+COPY lib/config/ lib/config/
+COPY lib/app/ lib/app/
+COPY lib/grpc/ lib/grpc/
+
 # Copy gateway service
 COPY gateway/ gateway/
 
@@ -24,6 +31,9 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/gateway/gateway .
+
+# Copy config file
+COPY gateway/config.yaml .
 
 EXPOSE 8080 8085
 

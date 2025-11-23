@@ -5,7 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"lib/postgres"
+
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"chat/internal/app/models"
 	"chat/internal/app/repository/chat"

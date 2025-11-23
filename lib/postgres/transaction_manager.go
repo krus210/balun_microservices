@@ -74,6 +74,7 @@ func (m *TransactionManager) runTransaction(ctx context.Context, txOpts pgx.TxOp
 type TransactionManagerAPI interface {
 	GetQueryEngine(ctx context.Context) QueryEngine
 	RunReadCommitted(ctx context.Context, f func(txCtx context.Context) error) error
+	RunRepeatableRead(ctx context.Context, f func(txCtx context.Context) error) error
 }
 
 // GetQueryEngine provides QueryEngine

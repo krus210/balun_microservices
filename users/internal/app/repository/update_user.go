@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"lib/postgres"
 	"time"
+
+	"github.com/sskorolev/balun_microservices/lib/postgres"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
