@@ -207,6 +207,17 @@ func LoadServiceConfig(ctx context.Context, serviceName string, opts ...ServiceO
 		// Server defaults
 		v.SetDefault("server.grpc.port", options.grpcPort)
 
+		// Logger defaults
+		v.SetDefault("logger.level", "info")
+
+		// Tracer defaults
+		v.SetDefault("tracer.enabled", true)
+		v.SetDefault("tracer.service_name", options.serviceName)
+		v.SetDefault("tracer.jaeger_agent_host", "jaeger-agent")
+		v.SetDefault("tracer.jaeger_agent_port", 4317)
+		v.SetDefault("tracer.sampler_type", "const")
+		v.SetDefault("tracer.sampler_param", 1)
+
 		// Database defaults
 		if options.databaseEnabled {
 			v.SetDefault("database.host", "localhost")

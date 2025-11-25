@@ -1,0 +1,44 @@
+groups:
+  - name: grpc_performance_alerts
+    rules:
+      # Высокое время ответа (95-й перцентиль)
+      - alert: HighResponseTime95
+        expr: histogram_quantile(0.95, sum(rate(balun_courses_grpc_histogram_response_time_seconds_bucket[1m])) by (le, service, method)) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time (95th percentile) for {{ $labels.service }}/{{ $labels.method }}"
+          description: "95th percentile response time is {{ $value }}s (threshold: 100ms)"
+
+      # Критически высокое время ответа (90-й перцентиль)
+      - alert: CriticalResponseTime90
+        expr: histogram_quantile(0.90, sum(rate(balun_courses_grpc_histogram_response_time_seconds_bucket[1m])) by (le, service, method)) > 0.09
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical response time (90th percentile) for {{ $labels.service }}/{{ $labels.method }}"
+          description: "90th percentile response time is {{ $value }}s (threshold: 90ms)"
+
+      # Высокий процент ошибок
+      - alert: HighErrorRate
+        expr: sum(rate(balun_courses_grpc_histogram_response_time_seconds_count{is_error="true"}[5m])) by (service, method) / sum(rate(balun_courses_grpc_histogram_response_time_seconds_count[5m])) by (service, method) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate for {{ $labels.service }}/{{ $labels.method }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+  - name: service_health_alerts
+    rules:
+      # Сервис недоступен
+      - alert: ServiceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} is not responding"

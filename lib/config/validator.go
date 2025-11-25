@@ -58,6 +58,12 @@ func ValidateServerConfig(cfg ServerConfig) error {
 		}
 	}
 
+	if cfg.Admin != nil {
+		if err := ValidateAdminConfig(*cfg.Admin); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -130,5 +136,86 @@ func ValidateKafkaConsumerConfig(cfg KafkaConsumerConfig) error {
 	if err := ValidateRequired(cfg.Topics.FriendRequestEvents, "kafka_consumer.topics.friend_request_events"); err != nil {
 		return err
 	}
+	return nil
+}
+
+// ValidateLoggerConfig валидирует LoggerConfig
+func ValidateLoggerConfig(cfg LoggerConfig) error {
+	validLevels := map[string]bool{
+		"debug": true,
+		"info":  true,
+		"warn":  true,
+		"error": true,
+		"fatal": true,
+		"panic": true,
+	}
+	if !validLevels[cfg.Level] {
+		return fmt.Errorf("logger.level must be one of: debug, info, warn, error, fatal, panic")
+	}
+	return nil
+}
+
+// ValidateTracerConfig валидирует TracerConfig
+func ValidateTracerConfig(cfg TracerConfig) error {
+	// Валидация только если трейсинг включен
+	if !cfg.Enabled {
+		return nil
+	}
+
+	if err := ValidateRequired(cfg.ServiceName, "tracer.service_name"); err != nil {
+		return err
+	}
+
+	// Проверяем наличие хотя бы одной конфигурации агента
+	if cfg.JaegerHost == "" && cfg.JaegerAgentHost == "" {
+		return fmt.Errorf("tracer.jaeger_host or tracer.jaeger_agent_host must be specified when tracer is enabled")
+	}
+
+	if cfg.JaegerAgentHost != "" && cfg.JaegerAgentPort <= 0 {
+		return fmt.Errorf("tracer.jaeger_agent_port must be positive when jaeger_agent_host is specified")
+	}
+
+	return nil
+}
+
+// ValidateMetricsConfig валидирует MetricsConfig
+func ValidateMetricsConfig(cfg MetricsConfig) error {
+	// Валидация только если метрики включены
+	if !cfg.Enabled {
+		return nil
+	}
+
+	if err := ValidateRequired(cfg.Namespace, "metrics.namespace"); err != nil {
+		return err
+	}
+
+	if err := ValidateRequired(cfg.Subsystem, "metrics.subsystem"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ValidateAdminConfig валидирует AdminConfig
+func ValidateAdminConfig(cfg AdminConfig) error {
+	// Валидация порта
+	if err := ValidatePort(cfg.Port, "server.admin.port"); err != nil {
+		return err
+	}
+
+	// Валидация метрик эндпоинта
+	if cfg.Metrics.Enabled {
+		if cfg.Metrics.Path == "" {
+			return fmt.Errorf("server.admin.metrics.path is required when metrics are enabled")
+		}
+	}
+
+	// Валидация pprof эндпоинта
+	if cfg.Pprof.Enabled {
+		if cfg.Pprof.Path == "" {
+			return fmt.Errorf("server.admin.pprof.path is required when pprof is enabled")
+		}
+	}
+
 	return nil
 }

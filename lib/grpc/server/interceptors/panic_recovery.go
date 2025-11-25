@@ -2,9 +2,9 @@ package interceptors
 
 import (
 	"context"
-	"log"
 	"runtime/debug"
 
+	"github.com/sskorolev/balun_microservices/lib/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,23 +18,20 @@ func PanicRecoveryUnaryInterceptor() grpc.UnaryServerInterceptor {
 		req interface{},
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
-	) (resp interface{}, err error) {
+	) (_ interface{}, err error) {
 		defer func() {
-			if r := recover(); r != nil {
-				// Получаем стек вызовов
-				stack := debug.Stack()
+			if v := recover(); v != nil {
+				logger.ErrorKV(ctx, "recover panic",
+					"panic", v,
+					"stacktrace", string(debug.Stack()),
+					"operation", info.FullMethod,
+					"component", "middleware",
+				)
 
-				// Логируем panic с полным стеком
-				log.Printf("PANIC recovered in gRPC handler: method=%s, error=%v\nStack trace:\n%s",
-					info.FullMethod, r, string(stack))
-
-				// Возвращаем Internal ошибку клиенту без раскрытия деталей
-				err = status.Error(codes.Internal, "internal server error")
-				resp = nil
+				err = status.Error(codes.Internal, codes.Internal.String()) // return error
 			}
 		}()
 
-		// Выполняем handler
 		return handler(ctx, req)
 	}
 }

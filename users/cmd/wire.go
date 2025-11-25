@@ -21,13 +21,36 @@ type AppContainer struct {
 	Usecase usecase.Usecase
 }
 
-// provideApp создает App и инициализирует PostgreSQL
+// provideApp создает App и инициализирует компоненты
 func provideApp(ctx context.Context, cfg *config.StandardServiceConfig) (*lib.App, error) {
 	app, err := lib.NewApp(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
+	// Инициализируем logger
+	if err := app.InitLogger(cfg.Logger, cfg.Service.Name, cfg.Service.Environment); err != nil {
+		return nil, err
+	}
+
+	// Инициализируем tracer
+	if err := app.InitTracer(cfg.Tracer); err != nil {
+		return nil, err
+	}
+
+	// Инициализируем metrics
+	if err := app.InitMetrics(cfg.Metrics, cfg.Service.Name); err != nil {
+		return nil, err
+	}
+
+	// Инициализируем admin HTTP сервер (метрики и pprof)
+	if cfg.Server.Admin != nil {
+		if err := app.InitAdminServer(*cfg.Server.Admin); err != nil {
+			return nil, err
+		}
+	}
+
+	// Инициализируем PostgreSQL
 	if err := app.InitPostgres(ctx, cfg.Database); err != nil {
 		return nil, err
 	}

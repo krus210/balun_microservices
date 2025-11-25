@@ -1,0 +1,67 @@
+global:
+  scrape_interval: 30s # Как часто собирать метрики
+  evaluation_interval: 30s # Как часто вычислять правила агрегации и алертинга
+  external_labels:
+    cluster: 'balun-microservices'
+    environment: 'dev'
+
+# Файлы с правилами агрегации и алертинга
+rule_files:
+  - "alerts.yml"
+
+# Конфигурация scraping
+scrape_configs:
+  # Prometheus собственные метрики
+  - job_name: "prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Social service admin сервер
+  - job_name: "social-admin"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["social:9090"]
+        labels:
+          service: "social"
+          component: "admin"
+
+  - job_name: "users-admin"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["users:9090"]
+        labels:
+          service: "users"
+          component: "admin"
+
+  - job_name: "auth-admin"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["auth:9090"]
+        labels:
+          service: "auth"
+          component: "admin"
+
+  - job_name: "chat-admin"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["chat:9090"]
+        labels:
+          service: "chat"
+          component: "admin"
+
+  - job_name: "notifications-admin"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["notifications:9090"]
+        labels:
+          service: "notifications"
+          component: "admin"
+
+  - job_name: "gateway-admin"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["gateway:9090"]
+        labels:
+          service: "gateway"
+          component: "admin"
