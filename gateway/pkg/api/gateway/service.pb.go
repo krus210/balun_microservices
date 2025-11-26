@@ -30,7 +30,7 @@ var File_api_gateway_service_proto protoreflect.FileDescriptor
 
 const file_api_gateway_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19api/gateway/service.proto\x12@github.com.krus210.balun_microservices.protobuf.gateway.v1.proto\x1a\x13api/auth/auth.proto\x1a\x13api/chat/chat.proto\x1a\x17api/social/social.proto\x1a\x15api/users/users.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xc50\n" +
+	"\x19api/gateway/service.proto\x12@github.com.krus210.balun_microservices.protobuf.gateway.v1.proto\x1a\x13api/auth/auth.proto\x1a\x13api/chat/chat.proto\x1a\x17api/social/social.proto\x1a\x15api/users/users.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\x8d4\n" +
 	"\x0eGatewayService\x12\xc4\x02\n" +
 	"\bRegister\x12N.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest\x1aO.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse\"\x96\x01\x92AsJ6\n" +
 	"\x03400\x12/\n" +
@@ -52,7 +52,12 @@ const file_api_gateway_service_proto_rawDesc = "" +
 	"\x19\x1a\x17#/definitions/rpcStatusJ5\n" +
 	"\x03401\x12.\n" +
 	"\x0fUnauthenticated\x12\x1b\n" +
-	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12\xd9\x02\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12\xff\x01\n" +
+	"\x06Logout\x12L.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutRequest\x1aM.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutResponse\"X\x92A7J5\n" +
+	"\x03401\x12.\n" +
+	"\x0fUnauthenticated\x12\x1b\n" +
+	"\x19\x1a\x17#/definitions/rpcStatus\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logout\x12\xc3\x01\n" +
+	"\aGetJWKS\x12M.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSRequest\x1aN.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/auth/jwks\x12\xd9\x02\n" +
 	"\rCreateProfile\x12T.github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest\x1aU.github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse\"\x9a\x01\x92AvJ6\n" +
 	"\x03400\x12/\n" +
 	"\x10Invalid argument\x12\x1b\n" +
@@ -138,87 +143,95 @@ var file_api_gateway_service_proto_goTypes = []any{
 	(*auth.RegisterRequest)(nil),                // 0: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest
 	(*auth.LoginRequest)(nil),                   // 1: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest
 	(*auth.RefreshRequest)(nil),                 // 2: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest
-	(*users.CreateProfileRequest)(nil),          // 3: github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest
-	(*users.UpdateProfileRequest)(nil),          // 4: github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileRequest
-	(*users.GetProfileByIDRequest)(nil),         // 5: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDRequest
-	(*users.GetProfileByNicknameRequest)(nil),   // 6: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameRequest
-	(*users.SearchByNicknameRequest)(nil),       // 7: github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameRequest
-	(*social.SendFriendRequestRequest)(nil),     // 8: github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestRequest
-	(*social.ListRequestsRequest)(nil),          // 9: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsRequest
-	(*social.AcceptFriendRequestRequest)(nil),   // 10: github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestRequest
-	(*social.DeclineFriendRequestRequest)(nil),  // 11: github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestRequest
-	(*social.RemoveFriendRequest)(nil),          // 12: github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendRequest
-	(*social.ListFriendsRequest)(nil),           // 13: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsRequest
-	(*chat.CreateDirectChatRequest)(nil),        // 14: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatRequest
-	(*chat.GetChatRequest)(nil),                 // 15: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatRequest
-	(*chat.ListUserChatsRequest)(nil),           // 16: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsRequest
-	(*chat.ListChatMembersRequest)(nil),         // 17: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest
-	(*chat.SendMessageRequest)(nil),             // 18: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest
-	(*chat.ListMessagesRequest)(nil),            // 19: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesRequest
-	(*auth.RegisterResponse)(nil),               // 20: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse
-	(*auth.LoginResponse)(nil),                  // 21: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse
-	(*auth.RefreshResponse)(nil),                // 22: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse
-	(*users.CreateProfileResponse)(nil),         // 23: github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse
-	(*users.UpdateProfileResponse)(nil),         // 24: github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileResponse
-	(*users.GetProfileByIDResponse)(nil),        // 25: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDResponse
-	(*users.GetProfileByNicknameResponse)(nil),  // 26: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse
-	(*users.SearchByNicknameResponse)(nil),      // 27: github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameResponse
-	(*social.SendFriendRequestResponse)(nil),    // 28: github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestResponse
-	(*social.ListRequestsResponse)(nil),         // 29: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsResponse
-	(*social.AcceptFriendRequestResponse)(nil),  // 30: github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestResponse
-	(*social.DeclineFriendRequestResponse)(nil), // 31: github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestResponse
-	(*social.RemoveFriendResponse)(nil),         // 32: github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse
-	(*social.ListFriendsResponse)(nil),          // 33: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsResponse
-	(*chat.CreateDirectChatResponse)(nil),       // 34: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatResponse
-	(*chat.GetChatResponse)(nil),                // 35: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse
-	(*chat.ListUserChatsResponse)(nil),          // 36: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsResponse
-	(*chat.ListChatMembersResponse)(nil),        // 37: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse
-	(*chat.SendMessageResponse)(nil),            // 38: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse
-	(*chat.ListMessagesResponse)(nil),           // 39: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesResponse
+	(*auth.LogoutRequest)(nil),                  // 3: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutRequest
+	(*auth.GetJWKSRequest)(nil),                 // 4: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSRequest
+	(*users.CreateProfileRequest)(nil),          // 5: github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest
+	(*users.UpdateProfileRequest)(nil),          // 6: github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileRequest
+	(*users.GetProfileByIDRequest)(nil),         // 7: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDRequest
+	(*users.GetProfileByNicknameRequest)(nil),   // 8: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameRequest
+	(*users.SearchByNicknameRequest)(nil),       // 9: github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameRequest
+	(*social.SendFriendRequestRequest)(nil),     // 10: github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestRequest
+	(*social.ListRequestsRequest)(nil),          // 11: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsRequest
+	(*social.AcceptFriendRequestRequest)(nil),   // 12: github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestRequest
+	(*social.DeclineFriendRequestRequest)(nil),  // 13: github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestRequest
+	(*social.RemoveFriendRequest)(nil),          // 14: github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendRequest
+	(*social.ListFriendsRequest)(nil),           // 15: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsRequest
+	(*chat.CreateDirectChatRequest)(nil),        // 16: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatRequest
+	(*chat.GetChatRequest)(nil),                 // 17: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatRequest
+	(*chat.ListUserChatsRequest)(nil),           // 18: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsRequest
+	(*chat.ListChatMembersRequest)(nil),         // 19: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest
+	(*chat.SendMessageRequest)(nil),             // 20: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest
+	(*chat.ListMessagesRequest)(nil),            // 21: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesRequest
+	(*auth.RegisterResponse)(nil),               // 22: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse
+	(*auth.LoginResponse)(nil),                  // 23: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse
+	(*auth.RefreshResponse)(nil),                // 24: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse
+	(*auth.LogoutResponse)(nil),                 // 25: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutResponse
+	(*auth.GetJWKSResponse)(nil),                // 26: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSResponse
+	(*users.CreateProfileResponse)(nil),         // 27: github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse
+	(*users.UpdateProfileResponse)(nil),         // 28: github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileResponse
+	(*users.GetProfileByIDResponse)(nil),        // 29: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDResponse
+	(*users.GetProfileByNicknameResponse)(nil),  // 30: github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse
+	(*users.SearchByNicknameResponse)(nil),      // 31: github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameResponse
+	(*social.SendFriendRequestResponse)(nil),    // 32: github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestResponse
+	(*social.ListRequestsResponse)(nil),         // 33: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsResponse
+	(*social.AcceptFriendRequestResponse)(nil),  // 34: github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestResponse
+	(*social.DeclineFriendRequestResponse)(nil), // 35: github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestResponse
+	(*social.RemoveFriendResponse)(nil),         // 36: github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse
+	(*social.ListFriendsResponse)(nil),          // 37: github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsResponse
+	(*chat.CreateDirectChatResponse)(nil),       // 38: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatResponse
+	(*chat.GetChatResponse)(nil),                // 39: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse
+	(*chat.ListUserChatsResponse)(nil),          // 40: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsResponse
+	(*chat.ListChatMembersResponse)(nil),        // 41: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse
+	(*chat.SendMessageResponse)(nil),            // 42: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse
+	(*chat.ListMessagesResponse)(nil),           // 43: github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesResponse
 }
 var file_api_gateway_service_proto_depIdxs = []int32{
 	0,  // 0: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Register:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest
 	1,  // 1: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Login:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest
 	2,  // 2: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Refresh:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest
-	3,  // 3: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateProfile:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest
-	4,  // 4: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.UpdateProfile:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileRequest
-	5,  // 5: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByID:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDRequest
-	6,  // 6: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByNickname:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameRequest
-	7,  // 7: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SearchByNickname:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameRequest
-	8,  // 8: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendFriendRequest:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestRequest
-	9,  // 9: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListRequests:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsRequest
-	10, // 10: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.AcceptFriendRequest:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestRequest
-	11, // 11: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.DeclineFriendRequest:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestRequest
-	12, // 12: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.RemoveFriend:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendRequest
-	13, // 13: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListFriends:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsRequest
-	14, // 14: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateDirectChat:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatRequest
-	15, // 15: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetChat:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatRequest
-	16, // 16: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListUserChats:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsRequest
-	17, // 17: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListChatMembers:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest
-	18, // 18: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendMessage:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest
-	19, // 19: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListMessages:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesRequest
-	20, // 20: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Register:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse
-	21, // 21: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Login:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse
-	22, // 22: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Refresh:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse
-	23, // 23: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateProfile:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse
-	24, // 24: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.UpdateProfile:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileResponse
-	25, // 25: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByID:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDResponse
-	26, // 26: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByNickname:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse
-	27, // 27: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SearchByNickname:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameResponse
-	28, // 28: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendFriendRequest:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestResponse
-	29, // 29: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListRequests:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsResponse
-	30, // 30: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.AcceptFriendRequest:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestResponse
-	31, // 31: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.DeclineFriendRequest:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestResponse
-	32, // 32: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.RemoveFriend:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse
-	33, // 33: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListFriends:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsResponse
-	34, // 34: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateDirectChat:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatResponse
-	35, // 35: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetChat:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse
-	36, // 36: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListUserChats:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsResponse
-	37, // 37: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListChatMembers:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse
-	38, // 38: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendMessage:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse
-	39, // 39: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListMessages:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesResponse
-	20, // [20:40] is the sub-list for method output_type
-	0,  // [0:20] is the sub-list for method input_type
+	3,  // 3: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Logout:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutRequest
+	4,  // 4: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetJWKS:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSRequest
+	5,  // 5: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateProfile:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileRequest
+	6,  // 6: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.UpdateProfile:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileRequest
+	7,  // 7: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByID:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDRequest
+	8,  // 8: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByNickname:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameRequest
+	9,  // 9: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SearchByNickname:input_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameRequest
+	10, // 10: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendFriendRequest:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestRequest
+	11, // 11: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListRequests:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsRequest
+	12, // 12: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.AcceptFriendRequest:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestRequest
+	13, // 13: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.DeclineFriendRequest:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestRequest
+	14, // 14: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.RemoveFriend:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendRequest
+	15, // 15: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListFriends:input_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsRequest
+	16, // 16: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateDirectChat:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatRequest
+	17, // 17: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetChat:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatRequest
+	18, // 18: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListUserChats:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsRequest
+	19, // 19: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListChatMembers:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersRequest
+	20, // 20: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendMessage:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageRequest
+	21, // 21: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListMessages:input_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesRequest
+	22, // 22: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Register:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse
+	23, // 23: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Login:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse
+	24, // 24: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Refresh:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse
+	25, // 25: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.Logout:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutResponse
+	26, // 26: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetJWKS:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSResponse
+	27, // 27: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateProfile:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.CreateProfileResponse
+	28, // 28: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.UpdateProfile:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.UpdateProfileResponse
+	29, // 29: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByID:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByIDResponse
+	30, // 30: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetProfileByNickname:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.GetProfileByNicknameResponse
+	31, // 31: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SearchByNickname:output_type -> github.com.krus210.balun_microservices.protobuf.users.v1.proto.SearchByNicknameResponse
+	32, // 32: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendFriendRequest:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.SendFriendRequestResponse
+	33, // 33: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListRequests:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListRequestsResponse
+	34, // 34: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.AcceptFriendRequest:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.AcceptFriendRequestResponse
+	35, // 35: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.DeclineFriendRequest:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.DeclineFriendRequestResponse
+	36, // 36: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.RemoveFriend:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.RemoveFriendResponse
+	37, // 37: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListFriends:output_type -> github.com.krus210.balun_microservices.protobuf.social.v1.proto.ListFriendsResponse
+	38, // 38: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.CreateDirectChat:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.CreateDirectChatResponse
+	39, // 39: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.GetChat:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.GetChatResponse
+	40, // 40: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListUserChats:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListUserChatsResponse
+	41, // 41: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListChatMembers:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListChatMembersResponse
+	42, // 42: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.SendMessage:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.SendMessageResponse
+	43, // 43: github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService.ListMessages:output_type -> github.com.krus210.balun_microservices.protobuf.chat.v1.proto.ListMessagesResponse
+	22, // [22:44] is the sub-list for method output_type
+	0,  // [0:22] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
