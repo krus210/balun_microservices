@@ -128,7 +128,9 @@ type LoginRequest struct {
 	// email -электронная почта
 	Email string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	// password - пароль пользователя
-	Password      string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	// device_id - id устройства
+	DeviceId      *string `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3,oneof" json:"device_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -177,6 +179,13 @@ func (x *LoginRequest) GetPassword() string {
 	return ""
 }
 
+func (x *LoginRequest) GetDeviceId() string {
+	if x != nil && x.DeviceId != nil {
+		return *x.DeviceId
+	}
+	return ""
+}
+
 // LoginResponse - ответ Login
 type LoginResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -185,7 +194,9 @@ type LoginResponse struct {
 	// refreshToken - токен после протухания accessToken
 	RefreshToken string `protobuf:"bytes,2,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
 	// userId - уникальный идентификатор пользователя
-	UserId        string `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId string `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	// expires_in_s - время жизни токена
+	ExpiresInS    string `protobuf:"bytes,4,opt,name=expires_in_s,json=expiresInS,proto3" json:"expires_in_s,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -241,11 +252,20 @@ func (x *LoginResponse) GetUserId() string {
 	return ""
 }
 
+func (x *LoginResponse) GetExpiresInS() string {
+	if x != nil {
+		return x.ExpiresInS
+	}
+	return ""
+}
+
 // RefreshRequest - запрос Refresh
 type RefreshRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// refreshToken - токен после протухания accessToken
-	RefreshToken  string `protobuf:"bytes,1,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
+	RefreshToken string `protobuf:"bytes,1,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
+	// device_id - id устройства
+	DeviceId      *string `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3,oneof" json:"device_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -287,6 +307,13 @@ func (x *RefreshRequest) GetRefreshToken() string {
 	return ""
 }
 
+func (x *RefreshRequest) GetDeviceId() string {
+	if x != nil && x.DeviceId != nil {
+		return *x.DeviceId
+	}
+	return ""
+}
+
 // RefreshResponse - ответ Refresh
 type RefreshResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -295,7 +322,9 @@ type RefreshResponse struct {
 	// refreshToken - токен после протухания accessToken
 	RefreshToken string `protobuf:"bytes,2,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
 	// userId - уникальный идентификатор пользователя
-	UserId        string `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId string `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	// expires_in_s - время жизни токена
+	ExpiresInS    string `protobuf:"bytes,4,opt,name=expires_in_s,json=expiresInS,proto3" json:"expires_in_s,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -351,6 +380,296 @@ func (x *RefreshResponse) GetUserId() string {
 	return ""
 }
 
+func (x *RefreshResponse) GetExpiresInS() string {
+	if x != nil {
+		return x.ExpiresInS
+	}
+	return ""
+}
+
+// LogoutRequest - запрос Logout
+type LogoutRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// refreshToken - токен после протухания accessToken
+	RefreshToken  string `protobuf:"bytes,1,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutRequest) Reset() {
+	*x = LogoutRequest{}
+	mi := &file_api_auth_auth_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutRequest) ProtoMessage() {}
+
+func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_auth_auth_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
+func (*LogoutRequest) Descriptor() ([]byte, []int) {
+	return file_api_auth_auth_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *LogoutRequest) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+// LogoutResponse - ответ Logout
+type LogoutResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutResponse) Reset() {
+	*x = LogoutResponse{}
+	mi := &file_api_auth_auth_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutResponse) ProtoMessage() {}
+
+func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_auth_auth_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutResponse.ProtoReflect.Descriptor instead.
+func (*LogoutResponse) Descriptor() ([]byte, []int) {
+	return file_api_auth_auth_proto_rawDescGZIP(), []int{7}
+}
+
+// GetJWKSRequest - запрос GetJWKS
+type GetJWKSRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJWKSRequest) Reset() {
+	*x = GetJWKSRequest{}
+	mi := &file_api_auth_auth_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJWKSRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJWKSRequest) ProtoMessage() {}
+
+func (x *GetJWKSRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_auth_auth_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJWKSRequest.ProtoReflect.Descriptor instead.
+func (*GetJWKSRequest) Descriptor() ([]byte, []int) {
+	return file_api_auth_auth_proto_rawDescGZIP(), []int{8}
+}
+
+// GetJWKSResponse - запрос GetJWKS
+type GetJWKSResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Jwks          []*JWK                 `protobuf:"bytes,1,rep,name=jwks,proto3" json:"jwks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJWKSResponse) Reset() {
+	*x = GetJWKSResponse{}
+	mi := &file_api_auth_auth_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJWKSResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJWKSResponse) ProtoMessage() {}
+
+func (x *GetJWKSResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_auth_auth_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJWKSResponse.ProtoReflect.Descriptor instead.
+func (*GetJWKSResponse) Descriptor() ([]byte, []int) {
+	return file_api_auth_auth_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetJWKSResponse) GetJwks() []*JWK {
+	if x != nil {
+		return x.Jwks
+	}
+	return nil
+}
+
+// JWK - JSON Web Key для валидации JWT токенов
+type JWK struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// kty - тип ключа (например, "RSA", "EC")
+	Kty string `protobuf:"bytes,1,opt,name=kty,proto3" json:"kty,omitempty"`
+	// use - назначение ключа (например, "sig" для подписи, "enc" для шифрования)
+	Use string `protobuf:"bytes,2,opt,name=use,proto3" json:"use,omitempty"`
+	// kid - уникальный идентификатор ключа
+	Kid string `protobuf:"bytes,3,opt,name=kid,proto3" json:"kid,omitempty"`
+	// alg - алгоритм (например, "RS256", "ES256")
+	Alg string `protobuf:"bytes,4,opt,name=alg,proto3" json:"alg,omitempty"`
+	// n - модуль RSA ключа (base64url encoded) - для RSA ключей
+	N string `protobuf:"bytes,5,opt,name=n,proto3" json:"n,omitempty"`
+	// e - экспонента RSA ключа (base64url encoded) - для RSA ключей
+	E string `protobuf:"bytes,6,opt,name=e,proto3" json:"e,omitempty"`
+	// x - X координата - для EC (Elliptic Curve) ключей
+	X string `protobuf:"bytes,7,opt,name=x,proto3" json:"x,omitempty"`
+	// y - Y координата - для EC (Elliptic Curve) ключей
+	Y string `protobuf:"bytes,8,opt,name=y,proto3" json:"y,omitempty"`
+	// crv - тип эллиптической кривой (например, "P-256") - для EC ключей
+	Crv           string `protobuf:"bytes,9,opt,name=crv,proto3" json:"crv,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JWK) Reset() {
+	*x = JWK{}
+	mi := &file_api_auth_auth_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JWK) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JWK) ProtoMessage() {}
+
+func (x *JWK) ProtoReflect() protoreflect.Message {
+	mi := &file_api_auth_auth_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JWK.ProtoReflect.Descriptor instead.
+func (*JWK) Descriptor() ([]byte, []int) {
+	return file_api_auth_auth_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *JWK) GetKty() string {
+	if x != nil {
+		return x.Kty
+	}
+	return ""
+}
+
+func (x *JWK) GetUse() string {
+	if x != nil {
+		return x.Use
+	}
+	return ""
+}
+
+func (x *JWK) GetKid() string {
+	if x != nil {
+		return x.Kid
+	}
+	return ""
+}
+
+func (x *JWK) GetAlg() string {
+	if x != nil {
+		return x.Alg
+	}
+	return ""
+}
+
+func (x *JWK) GetN() string {
+	if x != nil {
+		return x.N
+	}
+	return ""
+}
+
+func (x *JWK) GetE() string {
+	if x != nil {
+		return x.E
+	}
+	return ""
+}
+
+func (x *JWK) GetX() string {
+	if x != nil {
+		return x.X
+	}
+	return ""
+}
+
+func (x *JWK) GetY() string {
+	if x != nil {
+		return x.Y
+	}
+	return ""
+}
+
+func (x *JWK) GetCrv() string {
+	if x != nil {
+		return x.Crv
+	}
+	return ""
+}
+
 var File_api_auth_auth_proto protoreflect.FileDescriptor
 
 const file_api_auth_auth_proto_rawDesc = "" +
@@ -360,24 +679,52 @@ const file_api_auth_auth_proto_rawDesc = "" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"*\n" +
 	"\x10RegisterResponse\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\"@\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\"p\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"m\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12 \n" +
+	"\tdevice_id\x18\x03 \x01(\tH\x00R\bdeviceId\x88\x01\x01B\f\n" +
+	"\n" +
+	"_device_id\"\x8f\x01\n" +
 	"\rLoginResponse\x12 \n" +
 	"\vaccessToken\x18\x01 \x01(\tR\vaccessToken\x12\"\n" +
 	"\frefreshToken\x18\x02 \x01(\tR\frefreshToken\x12\x16\n" +
-	"\x06userId\x18\x03 \x01(\tR\x06userId\"4\n" +
+	"\x06userId\x18\x03 \x01(\tR\x06userId\x12 \n" +
+	"\fexpires_in_s\x18\x04 \x01(\tR\n" +
+	"expiresInS\"d\n" +
 	"\x0eRefreshRequest\x12\"\n" +
-	"\frefreshToken\x18\x01 \x01(\tR\frefreshToken\"o\n" +
+	"\frefreshToken\x18\x01 \x01(\tR\frefreshToken\x12 \n" +
+	"\tdevice_id\x18\x03 \x01(\tH\x00R\bdeviceId\x88\x01\x01B\f\n" +
+	"\n" +
+	"_device_id\"\x91\x01\n" +
 	"\x0fRefreshResponse\x12 \n" +
 	"\vaccessToken\x18\x01 \x01(\tR\vaccessToken\x12\"\n" +
 	"\frefreshToken\x18\x02 \x01(\tR\frefreshToken\x12\x16\n" +
-	"\x06userId\x18\x03 \x01(\tR\x06userId2\x91\x04\n" +
+	"\x06userId\x18\x03 \x01(\tR\x06userId\x12 \n" +
+	"\fexpires_in_s\x18\x04 \x01(\tR\n" +
+	"expiresInS\"3\n" +
+	"\rLogoutRequest\x12\"\n" +
+	"\frefreshToken\x18\x01 \x01(\tR\frefreshToken\"\x10\n" +
+	"\x0eLogoutResponse\"\x10\n" +
+	"\x0eGetJWKSRequest\"i\n" +
+	"\x0fGetJWKSResponse\x12V\n" +
+	"\x04jwks\x18\x01 \x03(\v2B.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.JWKR\x04jwks\"\x97\x01\n" +
+	"\x03JWK\x12\x10\n" +
+	"\x03kty\x18\x01 \x01(\tR\x03kty\x12\x10\n" +
+	"\x03use\x18\x02 \x01(\tR\x03use\x12\x10\n" +
+	"\x03kid\x18\x03 \x01(\tR\x03kid\x12\x10\n" +
+	"\x03alg\x18\x04 \x01(\tR\x03alg\x12\f\n" +
+	"\x01n\x18\x05 \x01(\tR\x01n\x12\f\n" +
+	"\x01e\x18\x06 \x01(\tR\x01e\x12\f\n" +
+	"\x01x\x18\a \x01(\tR\x01x\x12\f\n" +
+	"\x01y\x18\b \x01(\tR\x01y\x12\x10\n" +
+	"\x03crv\x18\t \x01(\tR\x03crv2\xe8\x06\n" +
 	"\vAuthService\x12\xad\x01\n" +
 	"\bRegister\x12N.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest\x1aO.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse\"\x00\x12\xa4\x01\n" +
 	"\x05Login\x12K.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest\x1aL.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse\"\x00\x12\xaa\x01\n" +
-	"\aRefresh\x12M.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest\x1aN.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse\"\x00B\x1bZ\x19gateway/pkg/api/auth;authb\x06proto3"
+	"\aRefresh\x12M.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest\x1aN.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse\"\x00\x12\xa7\x01\n" +
+	"\x06Logout\x12L.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutRequest\x1aM.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutResponse\"\x00\x12\xaa\x01\n" +
+	"\aGetJWKS\x12M.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSRequest\x1aN.github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSResponse\"\x00B\x1bZ\x19gateway/pkg/api/auth;authb\x06proto3"
 
 var (
 	file_api_auth_auth_proto_rawDescOnce sync.Once
@@ -391,7 +738,7 @@ func file_api_auth_auth_proto_rawDescGZIP() []byte {
 	return file_api_auth_auth_proto_rawDescData
 }
 
-var file_api_auth_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_api_auth_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_api_auth_auth_proto_goTypes = []any{
 	(*RegisterRequest)(nil),  // 0: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest
 	(*RegisterResponse)(nil), // 1: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse
@@ -399,19 +746,29 @@ var file_api_auth_auth_proto_goTypes = []any{
 	(*LoginResponse)(nil),    // 3: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse
 	(*RefreshRequest)(nil),   // 4: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest
 	(*RefreshResponse)(nil),  // 5: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse
+	(*LogoutRequest)(nil),    // 6: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutRequest
+	(*LogoutResponse)(nil),   // 7: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutResponse
+	(*GetJWKSRequest)(nil),   // 8: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSRequest
+	(*GetJWKSResponse)(nil),  // 9: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSResponse
+	(*JWK)(nil),              // 10: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.JWK
 }
 var file_api_auth_auth_proto_depIdxs = []int32{
-	0, // 0: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Register:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest
-	2, // 1: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Login:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest
-	4, // 2: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Refresh:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest
-	1, // 3: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Register:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse
-	3, // 4: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Login:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse
-	5, // 5: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Refresh:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	10, // 0: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSResponse.jwks:type_name -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.JWK
+	0,  // 1: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Register:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterRequest
+	2,  // 2: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Login:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginRequest
+	4,  // 3: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Refresh:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshRequest
+	6,  // 4: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Logout:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutRequest
+	8,  // 5: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.GetJWKS:input_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSRequest
+	1,  // 6: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Register:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RegisterResponse
+	3,  // 7: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Login:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LoginResponse
+	5,  // 8: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Refresh:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.RefreshResponse
+	7,  // 9: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.Logout:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.LogoutResponse
+	9,  // 10: github.com.krus210.balun_microservices.protobuf.auth.v1.proto.AuthService.GetJWKS:output_type -> github.com.krus210.balun_microservices.protobuf.auth.v1.proto.GetJWKSResponse
+	6,  // [6:11] is the sub-list for method output_type
+	1,  // [1:6] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_api_auth_auth_proto_init() }
@@ -419,13 +776,15 @@ func file_api_auth_auth_proto_init() {
 	if File_api_auth_auth_proto != nil {
 		return
 	}
+	file_api_auth_auth_proto_msgTypes[2].OneofWrappers = []any{}
+	file_api_auth_auth_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_auth_auth_proto_rawDesc), len(file_api_auth_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

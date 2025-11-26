@@ -26,6 +26,8 @@ const (
 	GatewayService_Register_FullMethodName             = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/Register"
 	GatewayService_Login_FullMethodName                = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/Login"
 	GatewayService_Refresh_FullMethodName              = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/Refresh"
+	GatewayService_Logout_FullMethodName               = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/Logout"
+	GatewayService_GetJWKS_FullMethodName              = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/GetJWKS"
 	GatewayService_CreateProfile_FullMethodName        = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/CreateProfile"
 	GatewayService_UpdateProfile_FullMethodName        = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/UpdateProfile"
 	GatewayService_GetProfileByID_FullMethodName       = "/github.com.krus210.balun_microservices.protobuf.gateway.v1.proto.GatewayService/GetProfileByID"
@@ -57,6 +59,10 @@ type GatewayServiceClient interface {
 	Login(ctx context.Context, in *auth.LoginRequest, opts ...grpc.CallOption) (*auth.LoginResponse, error)
 	// Refresh - Обновление токена
 	Refresh(ctx context.Context, in *auth.RefreshRequest, opts ...grpc.CallOption) (*auth.RefreshResponse, error)
+	// Logout - Отзыв текущего refresh токена
+	Logout(ctx context.Context, in *auth.LogoutRequest, opts ...grpc.CallOption) (*auth.LogoutResponse, error)
+	// GetJWKS - Публичные ключи (JWKS)
+	GetJWKS(ctx context.Context, in *auth.GetJWKSRequest, opts ...grpc.CallOption) (*auth.GetJWKSResponse, error)
 	// CreateProfile - Создание профиля пользователя
 	CreateProfile(ctx context.Context, in *users.CreateProfileRequest, opts ...grpc.CallOption) (*users.CreateProfileResponse, error)
 	// UpdateProfile - Обновление профиля пользователя
@@ -125,6 +131,26 @@ func (c *gatewayServiceClient) Refresh(ctx context.Context, in *auth.RefreshRequ
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(auth.RefreshResponse)
 	err := c.cc.Invoke(ctx, GatewayService_Refresh_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayServiceClient) Logout(ctx context.Context, in *auth.LogoutRequest, opts ...grpc.CallOption) (*auth.LogoutResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(auth.LogoutResponse)
+	err := c.cc.Invoke(ctx, GatewayService_Logout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayServiceClient) GetJWKS(ctx context.Context, in *auth.GetJWKSRequest, opts ...grpc.CallOption) (*auth.GetJWKSResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(auth.GetJWKSResponse)
+	err := c.cc.Invoke(ctx, GatewayService_GetJWKS_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -313,6 +339,10 @@ type GatewayServiceServer interface {
 	Login(context.Context, *auth.LoginRequest) (*auth.LoginResponse, error)
 	// Refresh - Обновление токена
 	Refresh(context.Context, *auth.RefreshRequest) (*auth.RefreshResponse, error)
+	// Logout - Отзыв текущего refresh токена
+	Logout(context.Context, *auth.LogoutRequest) (*auth.LogoutResponse, error)
+	// GetJWKS - Публичные ключи (JWKS)
+	GetJWKS(context.Context, *auth.GetJWKSRequest) (*auth.GetJWKSResponse, error)
 	// CreateProfile - Создание профиля пользователя
 	CreateProfile(context.Context, *users.CreateProfileRequest) (*users.CreateProfileResponse, error)
 	// UpdateProfile - Обновление профиля пользователя
@@ -365,6 +395,12 @@ func (UnimplementedGatewayServiceServer) Login(context.Context, *auth.LoginReque
 }
 func (UnimplementedGatewayServiceServer) Refresh(context.Context, *auth.RefreshRequest) (*auth.RefreshResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
+}
+func (UnimplementedGatewayServiceServer) Logout(context.Context, *auth.LogoutRequest) (*auth.LogoutResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedGatewayServiceServer) GetJWKS(context.Context, *auth.GetJWKSRequest) (*auth.GetJWKSResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetJWKS not implemented")
 }
 func (UnimplementedGatewayServiceServer) CreateProfile(context.Context, *users.CreateProfileRequest) (*users.CreateProfileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProfile not implemented")
@@ -488,6 +524,42 @@ func _GatewayService_Refresh_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServiceServer).Refresh(ctx, req.(*auth.RefreshRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GatewayService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(auth.LogoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServiceServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GatewayService_Logout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServiceServer).Logout(ctx, req.(*auth.LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GatewayService_GetJWKS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(auth.GetJWKSRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServiceServer).GetJWKS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GatewayService_GetJWKS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServiceServer).GetJWKS(ctx, req.(*auth.GetJWKSRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -816,6 +888,14 @@ var GatewayService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Refresh",
 			Handler:    _GatewayService_Refresh_Handler,
+		},
+		{
+			MethodName: "Logout",
+			Handler:    _GatewayService_Logout_Handler,
+		},
+		{
+			MethodName: "GetJWKS",
+			Handler:    _GatewayService_GetJWKS_Handler,
 		},
 		{
 			MethodName: "CreateProfile",
