@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/authmw"
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/logger"
 
@@ -83,6 +84,17 @@ func main() {
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(application.GetGRPCClient("users")))
 
+	// Инициализируем auth компоненты (JWKS кеш и JWT validator)
+	authComponents, authCleanup, err := app.InitAuthComponents(
+		ctx,
+		cfg.AuthService,
+		"social", // audience для social сервиса
+	)
+	if err != nil {
+		logger.FatalKV(ctx, "failed to initialize auth components", "error", err.Error())
+	}
+	defer authCleanup()
+
 	// Создаем Kafka producer
 	producer, err := kafka.NewSyncProducer([]string{cfg.Kafka.GetBrokers()}, cfg.Kafka.ClientID, nil)
 	if err != nil {
@@ -120,8 +132,12 @@ func main() {
 	socialUsecase := usecase.NewUsecase(usersClient, friendRequestRepo, outboxProc, application.TransactionManager())
 	controller := deliveryGrpc.NewSocialController(socialUsecase)
 
-	// Инициализируем gRPC сервер
-	application.InitGRPCServer(cfg.Server, errorsMiddleware.ErrorsUnaryInterceptor())
+	// Инициализируем gRPC сервер с JWT и errors middleware
+	application.InitGRPCServer(
+		cfg.Server,
+		errorsMiddleware.ErrorsUnaryInterceptor(),
+		authmw.UnaryServerInterceptor(authComponents.JWTValidator),
+	)
 
 	// Регистрируем gRPC сервисы
 	application.RegisterGRPC(func(s *grpc.Server) {

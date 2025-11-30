@@ -31,9 +31,9 @@ func (r *UsersRepositoryStub) SaveUser(ctx context.Context, email, password stri
 	}
 
 	user := &models.User{
-		ID:       uuid.NewString(),
-		Email:    email,
-		Password: password,
+		ID:           uuid.NewString(),
+		Email:        email,
+		PasswordHash: password,
 	}
 
 	r.users[user.ID] = user

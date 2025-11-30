@@ -9,6 +9,7 @@ package main
 import (
 	"context"
 	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/authmw"
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/postgres"
 	"users/internal/app/repository"
@@ -27,17 +28,26 @@ func InitializeApp(ctx context.Context, cfg *config.StandardServiceConfig) (*App
 	transactionManagerAPI := provideTransactionManager(app)
 	usersRepository := provideRepository(transactionManagerAPI)
 	usecase := provideUsecase(usersRepository)
-	appContainer := provideAppContainer(app, usecase)
+	authComponents, cleanup, err := provideAuthComponents(ctx, cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+	validator := provideJWTValidator(authComponents)
+	jwksProvider := provideJWKSCache(authComponents)
+	appContainer := provideAppContainer(app, usecase, validator, jwksProvider)
 	return appContainer, func() {
+		cleanup()
 	}, nil
 }
 
 // wire.go:
 
-// AppContainer содержит App и Usecase для передачи из Wire
+// AppContainer содержит App, Usecase и JWTValidator для передачи из Wire
 type AppContainer struct {
-	App     *app.App
-	Usecase usecase.Usecase
+	App          *app.App
+	Usecase      usecase.Usecase
+	JWTValidator *authmw.Validator
+	JWKSCache    authmw.JWKSProvider
 }
 
 // provideApp создает App и инициализирует компоненты
@@ -87,10 +97,27 @@ func provideUsecase(repo usecase.UsersRepository) usecase.Usecase {
 	return usecase.NewUsecase(repo)
 }
 
-// provideAppContainer создает контейнер с App и Usecase
-func provideAppContainer(app2 *app.App, uc usecase.Usecase) *AppContainer {
+// provideAuthComponents создает и инициализирует auth компоненты
+func provideAuthComponents(ctx context.Context, cfg *config.StandardServiceConfig) (*app.AuthComponents, func(), error) {
+	return app.InitAuthComponents(ctx, cfg.AuthService, "users")
+}
+
+// provideJWKSCache извлекает JWKS кеш из auth компонентов
+func provideJWKSCache(authComponents *app.AuthComponents) authmw.JWKSProvider {
+	return authComponents.JWKSCache
+}
+
+// provideJWTValidator извлекает JWT validator из auth компонентов
+func provideJWTValidator(authComponents *app.AuthComponents) *authmw.Validator {
+	return authComponents.JWTValidator
+}
+
+// provideAppContainer создает контейнер с App, Usecase и JWT компонентами
+func provideAppContainer(app2 *app.App, uc usecase.Usecase, validator *authmw.Validator, cache authmw.JWKSProvider) *AppContainer {
 	return &AppContainer{
-		App:     app2,
-		Usecase: uc,
+		App:          app2,
+		Usecase:      uc,
+		JWTValidator: validator,
+		JWKSCache:    cache,
 	}
 }
