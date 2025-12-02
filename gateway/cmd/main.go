@@ -120,6 +120,30 @@ func (s *Server) Refresh(ctx context.Context, req *auth.RefreshRequest) (*auth.R
 	return resp, nil
 }
 
+func (s *Server) Logout(ctx context.Context, req *auth.LogoutRequest) (*auth.LogoutResponse, error) {
+	logger.InfoKV(ctx, "Gateway: Logout request")
+
+	resp, err := s.authClient.Logout(ctx, req)
+	if err != nil {
+		logger.ErrorKV(ctx, "Gateway: Logout error", "error", err.Error())
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (s *Server) GetJWKS(ctx context.Context, req *auth.GetJWKSRequest) (*auth.GetJWKSResponse, error) {
+	logger.InfoKV(ctx, "Gateway: GetJWKS request")
+
+	resp, err := s.authClient.GetJWKS(ctx, req)
+	if err != nil {
+		logger.ErrorKV(ctx, "Gateway: GetJWKS error", "error", err.Error())
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func (s *Server) CreateProfile(ctx context.Context, req *users.CreateProfileRequest) (*users.CreateProfileResponse, error) {
 	logger.InfoKV(ctx, "Gateway: CreateProfile request", "nickname", req.GetNickname())
 

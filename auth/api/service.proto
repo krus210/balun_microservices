@@ -12,8 +12,14 @@ service AuthService {
   // Login - Аутентификация пользователя
   rpc Login(LoginRequest) returns (LoginResponse) {}
 
-  // Refresh - Запрос нового токена при протухании текущего
+  // Refresh - Ротация токенов (одноразовые)
   rpc Refresh(RefreshRequest) returns (RefreshResponse) {}
+
+  // Logout - Отзыв текущего refresh
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {}
+
+  // GetJWKS - Публичные ключи (JWKS)
+  rpc GetJWKS(GetJWKSRequest) returns (GetJWKSResponse) {}
 }
 
 // RegisterRequest - запрос Register
@@ -36,6 +42,8 @@ message LoginRequest {
   string email = 1;
   //  password - пароль пользователя
   string password = 2;
+  // device_id - id устройства
+  optional string device_id = 3;
 }
 
 // LoginResponse - ответ Login
@@ -46,12 +54,16 @@ message LoginResponse {
   string refreshToken = 2;
   // userId - уникальный идентификатор пользователя
   string userId = 3;
+  // expires_in_s - время жизни токена
+  string expires_in_s = 4;
 }
 
 // RefreshRequest - запрос Refresh
 message RefreshRequest {
   // refreshToken - токен после протухания accessToken
   string refreshToken = 1;
+  // device_id - id устройства
+  optional string device_id = 3;
 }
 
 // RefreshResponse - ответ Refresh
@@ -62,4 +74,55 @@ message RefreshResponse {
   string refreshToken = 2;
   // userId - уникальный идентификатор пользователя
   string userId = 3;
+  // expires_in_s - время жизни токена
+  string expires_in_s = 4;
+}
+
+// LogoutRequest - запрос Logout
+message LogoutRequest {
+  // refreshToken - токен после протухания accessToken
+  string refreshToken = 1;
+}
+
+// LogoutResponse - ответ Logout
+message LogoutResponse {
+}
+
+// GetJWKSRequest - запрос GetJWKS
+message GetJWKSRequest {
+}
+
+// GetJWKSResponse - запрос GetJWKS
+message GetJWKSResponse {
+  repeated JWK jwks = 1;
+}
+
+// JWK - JSON Web Key для валидации JWT токенов
+message JWK {
+  // kty - тип ключа (например, "RSA", "EC")
+  string kty = 1;
+
+  // use - назначение ключа (например, "sig" для подписи, "enc" для шифрования)
+  string use = 2;
+
+  // kid - уникальный идентификатор ключа
+  string kid = 3;
+
+  // alg - алгоритм (например, "RS256", "ES256")
+  string alg = 4;
+
+  // n - модуль RSA ключа (base64url encoded) - для RSA ключей
+  string n = 5;
+
+  // e - экспонента RSA ключа (base64url encoded) - для RSA ключей
+  string e = 6;
+
+  // x - X координата - для EC (Elliptic Curve) ключей
+  string x = 7;
+
+  // y - Y координата - для EC (Elliptic Curve) ключей
+  string y = 8;
+
+  // crv - тип эллиптической кривой (например, "P-256") - для EC ключей
+  string crv = 9;
 }

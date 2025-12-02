@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package authmw;
+
+option go_package = "github.com/sskorolev/balun_microservices/lib/authmw";
+
+// GetJWKSRequest - пустой запрос для получения JWKS
+message GetJWKSRequest {}
+
+// GetJWKSResponse - ответ с JWKS
+message GetJWKSResponse {
+  repeated JWK jwks = 1;
+}
+
+// JWK - JSON Web Key
+message JWK {
+  string kty = 1;
+  string use = 2;
+  string kid = 3;
+  string alg = 4;
+  string n = 5;
+  string e = 6;
+}

@@ -10,15 +10,19 @@ import (
 	"users/internal/app/usecase"
 
 	"github.com/google/wire"
+
 	lib "github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/authmw"
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/postgres"
 )
 
-// AppContainer содержит App и Usecase для передачи из Wire
+// AppContainer содержит App, Usecase и JWTValidator для передачи из Wire
 type AppContainer struct {
-	App     *lib.App
-	Usecase usecase.Usecase
+	App          *lib.App
+	Usecase      usecase.Usecase
+	JWTValidator *authmw.Validator
+	JWKSCache    authmw.JWKSProvider
 }
 
 // provideApp создает App и инициализирует компоненты
@@ -73,11 +77,28 @@ func provideUsecase(repo usecase.UsersRepository) usecase.Usecase {
 	return usecase.NewUsecase(repo)
 }
 
-// provideAppContainer создает контейнер с App и Usecase
-func provideAppContainer(app *lib.App, uc usecase.Usecase) *AppContainer {
+// provideAuthComponents создает и инициализирует auth компоненты
+func provideAuthComponents(ctx context.Context, cfg *config.StandardServiceConfig) (*lib.AuthComponents, func(), error) {
+	return lib.InitAuthComponents(ctx, cfg.AuthService, "users")
+}
+
+// provideJWKSCache извлекает JWKS кеш из auth компонентов
+func provideJWKSCache(authComponents *lib.AuthComponents) authmw.JWKSProvider {
+	return authComponents.JWKSCache
+}
+
+// provideJWTValidator извлекает JWT validator из auth компонентов
+func provideJWTValidator(authComponents *lib.AuthComponents) *authmw.Validator {
+	return authComponents.JWTValidator
+}
+
+// provideAppContainer создает контейнер с App, Usecase и JWT компонентами
+func provideAppContainer(app *lib.App, uc usecase.Usecase, validator *authmw.Validator, cache authmw.JWKSProvider) *AppContainer {
 	return &AppContainer{
-		App:     app,
-		Usecase: uc,
+		App:          app,
+		Usecase:      uc,
+		JWTValidator: validator,
+		JWKSCache:    cache,
 	}
 }
 
@@ -89,6 +110,9 @@ func InitializeApp(ctx context.Context, cfg *config.StandardServiceConfig) (*App
 		provideTransactionManager,
 		provideRepository,
 		provideUsecase,
+		provideAuthComponents, // Заменяет provideAuthGRPCConn, provideJWKSCache, provideJWTValidator
+		provideJWKSCache,
+		provideJWTValidator,
 		provideAppContainer,
 	)
 	return nil, nil, nil

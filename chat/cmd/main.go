@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/authmw"
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/logger"
 
@@ -81,14 +82,29 @@ func main() {
 
 	usersClient := adapters.NewUsersClient(usersPb.NewUsersServiceClient(application.GetGRPCClient("users")))
 
+	// Инициализируем auth компоненты (JWKS кеш и JWT validator)
+	authComponents, authCleanup, err := app.InitAuthComponents(
+		ctx,
+		cfg.AuthService,
+		"chat", // audience для chat сервиса
+	)
+	if err != nil {
+		logger.FatalKV(ctx, "failed to initialize auth components", "error", err.Error())
+	}
+	defer authCleanup()
+
 	repo := repository.NewRepository(application.TransactionManager())
 
 	chatUsecase := usecase.NewUsecase(usersClient, repo)
 
 	controller := deliveryGrpc.NewChatController(chatUsecase)
 
-	// Инициализируем gRPC сервер
-	application.InitGRPCServer(cfg.Server, errorsMiddleware.ErrorsUnaryInterceptor())
+	// Инициализируем gRPC сервер с JWT и errors middleware
+	application.InitGRPCServer(
+		cfg.Server,
+		errorsMiddleware.ErrorsUnaryInterceptor(),
+		authmw.UnaryServerInterceptor(authComponents.JWTValidator),
+	)
 
 	// Регистрируем gRPC сервисы
 	application.RegisterGRPC(func(s *grpc.Server) {

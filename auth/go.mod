@@ -4,12 +4,19 @@ go 1.25.1
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.9-20250912141014-52f32327d4b0.1
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/gojuno/minimock/v3 v3.4.6
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
+	github.com/jackc/pgx/v5 v5.7.6
+	github.com/spf13/viper v1.21.0
 	github.com/sskorolev/balun_microservices/lib/app v0.0.0
 	github.com/sskorolev/balun_microservices/lib/config v0.0.0
 	github.com/sskorolev/balun_microservices/lib/logger v0.0.0
+	github.com/sskorolev/balun_microservices/lib/postgres v0.0.0
+	github.com/sskorolev/balun_microservices/lib/secrets v0.0.0
 	github.com/stretchr/testify v1.11.1
+	golang.org/x/crypto v0.43.0
 	golang.org/x/sync v0.17.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251014184007-4626949a642f
 	google.golang.org/grpc v1.76.0
@@ -47,8 +54,9 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.7.6 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/mercari/go-circuitbreaker v0.0.2 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -65,12 +73,10 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/spf13/viper v1.21.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/admin v0.0.0 // indirect
+	github.com/sskorolev/balun_microservices/lib/authmw v0.0.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/grpc v0.0.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/metrics v0.0.0 // indirect
-	github.com/sskorolev/balun_microservices/lib/postgres v0.0.0 // indirect
-	github.com/sskorolev/balun_microservices/lib/secrets v0.0.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/tracer v0.0.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/uber/jaeger-client-go v2.30.0+incompatible // indirect
@@ -90,7 +96,6 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
@@ -116,3 +121,5 @@ replace github.com/sskorolev/balun_microservices/lib/metrics => ../lib/metrics
 replace github.com/sskorolev/balun_microservices/lib/admin => ../lib/admin
 
 replace github.com/sskorolev/balun_microservices/lib/logger => ../lib/logger
+
+replace github.com/sskorolev/balun_microservices/lib/authmw => ../lib/authmw

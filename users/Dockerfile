@@ -10,6 +10,7 @@ COPY lib/postgres/ lib/postgres/
 COPY lib/secrets/ lib/secrets/
 COPY lib/config/ lib/config/
 COPY lib/app/ lib/app/
+COPY lib/authmw/ lib/authmw/
 COPY lib/grpc/ lib/grpc/
 COPY lib/logger/ lib/logger/
 COPY lib/tracer/ lib/tracer/
@@ -35,6 +36,9 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/users/users .
+
+# Copy config file
+COPY users/config.yaml .
 
 EXPOSE 8082
 

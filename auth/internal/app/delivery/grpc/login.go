@@ -28,6 +28,7 @@ func (h *AuthController) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	user, err := h.usecase.Login(ctx, dto.LoginRequest{
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
+		DeviceID: req.GetDeviceId(),
 	})
 	if err != nil {
 		return nil, err
