@@ -15,6 +15,7 @@ COPY lib/logger/ lib/logger/
 COPY lib/tracer/ lib/tracer/
 COPY lib/metrics/ lib/metrics/
 COPY lib/admin/ lib/admin/
+COPY lib/authmw/ lib/authmw/
 
 # Copy auth service
 COPY auth/ auth/

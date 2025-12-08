@@ -16,6 +16,8 @@ require (
 	google.golang.org/protobuf v1.36.10
 )
 
+require github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
+
 require (
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -81,6 +83,7 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/admin v0.0.0 // indirect
+	github.com/sskorolev/balun_microservices/lib/authmw v0.0.0
 	github.com/sskorolev/balun_microservices/lib/grpc v0.0.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/metrics v0.0.0 // indirect
 	github.com/sskorolev/balun_microservices/lib/secrets v0.0.0 // indirect
@@ -130,3 +133,5 @@ replace github.com/sskorolev/balun_microservices/lib/tracer => ../lib/tracer
 replace github.com/sskorolev/balun_microservices/lib/metrics => ../lib/metrics
 
 replace github.com/sskorolev/balun_microservices/lib/admin => ../lib/admin
+
+replace github.com/sskorolev/balun_microservices/lib/authmw => ../lib/authmw

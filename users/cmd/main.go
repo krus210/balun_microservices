@@ -15,6 +15,7 @@ import (
 	pb "users/pkg/api"
 
 	"github.com/sskorolev/balun_microservices/lib/app"
+	"github.com/sskorolev/balun_microservices/lib/authmw"
 	"github.com/sskorolev/balun_microservices/lib/config"
 	"github.com/sskorolev/balun_microservices/lib/logger"
 )
@@ -36,11 +37,18 @@ func main() {
 	}
 	defer cleanup()
 
+	// Останавливаем JWKS кеш при завершении
+	defer container.JWKSCache.Stop()
+
 	// Создаем контроллер
 	controller := deliveryGrpc.NewUsersController(container.Usecase)
 
-	// Инициализируем gRPC сервер
-	container.App.InitGRPCServer(cfg.Server, errorsMiddleware.ErrorsUnaryInterceptor())
+	// Инициализируем gRPC сервер с JWT и errors middleware
+	container.App.InitGRPCServer(
+		cfg.Server,
+		errorsMiddleware.ErrorsUnaryInterceptor(),
+		authmw.UnaryServerInterceptor(container.JWTValidator),
+	)
 
 	// Регистрируем gRPC сервисы
 	container.App.RegisterGRPC(func(s *grpc.Server) {

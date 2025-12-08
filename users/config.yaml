@@ -49,6 +49,21 @@ database:
   sslmode: disable
   max_conn_idle_time: 1m
 
+auth_service:
+  host: auth
+  port: 8082
+  grpc_client:
+    timeout: 2s
+    retry:
+      max_attempts: 3
+      backoff:
+        base: 100ms
+        max: 2s
+        jitter: true
+      retryable_codes:
+        - UNAVAILABLE
+        - DEADLINE_EXCEEDED
+
 secrets:
   dev:
     env_prefix: "APP_"

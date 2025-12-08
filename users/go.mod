@@ -9,6 +9,7 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/sskorolev/balun_microservices/lib/app v0.0.0
+	github.com/sskorolev/balun_microservices/lib/authmw v0.0.0
 	github.com/sskorolev/balun_microservices/lib/config v0.0.0
 	github.com/sskorolev/balun_microservices/lib/logger v0.0.0
 	github.com/sskorolev/balun_microservices/lib/postgres v0.0.0
@@ -31,6 +32,7 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2 // indirect
@@ -116,3 +118,5 @@ replace github.com/sskorolev/balun_microservices/lib/metrics => ../lib/metrics
 replace github.com/sskorolev/balun_microservices/lib/admin => ../lib/admin
 
 replace github.com/sskorolev/balun_microservices/lib/logger => ../lib/logger
+
+replace github.com/sskorolev/balun_microservices/lib/authmw => ../lib/authmw

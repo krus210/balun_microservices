@@ -42,6 +42,37 @@ metrics:
   namespace: balun_courses
   subsystem: grpc
 
+database:
+  host: auth-db
+  port: 5432
+  name: auth_db
+  user: user
+  password: password
+  sslmode: disable
+  max_conn_idle_time: 1m
+
+auth:
+  issuer: balun-auth-service
+  audience:
+    - users
+    - social
+    - chat
+    - gateway
+  access_token_ttl: 15m
+  refresh_token_ttl: 720h  # 30 дней
+
+keys:
+  storage: db  # vault | db (для vault нужно добавить secrets конфигурацию)
+  vault:
+    path: secret/auth/rsa-keys
+  db:
+    auto_create_on_start: true
+
+crypto:
+  password:
+    bcrypt_cost: 12
+    min_length: 6
+
 users_service:
   host: users
   port: 8082

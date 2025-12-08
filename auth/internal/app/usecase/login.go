@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"auth/internal/app/usecase/dto"
-
+	"auth/internal/app/crypto"
 	"auth/internal/app/models"
-
-	"github.com/google/uuid"
+	"auth/internal/app/usecase/dto"
 )
 
 const (
@@ -17,6 +15,7 @@ const (
 )
 
 func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*models.User, error) {
+	// Получаем пользователя по email
 	user, err := s.usersRepo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("%s: userRepo GetUserByEmail error: %w", apiLogin, err)
@@ -24,19 +23,51 @@ func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*models.
 	if user == nil {
 		return nil, models.ErrNotFound
 	}
-	if user.Password != req.Password {
+
+	// Проверяем пароль
+	if err := s.passwordHasher.Verify(user.PasswordHash, req.Password); err != nil {
 		return nil, ErrWrongPassword
 	}
 
-	user.Token = &models.UserToken{
-		AccessToken:    uuid.New().String(),
-		RefreshToken:   uuid.New().String(),
-		TokenExpiresAt: time.Now().Add(time.Hour * 24 * 7),
+	// Создаем access token
+	accessToken, err := s.tokenManager.CreateAccessToken(ctx, user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to create access token: %w", apiLogin, err)
 	}
 
-	err = s.usersRepo.UpdateUser(ctx, user)
+	// Создаем refresh token
+	refreshToken, jti, err := s.tokenManager.CreateRefreshToken(ctx, user.ID, req.DeviceID)
 	if err != nil {
-		return nil, fmt.Errorf("%s: userRepo UpdateUser error: %w", apiLogin, err)
+		return nil, fmt.Errorf("%s: failed to create refresh token: %w", apiLogin, err)
+	}
+
+	// Хешируем refresh token для хранения в БД
+	tokenHash := crypto.HashToken(refreshToken)
+
+	// Сохраняем refresh token в БД
+	var deviceIDPtr *string
+	if req.DeviceID != "" {
+		deviceIDPtr = &req.DeviceID
+	}
+
+	refreshTokenModel := &models.RefreshToken{
+		UserID:    user.ID,
+		TokenHash: tokenHash,
+		JTI:       jti,
+		DeviceID:  deviceIDPtr,
+		ExpiresAt: time.Now().Add(s.cfg.RefreshTokenTTL),
+		CreatedAt: time.Now(),
+	}
+
+	if err := s.refreshTokensRepo.CreateToken(ctx, refreshTokenModel); err != nil {
+		return nil, fmt.Errorf("%s: failed to save refresh token: %w", apiLogin, err)
+	}
+
+	// Заполняем токены в пользователя
+	user.Token = &models.UserToken{
+		AccessToken:    accessToken,
+		RefreshToken:   refreshToken,
+		TokenExpiresAt: time.Now().Add(s.cfg.AccessTokenTTL),
 	}
 
 	return user, nil
